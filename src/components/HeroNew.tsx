@@ -1,11 +1,16 @@
 import React from 'react';
 import { ArrowRight, ChevronRight, BarChart3, Shield, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { ButtonColorful } from '@/components/ui/button-colorful';
+import { GlowingEffect } from '@/components/ui/glowing-effect';
+import { LogoCarousel } from '@/components/ui/logo-carousel';
+import { GradientHeading } from '@/components/ui/gradient-heading';
 import { AnimatedGroup } from '@/components/ui/animated-group';
 import { BackgroundBeams } from '@/components/ui/background-beams';
 import { cn } from '@/lib/utils';
 import { Link } from 'react-router-dom';
 import heroDashboard from "@/assets/hero-dashboard.jpg";
+import { clientLogos } from '@/components/LogoData';
 
 export function HeroNew() {
   return (
@@ -55,12 +60,10 @@ export function HeroNew() {
                   preset="scale"
                   className="mt-12 flex flex-col items-center justify-center gap-4 md:flex-row">
                   <div className="glass rounded-2xl border p-1">
-                    <Button
-                      size="lg"
-                      className="rounded-xl px-8 py-3 text-base font-semibold">
-                      <span className="text-nowrap">Acessar Portal</span>
-                      <ArrowRight className="ml-2 w-4 h-4" />
-                    </Button>
+                    <ButtonColorful 
+                      label="Acessar Portal"
+                      className="rounded-xl px-8 py-3 text-base font-semibold"
+                    />
                   </div>
                   <Button
                     size="lg"
@@ -72,22 +75,88 @@ export function HeroNew() {
 
                 {/* Features */}
                 <div className="grid md:grid-cols-3 gap-6 mt-16">
-                  <div className="glass p-6 rounded-2xl text-center group hover:shadow-glow transition-all duration-300">
-                    <BarChart3 className="w-12 h-12 text-primary mx-auto mb-4 group-hover:animate-pulse" />
-                    <h3 className="text-xl font-bold mb-2">Dashboards Avançados</h3>
-                    <p className="text-muted-foreground">Visualize suas métricas semanais e mensais com precisão</p>
+                  <div className="relative min-h-[14rem] list-none">
+                    <div className="relative h-full rounded-[1.25rem] border-[0.75px] border-border p-2 md:rounded-[1.5rem] md:p-3">
+                      <GlowingEffect
+                        spread={40}
+                        glow={true}
+                        disabled={false}
+                        proximity={64}
+                        inactiveZone={0.01}
+                        borderWidth={3}
+                      />
+                      <div className="relative flex h-full flex-col justify-between gap-6 overflow-hidden rounded-xl border-[0.75px] bg-background p-6 shadow-sm dark:shadow-[0px_0px_27px_0px_rgba(45,45,45,0.3)] md:p-6">
+                        <div className="relative flex flex-1 flex-col justify-between gap-3">
+                          <div className="w-fit rounded-lg border-[0.75px] border-border bg-muted p-2">
+                            <BarChart3 className="h-4 w-4" />
+                          </div>
+                          <div className="space-y-3">
+                            <h3 className="pt-0.5 text-xl leading-[1.375rem] font-semibold font-sans tracking-[-0.04em] md:text-2xl md:leading-[1.875rem] text-balance text-foreground">
+                              Dashboards Avançados
+                            </h3>
+                            <h2 className="[&_b]:md:font-semibold [&_strong]:md:font-semibold font-sans text-sm leading-[1.125rem] md:text-base md:leading-[1.375rem] text-muted-foreground">
+                              Visualize suas métricas semanais e mensais com precisão
+                            </h2>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                   
-                  <div className="glass p-6 rounded-2xl text-center group hover:shadow-glow transition-all duration-300">
-                    <Shield className="w-12 h-12 text-primary mx-auto mb-4 group-hover:animate-pulse" />
-                    <h3 className="text-xl font-bold mb-2">Segurança Total</h3>
-                    <p className="text-muted-foreground">Dados protegidos com criptografia de ponta</p>
+                  <div className="relative min-h-[14rem] list-none">
+                    <div className="relative h-full rounded-[1.25rem] border-[0.75px] border-border p-2 md:rounded-[1.5rem] md:p-3">
+                      <GlowingEffect
+                        spread={40}
+                        glow={true}
+                        disabled={false}
+                        proximity={64}
+                        inactiveZone={0.01}
+                        borderWidth={3}
+                      />
+                      <div className="relative flex h-full flex-col justify-between gap-6 overflow-hidden rounded-xl border-[0.75px] bg-background p-6 shadow-sm dark:shadow-[0px_0px_27px_0px_rgba(45,45,45,0.3)] md:p-6">
+                        <div className="relative flex flex-1 flex-col justify-between gap-3">
+                          <div className="w-fit rounded-lg border-[0.75px] border-border bg-muted p-2">
+                            <Shield className="h-4 w-4" />
+                          </div>
+                          <div className="space-y-3">
+                            <h3 className="pt-0.5 text-xl leading-[1.375rem] font-semibold font-sans tracking-[-0.04em] md:text-2xl md:leading-[1.875rem] text-balance text-foreground">
+                              Segurança Total
+                            </h3>
+                            <h2 className="[&_b]:md:font-semibold [&_strong]:md:font-semibold font-sans text-sm leading-[1.125rem] md:text-base md:leading-[1.375rem] text-muted-foreground">
+                              Dados protegidos com criptografia de ponta
+                            </h2>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                   
-                  <div className="glass p-6 rounded-2xl text-center group hover:shadow-glow transition-all duration-300">
-                    <Zap className="w-12 h-12 text-primary mx-auto mb-4 group-hover:animate-pulse" />
-                    <h3 className="text-xl font-bold mb-2">Performance</h3>
-                    <p className="text-muted-foreground">Otimização contínua das suas campanhas</p>
+                  <div className="relative min-h-[14rem] list-none">
+                    <div className="relative h-full rounded-[1.25rem] border-[0.75px] border-border p-2 md:rounded-[1.5rem] md:p-3">
+                      <GlowingEffect
+                        spread={40}
+                        glow={true}
+                        disabled={false}
+                        proximity={64}
+                        inactiveZone={0.01}
+                        borderWidth={3}
+                      />
+                      <div className="relative flex h-full flex-col justify-between gap-6 overflow-hidden rounded-xl border-[0.75px] bg-background p-6 shadow-sm dark:shadow-[0px_0px_27px_0px_rgba(45,45,45,0.3)] md:p-6">
+                        <div className="relative flex flex-1 flex-col justify-between gap-3">
+                          <div className="w-fit rounded-lg border-[0.75px] border-border bg-muted p-2">
+                            <Zap className="h-4 w-4" />
+                          </div>
+                          <div className="space-y-3">
+                            <h3 className="pt-0.5 text-xl leading-[1.375rem] font-semibold font-sans tracking-[-0.04em] md:text-2xl md:leading-[1.875rem] text-balance text-foreground">
+                              Performance
+                            </h3>
+                            <h2 className="[&_b]:md:font-semibold [&_strong]:md:font-semibold font-sans text-sm leading-[1.125rem] md:text-base md:leading-[1.375rem] text-muted-foreground">
+                              Otimização contínua das suas campanhas
+                            </h2>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -114,55 +183,14 @@ export function HeroNew() {
         </section>
         
         <section className="bg-background pb-16 pt-16 md:pb-32">
-          <div className="group relative m-auto max-w-5xl px-6">
-            <div className="absolute inset-0 z-10 flex scale-95 items-center justify-center opacity-0 duration-500 group-hover:scale-100 group-hover:opacity-100">
-              <div className="block text-sm duration-150 hover:opacity-75">
-                <span>Nossos Clientes</span>
-                <ChevronRight className="ml-1 inline-block size-3" />
-              </div>
+          <div className="mx-auto flex w-full max-w-screen-lg flex-col items-center space-y-8">
+            <div className="text-center">
+              <GradientHeading variant="secondary" size="lg">
+                Nossos Clientes
+              </GradientHeading>
             </div>
-            <div className="group-hover:blur-xs mx-auto mt-12 grid max-w-2xl grid-cols-4 gap-x-12 gap-y-8 transition-all duration-500 group-hover:opacity-50 sm:gap-x-16 sm:gap-y-14">
-              <div className="flex">
-                <div className="mx-auto h-5 w-20 bg-muted/20 rounded flex items-center justify-center text-xs">
-                  Cliente 1
-                </div>
-              </div>
-              <div className="flex">
-                <div className="mx-auto h-5 w-20 bg-muted/20 rounded flex items-center justify-center text-xs">
-                  Cliente 2
-                </div>
-              </div>
-              <div className="flex">
-                <div className="mx-auto h-5 w-20 bg-muted/20 rounded flex items-center justify-center text-xs">
-                  Cliente 3
-                </div>
-              </div>
-              <div className="flex">
-                <div className="mx-auto h-5 w-20 bg-muted/20 rounded flex items-center justify-center text-xs">
-                  Cliente 4
-                </div>
-              </div>
-              <div className="flex">
-                <div className="mx-auto h-5 w-20 bg-muted/20 rounded flex items-center justify-center text-xs">
-                  Cliente 5
-                </div>
-              </div>
-              <div className="flex">
-                <div className="mx-auto h-5 w-20 bg-muted/20 rounded flex items-center justify-center text-xs">
-                  Cliente 6
-                </div>
-              </div>
-              <div className="flex">
-                <div className="mx-auto h-5 w-20 bg-muted/20 rounded flex items-center justify-center text-xs">
-                  Cliente 7
-                </div>
-              </div>
-              <div className="flex">
-                <div className="mx-auto h-5 w-20 bg-muted/20 rounded flex items-center justify-center text-xs">
-                  Cliente 8
-                </div>
-              </div>
-            </div>
+
+            <LogoCarousel columnCount={4} logos={clientLogos} />
           </div>
         </section>
       </main>

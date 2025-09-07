@@ -7,7 +7,7 @@ export const Footer = () => {
           <div>
             <div className="flex items-center space-x-2 mb-4">
               <img 
-                src="/lovable-uploads/841bb7ed-4546-4b56-bb41-6b89e3102796.png" 
+                src="/lovable-uploads/ad06ec7f-d134-4e17-b18e-0dffcb76d294.png" 
                 alt="Logomarca" 
                 className="h-[35px] w-auto object-contain"
               />

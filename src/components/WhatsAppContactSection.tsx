@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { ButtonColorful } from "@/components/ui/button-colorful";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -82,10 +83,12 @@ Mensagem: ${formData.message}`;
               />
             </div>
             
-            <Button type="submit" className="w-full gap-2 bg-primary text-primary-foreground hover:bg-primary/90">
-              <MessageCircle className="h-4 w-4" />
-              Enviar via WhatsApp
-            </Button>
+            <ButtonColorful 
+              type="submit" 
+              variant="green"
+              label="Enviar via WhatsApp"
+              className="w-full"
+            />
           </form>
         </div>
       </div>
