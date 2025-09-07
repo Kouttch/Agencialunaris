@@ -2,6 +2,7 @@ import React from 'react';
 import { ArrowRight, ChevronRight, BarChart3, Shield, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { AnimatedGroup } from '@/components/ui/animated-group';
+import { BackgroundBeams } from '@/components/ui/background-beams';
 import { cn } from '@/lib/utils';
 import heroDashboard from "@/assets/hero-dashboard.jpg";
 
@@ -17,8 +18,10 @@ export function HeroNew() {
           <div className="h-[80rem] -translate-y-[350px] absolute left-0 top-0 w-56 -rotate-45 bg-[radial-gradient(50%_50%_at_50%_50%,hsl(var(--muted)/.04)_0,hsl(var(--muted)/.02)_80%,transparent_100%)]" />
         </div>
         
-        <section>
+        <section className="relative">
           <div className="relative pt-24 md:pt-36">
+            <BackgroundBeams className="-z-10" />
+            
             <AnimatedGroup
               preset="fade"
               className="absolute inset-0 -z-20">
