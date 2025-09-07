@@ -2,7 +2,7 @@ import { Header } from "@/components/Header";
 import { HeroNew } from "@/components/HeroNew";
 import { Features } from "@/components/Features";
 import { Footer } from "@/components/Footer";
-import { WhatsAppContact } from "@/components/WhatsAppContact";
+import { WhatsAppContactSection } from "@/components/WhatsAppContactSection";
 
 const Index = () => {
   return (
@@ -10,8 +10,8 @@ const Index = () => {
       <Header />
       <HeroNew />
       <Features />
+      <WhatsAppContactSection />
       <Footer />
-      <WhatsAppContact />
     </main>
   );
 };
