@@ -12,7 +12,7 @@ export const LunarisLogo = ({
         <img 
           src="/lovable-uploads/841bb7ed-4546-4b56-bb41-6b89e3102796.png" 
           alt="Logomarca" 
-          className="h-12 w-auto object-contain"
+          className="h-[42px] w-auto object-contain"
         />
       </div>
       

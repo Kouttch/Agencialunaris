@@ -8,10 +8,10 @@ Primary: Red accent for details | Black/White/Gray base colors
 
 @layer base {
   :root {
-    /* Main brand colors - red accent for details only */
-    --primary: 348 79% 58%; /* #E83950 - for important accents */
-    --primary-foreground: 0 0% 100%;
-    --primary-glow: 348 79% 68%;
+    /* Main brand colors - white accent */
+    --primary: 0 0% 100%; /* White for primary accents */
+    --primary-foreground: 0 0% 8%; /* Dark text on white */
+    --primary-glow: 0 0% 90%; /* Light gray glow */
     
     /* Dark theme base - near black */
     --background: 0 0% 8%; /* Very dark gray, almost black */
@@ -45,7 +45,7 @@ Primary: Red accent for details | Black/White/Gray base colors
     /* Interactive elements */
     --border: 0 0% 20%; /* Dark gray borders */
     --input: 0 0% 15%; /* Dark input backgrounds */
-    --ring: 348 79% 58%; /* Red focus ring */
+    --ring: 0 0% 100%; /* White focus ring */
     --accent: 0 0% 18%; /* Dark gray accent */
     --accent-foreground: 0 0% 95%;
     
