@@ -47,7 +47,7 @@ export function HeroNew() {
                       Explore o universo
                     </span>
                     <br />
-                    <span className="text-muted-foreground">do tráfego pago</span>
+                    <span className="text-muted-foreground">do Tráfego pago</span>
                   </h1>
                   
                   <p className="mx-auto mt-8 max-w-2xl text-balance text-lg text-muted-foreground leading-relaxed">
