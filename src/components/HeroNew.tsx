@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { AnimatedGroup } from '@/components/ui/animated-group';
 import { BackgroundBeams } from '@/components/ui/background-beams';
 import { cn } from '@/lib/utils';
+import { Link } from 'react-router-dom';
 import heroDashboard from "@/assets/hero-dashboard.jpg";
 
 export function HeroNew() {
@@ -19,23 +20,25 @@ export function HeroNew() {
             <div className="mx-auto max-w-7xl px-6">
               <div className="text-center sm:mx-auto lg:mr-auto lg:mt-0">
                 <AnimatedGroup preset="blur-slide">
-                  <div className="glass group mx-auto flex w-fit items-center gap-4 rounded-full border p-1 pl-4 shadow-lg transition-all duration-300 hover:shadow-glow">
-                    <span className="text-foreground text-sm">Portal Exclusivo de Gestão de Tráfego</span>
-                    <span className="block h-4 w-0.5 border-l border-border bg-border"></span>
-                    <div className="bg-background group-hover:bg-muted size-6 overflow-hidden rounded-full duration-500">
-                      <div className="flex w-12 -translate-x-1/2 duration-500 ease-in-out group-hover:translate-x-0">
-                        <span className="flex size-6">
-                          <ArrowRight className="m-auto size-3" />
-                        </span>
-                        <span className="flex size-6">
-                          <ArrowRight className="m-auto size-3" />
-                        </span>
+                  <Link to="/auth" className="block">
+                    <div className="glass group mx-auto flex w-fit items-center gap-4 rounded-full border p-1 pl-4 shadow-lg transition-all duration-300 hover:shadow-glow cursor-pointer">
+                      <span className="text-foreground text-sm">Portal Exclusivo de Gestão de Tráfego</span>
+                      <span className="block h-4 w-0.5 border-l border-border bg-border"></span>
+                      <div className="bg-background group-hover:bg-muted size-6 overflow-hidden rounded-full duration-500">
+                        <div className="flex w-12 -translate-x-1/2 duration-500 ease-in-out group-hover:translate-x-0">
+                          <span className="flex size-6">
+                            <ArrowRight className="m-auto size-3" />
+                          </span>
+                          <span className="flex size-6">
+                            <ArrowRight className="m-auto size-3" />
+                          </span>
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  </Link>
         
                   <h1 className="mt-8 max-w-4xl mx-auto text-balance text-6xl md:text-7xl lg:mt-16 xl:text-[5.25rem] font-black leading-tight">
-                    <span className="bg-gradient-to-r from-foreground via-primary to-primary-glow bg-clip-text text-transparent">
+                    <span style={{ background: 'linear-gradient(135deg, #c9444f, #483a89)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
                       Gestão de Tráfego
                     </span>
                     <br />

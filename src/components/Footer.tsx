@@ -6,10 +6,11 @@ export const Footer = () => {
           {/* Brand */}
           <div>
             <div className="flex items-center space-x-2 mb-4">
-              <div className="w-8 h-8 bg-gradient-to-br from-primary to-primary-glow rounded-lg shadow-glow"></div>
-              <span className="text-xl font-bold bg-gradient-to-r from-foreground to-muted bg-clip-text text-transparent">
-                TrafficPro
-              </span>
+              <img 
+                src="/lovable-uploads/841bb7ed-4546-4b56-bb41-6b89e3102796.png" 
+                alt="Logomarca" 
+                className="h-[35px] w-auto object-contain"
+              />
             </div>
             <p className="text-muted-foreground">
               O futuro da gestão de tráfego pago. Transparência, inovação e resultados excepcionais.
