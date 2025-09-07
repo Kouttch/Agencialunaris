@@ -1,27 +1,23 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Mail, Lock, Eye, EyeOff, User, ArrowLeft } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Separator } from "@/components/ui/separator";
+import { Mail, Lock, Eye, EyeOff, ArrowRight } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
 const Auth = () => {
   const navigate = useNavigate();
-  const { signIn, signUp, user, loading } = useAuth();
+  const { signIn, user, loading } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
-  const [activeTab, setActiveTab] = useState("login");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
 
-  // Login form state
-  const [loginEmail, setLoginEmail] = useState("");
-  const [loginPassword, setLoginPassword] = useState("");
-
-  // Signup form state
-  const [signupEmail, setSignupEmail] = useState("");
-  const [signupPassword, setSignupPassword] = useState("");
-  const [signupFullName, setSignupFullName] = useState("");
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   // Redirect authenticated users to home
   useEffect(() => {
@@ -30,212 +26,247 @@ const Auth = () => {
     }
   }, [user, loading, navigate]);
 
+  // Animated particles effect
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    const ctx = canvas?.getContext("2d");
+    if (!canvas || !ctx) return;
+
+    const setSize = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    };
+    setSize();
+
+    type P = { x: number; y: number; v: number; o: number };
+    let ps: P[] = [];
+    let raf = 0;
+
+    const make = () => ({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      v: Math.random() * 0.25 + 0.05,
+      o: Math.random() * 0.35 + 0.15,
+    });
+
+    const init = () => {
+      ps = [];
+      const count = Math.floor((canvas.width * canvas.height) / 9000);
+      for (let i = 0; i < count; i++) ps.push(make());
+    };
+
+    const draw = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ps.forEach((p) => {
+        p.y -= p.v;
+        if (p.y < 0) {
+          p.x = Math.random() * canvas.width;
+          p.y = canvas.height + Math.random() * 40;
+          p.v = Math.random() * 0.25 + 0.05;
+          p.o = Math.random() * 0.35 + 0.15;
+        }
+        ctx.fillStyle = `rgba(250,250,250,${p.o})`;
+        ctx.fillRect(p.x, p.y, 0.7, 2.2);
+      });
+      raf = requestAnimationFrame(draw);
+    };
+
+    const onResize = () => {
+      setSize();
+      init();
+    };
+
+    window.addEventListener("resize", onResize);
+    init();
+    raf = requestAnimationFrame(draw);
+    return () => {
+      window.removeEventListener("resize", onResize);
+      cancelAnimationFrame(raf);
+    };
+  }, []);
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    const { error } = await signIn(loginEmail, loginPassword);
+    const { error } = await signIn(email, password);
     if (!error) {
       navigate("/");
     }
   };
 
-  const handleSignup = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const { error } = await signUp(signupEmail, signupPassword, signupFullName);
-    if (!error) {
-      setActiveTab("login");
-    }
-  };
-
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="animate-pulse text-foreground">Carregando...</div>
+      <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
+        <div className="animate-pulse text-zinc-50">Carregando...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col">
-      {/* Header with back button */}
-      <div className="p-6">
-        <Button 
-          variant="ghost" 
+    <section className="fixed inset-0 bg-zinc-950 text-zinc-50">
+      <style>{`
+        .accent-lines{position:absolute;inset:0;pointer-events:none;opacity:.7}
+        .hline,.vline{position:absolute;background:#27272a;will-change:transform,opacity}
+        .hline{left:0;right:0;height:1px;transform:scaleX(0);transform-origin:50% 50%;animation:drawX .8s cubic-bezier(.22,.61,.36,1) forwards}
+        .vline{top:0;bottom:0;width:1px;transform:scaleY(0);transform-origin:50% 0%;animation:drawY .9s cubic-bezier(.22,.61,.36,1) forwards}
+        .hline:nth-child(1){top:18%;animation-delay:.12s}
+        .hline:nth-child(2){top:50%;animation-delay:.22s}
+        .hline:nth-child(3){top:82%;animation-delay:.32s}
+        .vline:nth-child(4){left:22%;animation-delay:.42s}
+        .vline:nth-child(5){left:50%;animation-delay:.54s}
+        .vline:nth-child(6){left:78%;animation-delay:.66s}
+        .hline::after,.vline::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(250,250,250,.24),transparent);opacity:0;animation:shimmer .9s ease-out forwards}
+        .hline:nth-child(1)::after{animation-delay:.12s}
+        .hline:nth-child(2)::after{animation-delay:.22s}
+        .hline:nth-child(3)::after{animation-delay:.32s}
+        .vline:nth-child(4)::after{animation-delay:.42s}
+        .vline:nth-child(5)::after{animation-delay:.54s}
+        .vline:nth-child(6)::after{animation-delay:.66s}
+        @keyframes drawX{0%{transform:scaleX(0);opacity:0}60%{opacity:.95}100%{transform:scaleX(1);opacity:.7}}
+        @keyframes drawY{0%{transform:scaleY(0);opacity:0}60%{opacity:.95}100%{transform:scaleY(1);opacity:.7}}
+        @keyframes shimmer{0%{opacity:0}35%{opacity:.25}100%{opacity:0}}
+
+        .card-animate {
+          opacity: 0;
+          transform: translateY(20px);
+          animation: fadeUp 0.8s cubic-bezier(.22,.61,.36,1) 0.4s forwards;
+        }
+        @keyframes fadeUp {
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+      `}</style>
+
+      {/* Subtle vignette */}
+      <div className="absolute inset-0 pointer-events-none [background:radial-gradient(80%_60%_at_50%_30%,rgba(255,255,255,0.06),transparent_60%)]" />
+
+      {/* Animated accent lines */}
+      <div className="accent-lines">
+        <div className="hline" />
+        <div className="hline" />
+        <div className="hline" />
+        <div className="vline" />
+        <div className="vline" />
+        <div className="vline" />
+      </div>
+
+      {/* Particles */}
+      <canvas
+        ref={canvasRef}
+        className="absolute inset-0 w-full h-full opacity-50 mix-blend-screen pointer-events-none"
+      />
+
+      {/* Header */}
+      <header className="absolute left-0 right-0 top-0 flex items-center justify-between px-6 py-4 border-b border-zinc-800/80">
+        <span className="text-xs tracking-[0.14em] uppercase text-zinc-400">
+          LUNARIS
+        </span>
+        <Button
+          variant="outline"
           onClick={() => navigate("/")}
-          className="glass glass-hover"
+          className="h-9 rounded-lg border-zinc-800 bg-zinc-900 text-zinc-50 hover:bg-zinc-900/80"
         >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Voltar ao Site
+          <span className="mr-2">Voltar ao Site</span>
+          <ArrowRight className="h-4 w-4" />
         </Button>
-      </div>
+      </header>
 
-      {/* Main content */}
-      <div className="flex-1 flex items-center justify-center px-4">
-        <div className="w-full max-w-md">
-          <Card className="glass border-glass-border backdrop-blur-xl">
-            <CardHeader className="text-center pb-8">
-              <CardTitle className="text-3xl font-bold bg-gradient-to-r from-foreground to-primary bg-clip-text text-transparent">
-                Lunaris Portal
-              </CardTitle>
-              <CardDescription className="text-muted-foreground text-lg">
-                Acesse ou crie sua conta para continuar
-              </CardDescription>
-            </CardHeader>
-            
-            <CardContent>
-              <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-                <TabsList className="grid w-full grid-cols-2 glass">
-                  <TabsTrigger value="login" className="data-[state=active]:bg-primary">
-                    Login
-                  </TabsTrigger>
-                  <TabsTrigger value="signup" className="data-[state=active]:bg-primary">
-                    Cadastro
-                  </TabsTrigger>
-                </TabsList>
-                
-                {/* Login Tab */}
-                <TabsContent value="login" className="space-y-6">
-                  <form onSubmit={handleLogin} className="space-y-6">
-                    <div className="space-y-2">
-                      <Label htmlFor="login-email" className="text-foreground font-medium">
-                        E-mail
-                      </Label>
-                      <div className="relative">
-                        <Mail className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
-                        <Input
-                          id="login-email"
-                          type="email"
-                          placeholder="seu@email.com"
-                          value={loginEmail}
-                          onChange={(e) => setLoginEmail(e.target.value)}
-                          className="pl-10 glass border-glass-border bg-card/50 backdrop-blur-sm focus:border-primary focus:shadow-glow"
-                          required
-                        />
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label htmlFor="login-password" className="text-foreground font-medium">
-                        Senha
-                      </Label>
-                      <div className="relative">
-                        <Lock className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
-                        <Input
-                          id="login-password"
-                          type={showPassword ? "text" : "password"}
-                          placeholder="••••••••"
-                          value={loginPassword}
-                          onChange={(e) => setLoginPassword(e.target.value)}
-                          className="pl-10 pr-10 glass border-glass-border bg-card/50 backdrop-blur-sm focus:border-primary focus:shadow-glow"
-                          required
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowPassword(!showPassword)}
-                          className="absolute right-3 top-3 text-muted-foreground hover:text-foreground transition-colors"
-                        >
-                          {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                        </button>
-                      </div>
-                    </div>
-                    
-                    <Button 
-                      type="submit" 
-                      variant="default" 
-                      size="lg" 
-                      className="w-full bg-gradient-to-r from-primary to-primary-glow hover:shadow-glow transition-all"
-                    >
-                      Entrar no Portal
-                    </Button>
-                  </form>
-                </TabsContent>
-                
-                {/* Signup Tab */}
-                <TabsContent value="signup" className="space-y-6">
-                  <form onSubmit={handleSignup} className="space-y-6">
-                    <div className="space-y-2">
-                      <Label htmlFor="signup-name" className="text-foreground font-medium">
-                        Nome Completo
-                      </Label>
-                      <div className="relative">
-                        <User className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
-                        <Input
-                          id="signup-name"
-                          type="text"
-                          placeholder="Seu Nome"
-                          value={signupFullName}
-                          onChange={(e) => setSignupFullName(e.target.value)}
-                          className="pl-10 glass border-glass-border bg-card/50 backdrop-blur-sm focus:border-primary focus:shadow-glow"
-                          required
-                        />
-                      </div>
-                    </div>
+      {/* Centered Login Card */}
+      <div className="h-full w-full grid place-items-center px-4">
+        <Card className="card-animate w-full max-w-sm border-zinc-800 bg-zinc-900/70 backdrop-blur supports-[backdrop-filter]:bg-zinc-900/60">
+          <CardHeader className="space-y-1">
+            <CardTitle className="text-2xl">Portal de Acesso</CardTitle>
+            <CardDescription className="text-zinc-400">
+              Entre com suas credenciais autorizadas
+            </CardDescription>
+          </CardHeader>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="signup-email" className="text-foreground font-medium">
-                        E-mail
-                      </Label>
-                      <div className="relative">
-                        <Mail className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
-                        <Input
-                          id="signup-email"
-                          type="email"
-                          placeholder="seu@email.com"
-                          value={signupEmail}
-                          onChange={(e) => setSignupEmail(e.target.value)}
-                          className="pl-10 glass border-glass-border bg-card/50 backdrop-blur-sm focus:border-primary focus:shadow-glow"
-                          required
-                        />
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label htmlFor="signup-password" className="text-foreground font-medium">
-                        Senha
-                      </Label>
-                      <div className="relative">
-                        <Lock className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
-                        <Input
-                          id="signup-password"
-                          type={showPassword ? "text" : "password"}
-                          placeholder="••••••••"
-                          value={signupPassword}
-                          onChange={(e) => setSignupPassword(e.target.value)}
-                          className="pl-10 pr-10 glass border-glass-border bg-card/50 backdrop-blur-sm focus:border-primary focus:shadow-glow"
-                          required
-                          minLength={6}
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowPassword(!showPassword)}
-                          className="absolute right-3 top-3 text-muted-foreground hover:text-foreground transition-colors"
-                        >
-                          {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                        </button>
-                      </div>
-                    </div>
-                    
-                    <Button 
-                      type="submit" 
-                      variant="default" 
-                      size="lg" 
-                      className="w-full bg-gradient-to-r from-primary to-primary-glow hover:shadow-glow transition-all"
-                    >
-                      Criar Conta
-                    </Button>
-                  </form>
-                </TabsContent>
-              </Tabs>
-            </CardContent>
-          </Card>
-          
-          <div className="mt-8 text-center">
-            <p className="text-muted-foreground text-sm">
-              Plataforma exclusiva para gerenciamento de campanhas
-            </p>
+          <CardContent className="grid gap-5">
+            <form onSubmit={handleLogin} className="grid gap-5">
+              <div className="grid gap-2">
+                <Label htmlFor="email" className="text-zinc-300">
+                  E-mail
+                </Label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="seu@email.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="pl-10 bg-zinc-950 border-zinc-800 text-zinc-50 placeholder:text-zinc-600"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="password" className="text-zinc-300">
+                  Senha
+                </Label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
+                  <Input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="pl-10 pr-10 bg-zinc-950 border-zinc-800 text-zinc-50 placeholder:text-zinc-600"
+                    required
+                  />
+                  <button
+                    type="button"
+                    aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-md text-zinc-400 hover:text-zinc-200"
+                    onClick={() => setShowPassword((v) => !v)}
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Checkbox
+                    id="remember"
+                    checked={rememberMe}
+                    onCheckedChange={(checked) => setRememberMe(checked as boolean)}
+                    className="border-zinc-700 data-[state=checked]:bg-zinc-50 data-[state=checked]:text-zinc-900"
+                  />
+                  <Label htmlFor="remember" className="text-zinc-400">
+                    Lembrar de mim
+                  </Label>
+                </div>
+                <a href="#" className="text-sm text-zinc-300 hover:text-zinc-100">
+                  Esqueceu a senha?
+                </a>
+              </div>
+
+              <Button 
+                type="submit" 
+                className="w-full h-10 rounded-lg bg-zinc-50 text-zinc-900 hover:bg-zinc-200"
+              >
+                Entrar no Portal
+              </Button>
+            </form>
+          </CardContent>
+
+          <div className="p-6 pt-0">
+            <div className="text-center text-sm text-zinc-400">
+              <p>Acesso restrito a usuários autorizados</p>
+              <p className="mt-1 text-xs">Contas criadas somente por administradores</p>
+            </div>
           </div>
-        </div>
+        </Card>
       </div>
-    </div>
+    </section>
   );
 };
 
