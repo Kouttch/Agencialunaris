@@ -8,12 +8,12 @@ export const LunarisLogo = ({
     theme
   } = useTheme();
   return <div className={`flex items-center space-x-3 ${className}`}>
-      <div className="relative py-[4px] mx-[9px] my-0 px-[31px]">
-        <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-foreground">
-          <circle cx="16" cy="16" r="14" stroke="currentColor" strokeWidth="2" fill="none" />
-          <path d="M8 16 C8 10, 12 6, 16 8 C20 10, 24 14, 22 18 C20 22, 16 20, 16 16 C16 12, 20 8, 24 16" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" />
-          <circle cx="16" cy="16" r="2" fill="currentColor" />
-        </svg>
+      <div className="relative">
+        <img 
+          src="/lovable-uploads/4ba262f3-415c-4a4b-8118-476ed941caae.png" 
+          alt="Logo Icon" 
+          className="w-8 h-8 object-contain"
+        />
       </div>
       
     </div>;
