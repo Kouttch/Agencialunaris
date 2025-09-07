@@ -2,39 +2,39 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Futuristic Traffic Management Design System 
-Primary: #E83950 | Secondary: #202342 | Glass effects, gradients, dark theme
+/* Dark & Clean Design System 
+Primary: Red accent for details | Black/White/Gray base colors
 */
 
 @layer base {
   :root {
-    /* Main brand colors */
-    --primary: 348 79% 58%; /* #E83950 */
+    /* Main brand colors - red accent for details only */
+    --primary: 348 79% 58%; /* #E83950 - for important accents */
     --primary-foreground: 0 0% 100%;
     --primary-glow: 348 79% 68%;
     
-    /* Dark theme base */
-    --background: 230 29% 13%; /* #202342 */
-    --foreground: 0 0% 100%;
+    /* Dark theme base - near black */
+    --background: 0 0% 8%; /* Very dark gray, almost black */
+    --foreground: 0 0% 95%; /* Off-white */
     
     /* Glass effect colors */
-    --glass: 230 29% 13% / 0.1;
-    --glass-border: 0 0% 100% / 0.1;
-    --glass-hover: 230 29% 13% / 0.2;
+    --glass: 0 0% 15% / 0.1;
+    --glass-border: 0 0% 25% / 0.2;
+    --glass-hover: 0 0% 20% / 0.2;
     
     /* Card system */
-    --card: 230 29% 15%;
-    --card-foreground: 0 0% 100%;
-    --card-glass: 230 29% 13% / 0.05;
+    --card: 0 0% 12%; /* Dark gray cards */
+    --card-foreground: 0 0% 95%;
+    --card-glass: 0 0% 10% / 0.05;
     
     /* Secondary colors */
-    --secondary: 230 29% 18%;
-    --secondary-foreground: 0 0% 100%;
+    --secondary: 0 0% 18%; /* Medium dark gray */
+    --secondary-foreground: 0 0% 95%;
     
     /* Neutral helpers */
-    --muted: 223 6% 65%; /* #A6A8B3 */
-    --muted-foreground: 223 6% 75%;
-    --light-background: 225 11% 96%; /* #F4F5F7 */
+    --muted: 0 0% 35%; /* Medium gray */
+    --muted-foreground: 0 0% 65%; /* Light gray */
+    --light-background: 0 0% 98%; /* Almost white */
     
     /* Status colors */
     --success: 142 71% 45%;
@@ -43,19 +43,19 @@ Primary: #E83950 | Secondary: #202342 | Glass effects, gradients, dark theme
     --destructive-foreground: 0 0% 100%;
     
     /* Interactive elements */
-    --border: 230 29% 25%;
-    --input: 230 29% 20%;
-    --ring: 348 79% 58%;
-    --accent: 230 29% 20%;
-    --accent-foreground: 0 0% 100%;
+    --border: 0 0% 20%; /* Dark gray borders */
+    --input: 0 0% 15%; /* Dark input backgrounds */
+    --ring: 348 79% 58%; /* Red focus ring */
+    --accent: 0 0% 18%; /* Dark gray accent */
+    --accent-foreground: 0 0% 95%;
     
     /* Popover */
-    --popover: 230 29% 15%;
-    --popover-foreground: 0 0% 100%;
+    --popover: 0 0% 12%; /* Dark gray like cards */
+    --popover-foreground: 0 0% 95%;
 
     --radius: 0.5rem;
 
-    /* Futuristic gradients */
+    /* Clean gradients */
     --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-glow)));
     --gradient-glass: linear-gradient(135deg, 
       hsl(var(--glass)), 
@@ -66,10 +66,10 @@ Primary: #E83950 | Secondary: #202342 | Glass effects, gradients, dark theme
       hsl(var(--card))
     );
     
-    /* Neon glows */
-    --glow-primary: 0 0 20px hsl(var(--primary) / 0.3);
-    --glow-primary-strong: 0 0 40px hsl(var(--primary) / 0.6);
-    --glow-glass: 0 8px 32px hsl(0 0% 0% / 0.3);
+    /* Subtle glows */
+    --glow-primary: 0 0 20px hsl(var(--primary) / 0.2);
+    --glow-primary-strong: 0 0 40px hsl(var(--primary) / 0.4);
+    --glow-glass: 0 8px 32px hsl(0 0% 0% / 0.4);
     
     /* Animations */
     --animation-glow: glow 2s ease-in-out infinite alternate;
@@ -87,8 +87,8 @@ Primary: #E83950 | Secondary: #202342 | Glass effects, gradients, dark theme
   body {
     @apply bg-background text-foreground;
     background-image: 
-      radial-gradient(circle at 20% 20%, hsl(var(--primary) / 0.1) 0%, transparent 50%),
-      radial-gradient(circle at 80% 80%, hsl(var(--primary-glow) / 0.05) 0%, transparent 50%);
+      radial-gradient(circle at 20% 20%, hsl(var(--primary) / 0.03) 0%, transparent 50%),
+      radial-gradient(circle at 80% 80%, hsl(0 0% 15% / 0.1) 0%, transparent 50%);
   }
 
   /* Glassmorphism utilities */
