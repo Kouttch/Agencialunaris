@@ -10,9 +10,9 @@ export const LunarisLogo = ({
   return <div className={`flex items-center space-x-3 ${className}`}>
       <div className="relative">
         <img 
-          src="/lovable-uploads/4ba262f3-415c-4a4b-8118-476ed941caae.png" 
-          alt="Logo Icon" 
-          className="w-8 h-8 object-contain"
+          src="/lovable-uploads/841bb7ed-4546-4b56-bb41-6b89e3102796.png" 
+          alt="Logomarca" 
+          className="h-12 w-auto object-contain"
         />
       </div>
       
