@@ -42,7 +42,7 @@ export function HeroNew() {
                       Explore o Universo
                     </span>
                     <br />
-                    <span className="text-muted-foreground">do Futuro</span>
+                    <span className="text-muted-foreground">do tráfego pago</span>
                   </h1>
                   
                   <p className="mx-auto mt-8 max-w-2xl text-balance text-lg text-muted-foreground leading-relaxed">
