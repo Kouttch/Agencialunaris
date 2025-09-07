@@ -6,7 +6,7 @@ import { WhatsAppContactSection } from "@/components/WhatsAppContactSection";
 
 const Index = () => {
   return (
-    <main className="min-h-screen bg-background text-foreground">
+    <main className="min-h-screen">
       <Header />
       <HeroNew />
       <Features />
