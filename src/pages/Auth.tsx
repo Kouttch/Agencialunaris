@@ -158,7 +158,7 @@ const Auth = () => {
       />
 
       {/* Header */}
-      <header className="absolute left-0 right-0 top-0 flex items-center justify-between px-6 py-4 border-b border-zinc-800/80">
+      <header className="absolute left-0 right-0 top-0 flex items-center justify-between px-6 py-4 border-b border-zinc-800/30 bg-zinc-950/20 backdrop-blur-md supports-[backdrop-filter]:bg-zinc-950/10">
         <img 
           src="/lovable-uploads/9ff510c8-a3b6-40fc-8d68-a549f1a5daf1.png" 
           alt="Logomarca" 
