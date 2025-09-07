@@ -25,9 +25,11 @@ export const LunarisLogo = ({ className }: { className?: string }) => {
           <circle cx="16" cy="16" r="2" fill="currentColor"/>
         </svg>
       </div>
-      <span className="text-xl font-bold text-foreground">
-        Lunaris
-      </span>
+      <img 
+        src="/lovable-uploads/54ff841c-9693-4278-bef0-1ff83ef8374a.png" 
+        alt="Lunaris" 
+        className="h-8 w-auto"
+      />
     </div>
   );
 };
