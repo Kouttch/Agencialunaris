@@ -39,7 +39,7 @@ export function HeroNew() {
         
                   <h1 className="mt-8 max-w-4xl mx-auto text-balance text-6xl md:text-7xl lg:mt-16 xl:text-[5.25rem] font-black leading-tight">
                     <span style={{ background: 'linear-gradient(135deg, #c9444f, #483a89)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
-                      Gestão de Tráfego
+                      Explore o Universo
                     </span>
                     <br />
                     <span className="text-muted-foreground">do Futuro</span>
