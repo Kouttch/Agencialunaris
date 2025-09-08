@@ -1,16 +1,14 @@
 export const Footer = () => {
-  return (
-    <footer className="py-12 px-4 border-t border-glass-border bg-card/30">
+  return <footer className="py-12 px-4 border-t border-glass-border bg-card/30">
       <div className="container mx-auto">
         <div className="grid md:grid-cols-3 gap-8 mb-8">
           {/* Brand */}
           <div>
             <div className="flex items-center space-x-2 mb-4">
-              <img 
-                src="/lovable-uploads/ad06ec7f-d134-4e17-b18e-0dffcb76d294.png" 
-                alt="Logomarca" 
-                className="h-[35px] w-auto object-contain"
-              />
+              <div className="w-8 h-8 bg-gradient-to-br from-primary to-primary-glow rounded-lg shadow-glow"></div>
+              <span className="text-xl font-bold bg-gradient-to-r from-foreground to-muted bg-clip-text text-transparent">
+                TrafficPro
+              </span>
             </div>
             <p className="text-muted-foreground">
               O futuro da gestão de tráfego pago. Transparência, inovação e resultados excepcionais.
@@ -58,9 +56,8 @@ export const Footer = () => {
 
         {/* Bottom */}
         <div className="pt-8 border-t border-glass-border text-center text-muted-foreground">
-          <p>© 2024 TrafficPro. Todos os direitos reservados. Plataforma segura com Supabase.</p>
+          <p>© 2025 Agência Lunaris. Todos os direitos reservados. Plataforma segura com Supabase.</p>
         </div>
       </div>
-    </footer>
-  );
+    </footer>;
 };
