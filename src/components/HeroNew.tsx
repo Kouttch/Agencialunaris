@@ -183,14 +183,19 @@ export function HeroNew() {
         </section>
         
         <section className="bg-background pb-16 pt-16 md:pb-32">
-          <div className="mx-auto flex w-full max-w-screen-lg flex-col items-center space-y-8">
+          <div className="mx-auto flex w-full max-w-screen-xl flex-col items-center space-y-12">
             <div className="text-center">
               <GradientHeading variant="secondary" size="lg">
                 Nossos Clientes
               </GradientHeading>
+              <p className="mt-4 text-muted-foreground max-w-2xl mx-auto">
+                Confiança de empresas que escolheram nossa expertise em gestão de tráfego
+              </p>
             </div>
 
-            <LogoCarousel columnCount={4} logos={clientLogos} />
+            <div className="w-full">
+              <LogoCarousel columnCount={4} logos={clientLogos} />
+            </div>
           </div>
         </section>
       </main>

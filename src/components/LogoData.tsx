@@ -1,172 +1,142 @@
 import React, { type SVGProps } from "react";
 
-// Logos fictícios para o carousel
-function AppleIcon(props: SVGProps<SVGSVGElement>) {
+// Novos logos dos clientes
+function ReiDoFrangoIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <div className="flex items-center justify-center h-full w-full">
+      <img
+        src="/lovable-uploads/58085403-9641-4c95-b5c8-70adf41b1a68.png"
+        alt="Rei do Frango"
+        className="h-full w-full object-contain"
+      />
+    </div>
+  );
+}
+
+function GeometricBlueIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <div className="flex items-center justify-center h-full w-full">
+      <img
+        src="/lovable-uploads/9066b8af-4e34-4366-833f-522cf7d74814.png"
+        alt="Logo Geométrico"
+        className="h-full w-full object-contain"
+      />
+    </div>
+  );
+}
+
+function GreenIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <div className="flex items-center justify-center h-full w-full">
+      <img
+        src="/lovable-uploads/93ee5ae4-973c-4241-a4a9-74c040eedf8a.png"
+        alt=".Green"
+        className="h-full w-full object-contain"
+      />
+    </div>
+  );
+}
+
+function SuperTenisIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <div className="flex items-center justify-center h-full w-full">
+      <img
+        src="/lovable-uploads/e25da953-9cc8-49a5-a664-0382f554ec02.png"
+        alt="Super Tênis"
+        className="h-full w-full object-contain"
+      />
+    </div>
+  );
+}
+
+function MascotIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <div className="flex items-center justify-center h-full w-full">
+      <img
+        src="/lovable-uploads/9da1a037-475d-4325-84fe-8e112c174298.png"
+        alt="Mascote"
+        className="h-full w-full object-contain"
+      />
+    </div>
+  );
+}
+
+function RedLineIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <svg
+      viewBox="0 0 120 40"
+      width="120"
+      height="40"
       xmlns="http://www.w3.org/2000/svg"
-      width="209"
-      height="256"
-      viewBox="0 0 814 1000"
       {...props}
     >
-      <path d="M788.1 340.9c-5.8 4.5-108.2 62.2-108.2 190.5 0 148.4 130.3 200.9 134.2 202.2-.6 3.2-20.7 71.9-68.7 141.9-42.8 61.6-87.5 123.1-155.5 123.1s-85.5-39.5-164-39.5c-76.5 0-103.7 40.8-165.9 40.8s-105.6-57-155.5-127C46.7 790.7 0 663 0 541.8c0-194.4 126.4-297.5 250.8-297.5 66.1 0 121.2 43.4 162.7 43.4 39.5 0 101.1-46 176.3-46 28.5 0 130.9 2.6 198.3 99.2zm-234-181.5c31.1-36.9 53.1-88.1 53.1-139.3 0-7.1-.6-14.3-1.9-20.1-50.6 1.9-110.8 33.7-147.1 75.8-28.5 32.4-55.1 83.6-55.1 135.5 0 7.8 1.3 15.6 1.9 18.1 3.2.6 8.4 1.3 13.6 1.3 45.4 0 102.5-30.4 135.5-71.3z" />
+      <rect x="0" y="15" width="120" height="10" fill="#E53E3E" rx="5" />
     </svg>
   );
 }
 
-function GoogleIcon(props: SVGProps<SVGSVGElement>) {
+function SimpleBrandIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <svg
-      viewBox="0 0 256 262"
-      width="256"
-      height="262"
+      viewBox="0 0 100 50"
+      width="100"
+      height="50"
       xmlns="http://www.w3.org/2000/svg"
-      preserveAspectRatio="xMidYMid"
       {...props}
     >
-      <path
-        d="M255.878 133.451c0-10.734-.871-18.567-2.756-26.69H130.55v48.448h71.947c-1.45 12.04-9.283 30.172-26.69 42.356l-.244 1.622 38.755 30.023 2.685.268c24.659-22.774 38.875-56.282 38.875-96.027"
-        fill="#4285F4"
-      />
-      <path
-        d="M130.55 261.1c35.248 0 64.839-11.605 86.453-31.622l-41.196-31.913c-11.024 7.688-25.82 13.055-45.257 13.055-34.523 0-63.824-22.773-74.269-54.25l-1.531.13-40.298 31.187-.527 1.465C35.393 231.798 79.49 261.1 130.55 261.1"
-        fill="#34A853"
-      />
-      <path
-        d="M56.281 156.37c-2.756-8.123-4.351-16.827-4.351-25.82 0-8.994 1.595-17.697 4.206-25.82l-.073-1.73L15.26 71.312l-1.335.635C5.077 89.644 0 109.517 0 130.55s5.077 40.905 13.925 58.602l42.356-32.782"
-        fill="#FBBC05"
-      />
-      <path
-        d="M130.55 50.479c24.514 0 41.05 10.589 50.479 19.438l36.844-35.974C195.245 12.91 165.798 0 130.55 0 79.49 0 35.393 29.301 13.925 71.947l42.211 32.783c10.59-31.477 39.891-54.251 74.414-54.251"
-        fill="#EB4335"
-      />
+      <circle cx="25" cy="25" r="15" fill="hsl(var(--primary))" />
+      <rect x="45" y="10" width="45" height="30" rx="5" fill="hsl(var(--muted-foreground))" />
     </svg>
   );
 }
 
-function MetaIcon(props: SVGProps<SVGSVGElement>) {
+function ModernBrandIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <svg
-      viewBox="0 0 256 256"
-      width="256"
-      height="256"
+      viewBox="0 0 80 80"
+      width="80"
+      height="80"
       xmlns="http://www.w3.org/2000/svg"
-      preserveAspectRatio="xMidYMid"
       {...props}
     >
-      <path
-        d="M256 128C256 57.308 198.692 0 128 0 57.308 0 0 57.307 0 128c0 63.888 46.808 116.843 108 126.445V165H75.5v-37H108V99.8c0-32.08 19.11-49.8 48.348-49.8C170.352 50 185 52.5 185 52.5V84h-16.14C152.959 84 148 93.867 148 103.99V128h35.5l-5.675 37H148v89.445c61.192-9.602 108-62.556 108-126.445"
-        fill="#1877F2"
-      />
-      <path
-        d="m177.825 165 5.675-37H148v-24.01C148 93.866 152.959 84 168.86 84H185V52.5S170.352 50 156.347 50C127.11 50 108 67.72 108 99.8V128H75.5v37H108v89.445A128.959 128.959 0 0 0 128 256a128.9 128.9 0 0 0 20-1.555V165h29.825"
-        fill="#FFF"
-      />
+      <rect x="10" y="10" width="60" height="60" rx="12" fill="hsl(var(--accent))" />
+      <circle cx="40" cy="40" r="15" fill="hsl(var(--background))" />
+      <circle cx="40" cy="40" r="8" fill="hsl(var(--primary))" />
     </svg>
   );
 }
 
-function MicrosoftIcon(props: SVGProps<SVGSVGElement>) {
+function TechBrandIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <svg
-      viewBox="0 0 256 256"
-      width="256"
-      height="256"
+      viewBox="0 0 120 40"
+      width="120"
+      height="40"
       xmlns="http://www.w3.org/2000/svg"
       {...props}
     >
-      <path fill="#F1511B" d="M121.666 121.666H0V0h121.666z" />
-      <path fill="#80CC28" d="M256 121.666H134.334V0H256z" />
-      <path fill="#00ADEF" d="M121.666 256H0V134.334h121.666z" />
-      <path fill="#FBBC09" d="M256 256H134.334V134.334H256z" />
-    </svg>
-  );
-}
-
-function AmazonIcon(props: SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      viewBox="0 0 256 153"
-      width="256"
-      height="153"
-      xmlns="http://www.w3.org/2000/svg"
-      preserveAspectRatio="xMidYMid"
-      {...props}
-    >
       <path
-        d="M72.392 55.438c0-4.404-1.518-8.07-4.555-10.998-3.037-2.928-6.703-4.392-10.998-4.392-4.295 0-7.96 1.464-10.998 4.392-3.037 2.928-4.555 6.594-4.555 10.998 0 4.404 1.518 8.07 4.555 10.998 3.037 2.928 6.703 4.392 10.998 4.392 4.295 0 7.96-1.464 10.998-4.392 3.037-2.928 4.555-6.594 4.555-10.998m163.34 1.315c-2.602-2.276-5.641-3.414-9.118-3.414-5.095 0-9.336 1.845-12.723 5.535-3.387 3.69-5.08 8.288-5.08 13.795 0 5.507 1.693 10.105 5.08 13.795 3.387 3.69 7.628 5.535 12.723 5.535 3.477 0 6.516-1.138 9.118-3.414 2.602-2.276 3.903-5.205 3.903-8.787v-13.463c0-3.582-1.301-6.511-3.903-8.787M256 114.321c0 12.831-10.403 23.234-23.234 23.234H23.234C10.403 137.555 0 127.152 0 114.321V23.234C0 10.403 10.403 0 23.234 0h209.532C245.597 0 256 10.403 256 23.234v91.087z"
-        fill="#FFF"
+        d="M10 20 L30 10 L50 20 L70 10 L90 20 L110 10"
+        stroke="hsl(var(--primary))"
+        strokeWidth="3"
+        fill="none"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
-    </svg>
-  );
-}
-
-function NetflixIcon(props: SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      viewBox="0 0 256 692"
-      width="256"
-      height="692"
-      xmlns="http://www.w3.org/2000/svg"
-      preserveAspectRatio="xMidYMid"
-      {...props}
-    >
-      <path
-        d="M255.993 691.394V.626L171.364.322v423.676l-84.629-423.37L1.106.322v690.374l85.337.374V267.433L171.364 691l84.629.394z"
-        fill="#E50914"
-      />
-    </svg>
-  );
-}
-
-function TeslaIcon(props: SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      viewBox="0 0 256 64"
-      width="256"
-      height="64"
-      xmlns="http://www.w3.org/2000/svg"
-      preserveAspectRatio="xMidYMid"
-      {...props}
-    >
-      <path
-        d="M238.077 14.382h17.877v48.055h-17.877V14.382zM213.025 14.382v48.055h-17.876V27.444h-.292l-21.209 34.993h-14.17l-21.208-34.993h-.293v34.993h-17.876V14.382h26.671l18.543 30.42h.292l18.835-30.42h28.583zM98.084 19.468v42.969h-17.876v-42.97H98.084z"
-        fill="#E82127"
-      />
-    </svg>
-  );
-}
-
-function UberIcon(props: SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      viewBox="0 0 256 256"
-      width="256"
-      height="256"
-      xmlns="http://www.w3.org/2000/svg"
-      preserveAspectRatio="xMidYMid"
-      {...props}
-    >
-      <path
-        d="M128 0C57.308 0 0 57.308 0 128s57.308 128 128 128 128-57.308 128-128S198.692 0 128 0zm0 240C65.065 240 16 190.935 16 128S65.065 16 128 16s112 49.065 112 112-49.065 112-112 112z"
-        fill="#000"
-      />
-      <path
-        d="M128 64c-35.346 0-64 28.654-64 64s28.654 64 64 64 64-28.654 64-64-28.654-64-64-64zm0 112c-26.51 0-48-21.49-48-48s21.49-48 48-48 48 21.49 48 48-21.49 48-48 48z"
-        fill="#000"
-      />
+      <circle cx="20" cy="15" r="3" fill="hsl(var(--accent))" />
+      <circle cx="60" cy="15" r="3" fill="hsl(var(--accent))" />
+      <circle cx="100" cy="15" r="3" fill="hsl(var(--accent))" />
     </svg>
   );
 }
 
 export const clientLogos = [
-  { name: "Apple", id: 1, img: AppleIcon },
-  { name: "Google", id: 2, img: GoogleIcon },
-  { name: "Meta", id: 3, img: MetaIcon },
-  { name: "Microsoft", id: 4, img: MicrosoftIcon },
-  { name: "Amazon", id: 5, img: AmazonIcon },
-  { name: "Netflix", id: 6, img: NetflixIcon },
-  { name: "Tesla", id: 7, img: TeslaIcon },
-  { name: "Uber", id: 8, img: UberIcon },
+  { name: "Rei do Frango", id: 1, img: ReiDoFrangoIcon },
+  { name: "Geométrico", id: 2, img: GeometricBlueIcon },
+  { name: "Green", id: 3, img: GreenIcon },
+  { name: "Super Tênis", id: 4, img: SuperTenisIcon },
+  { name: "Mascote", id: 5, img: MascotIcon },
+  { name: "Red Line", id: 6, img: RedLineIcon },
+  { name: "Simple Brand", id: 7, img: SimpleBrandIcon },
+  { name: "Tech Brand", id: 8, img: TechBrandIcon },
 ];
