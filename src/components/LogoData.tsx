@@ -64,55 +64,37 @@ function MascotIcon(props: SVGProps<SVGSVGElement>) {
 // Criando SVGs melhorados para completar as 8 logomarcas
 function TechBrandIcon(props: SVGProps<SVGSVGElement>) {
   return (
-    <svg
-      viewBox="0 0 120 60"
-      width="120"
-      height="60"
-      className="fill-muted-foreground"
-      {...props}
-    >
-      <rect x="20" y="20" width="80" height="20" rx="10" fill="hsl(var(--primary))" />
-      <circle cx="30" cy="30" r="6" fill="hsl(var(--background))" />
-      <circle cx="50" cy="30" r="6" fill="hsl(var(--background))" />
-      <circle cx="70" cy="30" r="6" fill="hsl(var(--background))" />
-      <circle cx="90" cy="30" r="6" fill="hsl(var(--background))" />
-    </svg>
+    <div className="flex items-center justify-center h-full w-full">
+      <img
+        src="/lovable-uploads/86bf827f-1738-4b6b-a9f4-6ef96044cb0c.png"
+        alt="Tech Brand"
+        className="h-full w-full object-contain max-h-16 max-w-24"
+      />
+    </div>
   );
 }
 
 function ModernBrandIcon(props: SVGProps<SVGSVGElement>) {
   return (
-    <svg
-      viewBox="0 0 100 60"
-      width="100"
-      height="60"
-      className="fill-muted-foreground"
-      {...props}
-    >
-      <rect x="10" y="15" width="80" height="30" rx="15" fill="hsl(var(--accent))" />
-      <circle cx="30" cy="30" r="8" fill="hsl(var(--background))" />
-      <circle cx="70" cy="30" r="8" fill="hsl(var(--background))" />
-      <rect x="40" y="22" width="20" height="16" rx="8" fill="hsl(var(--primary))" />
-    </svg>
+    <div className="flex items-center justify-center h-full w-full">
+      <img
+        src="/lovable-uploads/3cb41719-1c90-4212-8d14-4c9ef378e4fa.png"
+        alt="Modern Brand"
+        className="h-full w-full object-contain max-h-16 max-w-24"
+      />
+    </div>
   );
 }
 
 function DigitalBrandIcon(props: SVGProps<SVGSVGElement>) {
   return (
-    <svg
-      viewBox="0 0 120 60"
-      width="120"
-      height="60"
-      className="fill-muted-foreground"
-      {...props}
-    >
-      <polygon 
-        points="30,15 60,15 90,30 60,45 30,45" 
-        fill="hsl(var(--primary))" 
+    <div className="flex items-center justify-center h-full w-full">
+      <img
+        src="/lovable-uploads/3f67c125-1e2e-4f31-aa79-54e1923331b3.png"
+        alt="Digital Brand"
+        className="h-full w-full object-contain max-h-16 max-w-24"
       />
-      <circle cx="45" cy="30" r="8" fill="hsl(var(--background))" />
-      <circle cx="75" cy="30" r="4" fill="hsl(var(--accent))" />
-    </svg>
+    </div>
   );
 }
 
