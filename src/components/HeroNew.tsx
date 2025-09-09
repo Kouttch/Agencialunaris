@@ -90,7 +90,7 @@ export function HeroNew() {
                           <div className="w-fit mx-auto rounded-lg border-[0.75px] border-border bg-muted p-4">
                             <BarChart3 className="h-8 w-8" />
                           </div>
-                          <div className="space-y-3">
+                          <div className="space-y-3 text-center">
                             <h3 className="pt-0.5 text-xl leading-[1.375rem] font-semibold font-sans tracking-[-0.04em] md:text-2xl md:leading-[1.875rem] text-balance text-foreground">
                               Dashboards Avançados
                             </h3>
@@ -118,7 +118,7 @@ export function HeroNew() {
                           <div className="w-fit mx-auto rounded-lg border-[0.75px] border-border bg-muted p-4">
                             <Shield className="h-8 w-8" />
                           </div>
-                          <div className="space-y-3">
+                          <div className="space-y-3 text-center">
                             <h3 className="pt-0.5 text-xl leading-[1.375rem] font-semibold font-sans tracking-[-0.04em] md:text-2xl md:leading-[1.875rem] text-balance text-foreground">
                               Segurança Total
                             </h3>
@@ -146,7 +146,7 @@ export function HeroNew() {
                           <div className="w-fit mx-auto rounded-lg border-[0.75px] border-border bg-muted p-4">
                             <Zap className="h-8 w-8" />
                           </div>
-                          <div className="space-y-3">
+                          <div className="space-y-3 text-center">
                             <h3 className="pt-0.5 text-xl leading-[1.375rem] font-semibold font-sans tracking-[-0.04em] md:text-2xl md:leading-[1.875rem] text-balance text-foreground">
                               Performance
                             </h3>

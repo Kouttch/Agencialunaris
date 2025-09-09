@@ -62,7 +62,7 @@ export const Features = () => {
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {features.map((feature, index) => (
             <Card key={index} className="glass border-glass-border hover:shadow-glow transition-all duration-500 group">
-              <CardHeader>
+              <CardHeader className="text-center">
                 <div className="w-12 h-12 bg-gradient-to-br from-primary to-primary-glow rounded-lg flex items-center justify-center mb-4 group-hover:animate-pulse mx-auto">
                   <feature.icon className="w-6 h-6 text-primary-foreground" />
                 </div>
