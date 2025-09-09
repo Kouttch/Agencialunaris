@@ -87,8 +87,8 @@ export function HeroNew() {
                       />
                       <div className="relative flex h-full flex-col justify-between gap-6 overflow-hidden rounded-xl border-[0.75px] bg-background p-6 shadow-sm dark:shadow-[0px_0px_27px_0px_rgba(45,45,45,0.3)] md:p-6">
                         <div className="relative flex flex-1 flex-col justify-between gap-3">
-                          <div className="w-fit rounded-lg border-[0.75px] border-border bg-muted p-3">
-                            <BarChart3 className="h-6 w-6" />
+                          <div className="w-fit mx-auto rounded-lg border-[0.75px] border-border bg-muted p-4">
+                            <BarChart3 className="h-8 w-8" />
                           </div>
                           <div className="space-y-3">
                             <h3 className="pt-0.5 text-xl leading-[1.375rem] font-semibold font-sans tracking-[-0.04em] md:text-2xl md:leading-[1.875rem] text-balance text-foreground">
@@ -115,8 +115,8 @@ export function HeroNew() {
                       />
                       <div className="relative flex h-full flex-col justify-between gap-6 overflow-hidden rounded-xl border-[0.75px] bg-background p-6 shadow-sm dark:shadow-[0px_0px_27px_0px_rgba(45,45,45,0.3)] md:p-6">
                         <div className="relative flex flex-1 flex-col justify-between gap-3">
-                          <div className="w-fit rounded-lg border-[0.75px] border-border bg-muted p-3">
-                            <Shield className="h-6 w-6" />
+                          <div className="w-fit mx-auto rounded-lg border-[0.75px] border-border bg-muted p-4">
+                            <Shield className="h-8 w-8" />
                           </div>
                           <div className="space-y-3">
                             <h3 className="pt-0.5 text-xl leading-[1.375rem] font-semibold font-sans tracking-[-0.04em] md:text-2xl md:leading-[1.875rem] text-balance text-foreground">
@@ -143,8 +143,8 @@ export function HeroNew() {
                       />
                       <div className="relative flex h-full flex-col justify-between gap-6 overflow-hidden rounded-xl border-[0.75px] bg-background p-6 shadow-sm dark:shadow-[0px_0px_27px_0px_rgba(45,45,45,0.3)] md:p-6">
                         <div className="relative flex flex-1 flex-col justify-between gap-3">
-                          <div className="w-fit rounded-lg border-[0.75px] border-border bg-muted p-3">
-                            <Zap className="h-6 w-6" />
+                          <div className="w-fit mx-auto rounded-lg border-[0.75px] border-border bg-muted p-4">
+                            <Zap className="h-8 w-8" />
                           </div>
                           <div className="space-y-3">
                             <h3 className="pt-0.5 text-xl leading-[1.375rem] font-semibold font-sans tracking-[-0.04em] md:text-2xl md:leading-[1.875rem] text-balance text-foreground">
@@ -171,7 +171,7 @@ export function HeroNew() {
                 <div className="glass relative mx-auto max-w-6xl overflow-hidden rounded-2xl border p-4 shadow-lg ring-1 ring-border">
                   <img
                     className="bg-background aspect-[15/8] relative rounded-2xl"
-                    src={heroDashboard}
+                    src="/lovable-uploads/95adacff-25e7-437d-8260-9d66ac110d9d.png"
                     alt="Dashboard do portal"
                     width="2700"
                     height="1440"

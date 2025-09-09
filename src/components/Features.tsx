@@ -63,7 +63,7 @@ export const Features = () => {
           {features.map((feature, index) => (
             <Card key={index} className="glass border-glass-border hover:shadow-glow transition-all duration-500 group">
               <CardHeader>
-                <div className="w-12 h-12 bg-gradient-to-br from-primary to-primary-glow rounded-lg flex items-center justify-center mb-4 group-hover:animate-pulse">
+                <div className="w-12 h-12 bg-gradient-to-br from-primary to-primary-glow rounded-lg flex items-center justify-center mb-4 group-hover:animate-pulse mx-auto">
                   <feature.icon className="w-6 h-6 text-primary-foreground" />
                 </div>
                 <CardTitle className="text-xl group-hover:text-primary transition-colors">
