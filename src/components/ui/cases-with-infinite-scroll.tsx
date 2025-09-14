@@ -113,7 +113,7 @@ function Case() {
       <div className="container mx-auto">
         <div className="flex flex-col gap-10">
           <h2 className="text-3xl md:text-4xl lg:text-5xl tracking-tighter lg:max-w-xl font-regular text-left">
-            Nossos Clientes
+            Alguns de nossos Clientes
           </h2>
           <Carousel setApi={setApi} className="w-full">
             <CarouselContent>
