@@ -1,59 +1,38 @@
 import { Marquee } from "@/components/ui/marquee"
 
 const ClientLogos = {
-  logo1: () => (
+  cliente1: () => (
     <img 
-      src="/lovable-uploads/logo-client-1.png" 
+      src="/lovable-uploads/logo-cliente-7.png" 
       alt="Cliente 1" 
-      className="h-[50px] w-auto object-contain filter brightness-90"
-    />
-  ),
-  logo2: () => (
-    <img 
-      src="/lovable-uploads/logo-client-2.png" 
-      alt="Cliente 2" 
-      className="h-[50px] w-auto object-contain filter brightness-90"
-    />
-  ),
-  logo3: () => (
-    <img 
-      src="/lovable-uploads/logo-client-3.png" 
-      alt="Cliente 3" 
       className="h-[50px] w-auto object-contain filter brightness-90"
     />
   ),
   greenit: () => (
     <img 
-      src="/lovable-uploads/logo-greenit.png" 
+      src="/lovable-uploads/logo-greenit-novo.png" 
       alt="Green IT" 
       className="h-[50px] w-auto object-contain filter brightness-90"
     />
   ),
   jotam: () => (
     <img 
-      src="/lovable-uploads/logo-jotam.png" 
+      src="/lovable-uploads/logo-jotam-novo.png" 
       alt="Jotam" 
       className="h-[50px] w-auto object-contain filter brightness-90"
     />
   ),
   superTenis: () => (
     <img 
-      src="/lovable-uploads/logo-super-tenis.png" 
+      src="/lovable-uploads/logo-super-tenis-novo.png" 
       alt="Super Tênis" 
       className="h-[50px] w-auto object-contain filter brightness-90"
     />
   ),
   reiDoFrango: () => (
     <img 
-      src="/lovable-uploads/logo-rei-frango.png" 
+      src="/lovable-uploads/logo-rei-frango-novo.png" 
       alt="Rei do Frango" 
-      className="h-[50px] w-auto object-contain filter brightness-90"
-    />
-  ),
-  logo6: () => (
-    <img 
-      src="/lovable-uploads/logo-client-6.png" 
-      alt="Cliente 6" 
       className="h-[50px] w-auto object-contain filter brightness-90"
     />
   ),
@@ -62,14 +41,11 @@ const ClientLogos = {
 
 export function MarqueeDemo() {
   const arr = [
-    ClientLogos.logo1, 
-    ClientLogos.logo2, 
-    ClientLogos.logo3, 
+    ClientLogos.cliente1, 
     ClientLogos.greenit, 
     ClientLogos.jotam, 
     ClientLogos.superTenis, 
-    ClientLogos.reiDoFrango, 
-    ClientLogos.logo6
+    ClientLogos.reiDoFrango
   ]
 
   return (
