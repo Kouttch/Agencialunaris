@@ -3,14 +3,13 @@ import { ArrowRight, ChevronRight, BarChart3, Shield, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ButtonColorful } from '@/components/ui/button-colorful';
 import { GlowingEffect } from '@/components/ui/glowing-effect';
-import { LogoCarousel } from '@/components/ui/logo-carousel';
+import { MarqueeDemo } from '@/components/ui/marquee-demo';
 import { GradientHeading } from '@/components/ui/gradient-heading';
 import { AnimatedGroup } from '@/components/ui/animated-group';
 import { BackgroundBeams } from '@/components/ui/background-beams';
 import { cn } from '@/lib/utils';
 import { Link, useNavigate } from 'react-router-dom';
 import heroDashboard from "@/assets/hero-dashboard.jpg";
-import { clientLogos } from '@/components/LogoData';
 
 export function HeroNew() {
   const navigate = useNavigate();
@@ -55,7 +54,7 @@ export function HeroNew() {
                       <span 
                         className="animate-pulse bg-gradient-to-r from-pink-500 via-purple-500 to-cyan-500 bg-clip-text text-transparent bg-300% animate-gradient-x"
                         style={{
-                          filter: 'drop-shadow(0 0 20px rgba(219, 39, 119, 0.5)) drop-shadow(0 0 40px rgba(147, 51, 234, 0.3))',
+                          filter: 'drop-shadow(0 0 6px rgba(219, 39, 119, 0.15)) drop-shadow(0 0 12px rgba(147, 51, 234, 0.09))',
                           backgroundSize: '300% 300%',
                           animation: 'gradient-x 2s ease infinite, glow-pulse 2s ease-in-out infinite alternate'
                         }}
@@ -213,7 +212,7 @@ export function HeroNew() {
             </div>
 
             <div className="w-full">
-              <LogoCarousel columnCount={4} logos={clientLogos} />
+              <MarqueeDemo />
             </div>
           </div>
         </section>
