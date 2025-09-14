@@ -60,7 +60,7 @@ export function HeroNew() {
                           animation: 'gradient-x 2s ease infinite, glow-pulse 2s ease-in-out infinite alternate'
                         }}
                       >
-                        Explore o universo
+                        Universo
                       </span>
                     </span>
                     <br />
