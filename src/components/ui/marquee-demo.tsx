@@ -3,58 +3,58 @@ import { Marquee } from "@/components/ui/marquee"
 const ClientLogos = {
   logo1: () => (
     <img 
-      src="/client-logos/logo-1.png" 
+      src="/lovable-uploads/logo-client-1.png" 
       alt="Cliente 1" 
-      className="h-[40px] w-auto object-contain"
+      className="h-[50px] w-auto object-contain filter brightness-90"
     />
   ),
   logo2: () => (
     <img 
-      src="/client-logos/logo-2.png" 
+      src="/lovable-uploads/logo-client-2.png" 
       alt="Cliente 2" 
-      className="h-[40px] w-auto object-contain"
+      className="h-[50px] w-auto object-contain filter brightness-90"
     />
   ),
   logo3: () => (
     <img 
-      src="/client-logos/logo-3.png" 
+      src="/lovable-uploads/logo-client-3.png" 
       alt="Cliente 3" 
-      className="h-[40px] w-auto object-contain"
+      className="h-[50px] w-auto object-contain filter brightness-90"
     />
   ),
   greenit: () => (
     <img 
-      src="/client-logos/greenit.png" 
+      src="/lovable-uploads/logo-greenit.png" 
       alt="Green IT" 
-      className="h-[40px] w-auto object-contain"
+      className="h-[50px] w-auto object-contain filter brightness-90"
     />
   ),
   jotam: () => (
     <img 
-      src="/client-logos/jotam.png" 
+      src="/lovable-uploads/logo-jotam.png" 
       alt="Jotam" 
-      className="h-[40px] w-auto object-contain"
+      className="h-[50px] w-auto object-contain filter brightness-90"
     />
   ),
   superTenis: () => (
     <img 
-      src="/client-logos/super-tenis.png" 
+      src="/lovable-uploads/logo-super-tenis.png" 
       alt="Super Tênis" 
-      className="h-[40px] w-auto object-contain"
+      className="h-[50px] w-auto object-contain filter brightness-90"
     />
   ),
   reiDoFrango: () => (
     <img 
-      src="/client-logos/rei-do-frango.png" 
+      src="/lovable-uploads/logo-rei-frango.png" 
       alt="Rei do Frango" 
-      className="h-[40px] w-auto object-contain"
+      className="h-[50px] w-auto object-contain filter brightness-90"
     />
   ),
   logo6: () => (
     <img 
-      src="/client-logos/logo-6.png" 
+      src="/lovable-uploads/logo-client-6.png" 
       alt="Cliente 6" 
-      className="h-[40px] w-auto object-contain"
+      className="h-[50px] w-auto object-contain filter brightness-90"
     />
   ),
 };
