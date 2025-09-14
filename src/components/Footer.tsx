@@ -8,8 +8,8 @@ export const Footer = () => {
           <div>
             <div className="flex items-center space-x-2 mb-4">
               <img 
-                src="/logo-maluquinho.png" 
-                alt="Maluquinho Imports" 
+                src="/lovable-uploads/logo-ac-varejo.png" 
+                alt="AC Varejo" 
                 className="h-12 w-auto object-contain"
               />
             </div>
