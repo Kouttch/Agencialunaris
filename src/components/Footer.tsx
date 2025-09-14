@@ -13,9 +13,16 @@ export const Footer = () => {
                 className="h-12 w-auto object-contain"
               />
             </div>
-            <p className="text-muted-foreground">
-              O futuro da gestão de tráfego pago. Transparência, inovação e resultados excepcionais.
-            </p>
+            <div className="flex items-start space-x-3">
+              <img 
+                src="/lovable-uploads/icon-white.png" 
+                alt="AC Varejo Icon" 
+                className="h-[35px] w-auto object-contain flex-shrink-0 mt-1"
+              />
+              <p className="text-muted-foreground">
+                O futuro da gestão de tráfego pago. Transparência, inovação e resultados excepcionais.
+              </p>
+            </div>
           </div>
 
           {/* Links */}
