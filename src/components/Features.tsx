@@ -82,10 +82,10 @@ export const Features = () => {
         {/* Stats section */}
         <div className="mt-24 grid md:grid-cols-4 gap-8">
           {[
-            { number: "99.9%", label: "Uptime" },
-            { number: "500+", label: "Clientes Ativos" },
-            { number: "R$ 50M+", label: "Investimento Gerenciado" },
-            { number: "24/7", label: "Suporte" },
+            { number: "+88%", label: "Taxa de aproveitamento de criativos" },
+            { number: "20+", label: "Clientes Ativos" },
+            { number: "R$ 500K+", label: "Investido em Anúncios" },
+            { number: "+7", label: "Atuação em estados do Brasil" },
           ].map((stat, index) => (
             <div key={index} className="text-center">
               <div className="text-4xl md:text-5xl font-black text-primary mb-2">
