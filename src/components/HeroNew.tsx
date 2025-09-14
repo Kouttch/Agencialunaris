@@ -8,11 +8,19 @@ import { GradientHeading } from '@/components/ui/gradient-heading';
 import { AnimatedGroup } from '@/components/ui/animated-group';
 import { BackgroundBeams } from '@/components/ui/background-beams';
 import { cn } from '@/lib/utils';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import heroDashboard from "@/assets/hero-dashboard.jpg";
 import { clientLogos } from '@/components/LogoData';
 
 export function HeroNew() {
+  const navigate = useNavigate();
+
+  const scrollToWhatsApp = () => {
+    const whatsappSection = document.querySelector('.whatsapp-contact-section');
+    if (whatsappSection) {
+      whatsappSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
   return (
     <>
       <main className="overflow-hidden">
@@ -43,8 +51,17 @@ export function HeroNew() {
                   </Link>
         
                   <h1 className="mt-8 max-w-4xl mx-auto text-balance text-6xl md:text-7xl lg:mt-16 xl:text-[5.25rem] font-black leading-tight">
-                    <span style={{ background: 'linear-gradient(135deg, #c9444f, #483a89)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
-                      Explore o universo
+                    <span className="relative inline-block">
+                      <span 
+                        className="animate-pulse bg-gradient-to-r from-pink-500 via-purple-500 to-cyan-500 bg-clip-text text-transparent bg-300% animate-gradient-x"
+                        style={{
+                          filter: 'drop-shadow(0 0 20px rgba(219, 39, 119, 0.5)) drop-shadow(0 0 40px rgba(147, 51, 234, 0.3))',
+                          backgroundSize: '300% 300%',
+                          animation: 'gradient-x 2s ease infinite, glow-pulse 2s ease-in-out infinite alternate'
+                        }}
+                      >
+                        Explore o universo
+                      </span>
                     </span>
                     <br />
                     <span className="text-muted-foreground">do Tráfego pago</span>
@@ -62,13 +79,15 @@ export function HeroNew() {
                   <div className="glass rounded-2xl border p-1">
                     <ButtonColorful 
                       label="Acessar Portal"
-                      className="rounded-xl px-8 py-3 text-base font-semibold"
+                      className="rounded-xl px-8 py-3 text-base font-semibold cursor-pointer"
+                      onClick={() => navigate('/auth')}
                     />
                   </div>
                   <Button
                     size="lg"
                     variant="ghost"
-                    className="h-12 rounded-xl px-8 py-3 text-base glass">
+                    className="h-12 rounded-xl px-8 py-3 text-base glass"
+                    onClick={scrollToWhatsApp}>
                     <span className="text-nowrap">Saiba Mais</span>
                   </Button>
                 </AnimatedGroup>
