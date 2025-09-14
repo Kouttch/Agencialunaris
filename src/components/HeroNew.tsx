@@ -5,6 +5,7 @@ import { ButtonColorful } from '@/components/ui/button-colorful';
 import { GlowingEffect } from '@/components/ui/glowing-effect';
 import { MarqueeDemo } from '@/components/ui/marquee-demo';
 import { GradientHeading } from '@/components/ui/gradient-heading';
+import { GradientText } from '@/components/ui/gradient-text';
 import { AnimatedGroup } from '@/components/ui/animated-group';
 import { BackgroundBeams } from '@/components/ui/background-beams';
 import { cn } from '@/lib/utils';
@@ -50,18 +51,13 @@ export function HeroNew() {
                   </Link>
         
                   <h1 className="mt-8 max-w-4xl mx-auto text-balance text-6xl md:text-7xl lg:mt-16 xl:text-[5.25rem] font-black leading-tight">
-                    <span className="relative inline-block">
-                      <span 
-                        className="animate-pulse bg-gradient-to-r from-pink-500 via-purple-500 to-cyan-500 bg-clip-text text-transparent bg-300% animate-gradient-x"
-                        style={{
-                          filter: 'drop-shadow(0 0 6px rgba(219, 39, 119, 0.15)) drop-shadow(0 0 12px rgba(147, 51, 234, 0.09))',
-                          backgroundSize: '300% 300%',
-                          animation: 'gradient-x 2s ease infinite, glow-pulse 2s ease-in-out infinite alternate'
-                        }}
-                      >
-                        Explore o Universo
-                      </span>
-                    </span>
+                    <GradientText 
+                      colors={["#ff40aa", "#40aaff", "#ff40aa"]}
+                      animationSpeed={3}
+                      className="text-6xl md:text-7xl xl:text-[5.25rem] font-black"
+                    >
+                      Explore o Universo
+                    </GradientText>
                     <br />
                     <span className="text-muted-foreground">do Tráfego pago</span>
                   </h1>

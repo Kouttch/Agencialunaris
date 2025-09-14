@@ -103,6 +103,11 @@ export default {
         marquee: {
           to: { transform: "translateX(-50%)" },
         },
+        gradient: {
+          "0%": { backgroundPosition: "0% 50%" },
+          "50%": { backgroundPosition: "100% 50%" },
+          "100%": { backgroundPosition: "0% 50%" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -111,6 +116,7 @@ export default {
         float: "float 6s ease-in-out infinite",
         "pulse-glow": "pulse-glow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
         marquee: "marquee var(--duration, 30s) linear infinite",
+        gradient: "gradient var(--animation-duration, 8s) linear infinite",
       },
       
       backdropBlur: {
