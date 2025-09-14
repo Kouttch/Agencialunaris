@@ -51,6 +51,27 @@ const ClientLogos = {
       className="h-[80px] w-auto object-contain filter brightness-90"
     />
   ),
+  cliente8: () => (
+    <img 
+      src="/lovable-uploads/logo-cliente-8.png" 
+      alt="Cliente 8" 
+      className="h-[80px] w-auto object-contain filter brightness-90"
+    />
+  ),
+  cliente9: () => (
+    <img 
+      src="/lovable-uploads/logo-cliente-9.png" 
+      alt="Cliente 9" 
+      className="h-[80px] w-auto object-contain filter brightness-90"
+    />
+  ),
+  cliente10: () => (
+    <img 
+      src="/lovable-uploads/logo-cliente-10.png" 
+      alt="Cliente 10" 
+      className="h-[80px] w-auto object-contain filter brightness-90"
+    />
+  ),
 };
 
 function Case() {
@@ -63,7 +84,10 @@ function Case() {
     ClientLogos.jotam, 
     ClientLogos.superTenis, 
     ClientLogos.reiDoFrango,
-    ClientLogos.clienteNovo
+    ClientLogos.clienteNovo,
+    ClientLogos.cliente8,
+    ClientLogos.cliente9,
+    ClientLogos.cliente10
   ];
 
   useEffect(() => {
