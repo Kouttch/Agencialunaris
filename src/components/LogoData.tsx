@@ -103,7 +103,6 @@ export const clientLogos = [
   { name: "Geométrico", id: 2, img: GeometricBlueIcon },
   { name: "Green", id: 3, img: GreenIcon },
   { name: "Super Tênis", id: 4, img: SuperTenisIcon },
-  { name: "Mascote", id: 5, img: MascotIcon },
   { name: "Tech Brand", id: 6, img: TechBrandIcon },
   { name: "Modern Brand", id: 7, img: ModernBrandIcon },
   { name: "Digital Brand", id: 8, img: DigitalBrandIcon },
