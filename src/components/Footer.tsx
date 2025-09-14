@@ -6,23 +6,16 @@ export const Footer = () => {
         <div className="grid md:grid-cols-3 gap-8 mb-8">
           {/* Brand */}
           <div>
-            <div className="flex items-center space-x-2 mb-4">
-              <img 
-                src="/lovable-uploads/logo-ac-varejo.png" 
-                alt="AC Varejo" 
-                className="h-12 w-auto object-contain"
-              />
-            </div>
-            <div className="flex items-start space-x-3">
+            <div className="mb-4">
               <img 
                 src="/lovable-uploads/icon-white.png" 
                 alt="AC Varejo Icon" 
-                className="h-[35px] w-auto object-contain flex-shrink-0 mt-1"
+                className="h-[35px] w-auto object-contain"
               />
-              <p className="text-muted-foreground">
-                O futuro da gestão de tráfego pago. Transparência, inovação e resultados excepcionais.
-              </p>
             </div>
+            <p className="text-muted-foreground">
+              O futuro da gestão de tráfego pago. Transparência, inovação e resultados excepcionais.
+            </p>
           </div>
 
           {/* Links */}
