@@ -54,12 +54,11 @@ export function HeroNew() {
                     <GradientText 
                       colors={["#ff40aa", "#40aaff", "#ff40aa"]}
                       animationSpeed={3}
-                      className="text-6xl md:text-7xl xl:text-[5.25rem] font-black"
+                      className="text-6xl md:text-7xl xl:text-[5.25rem] font-black leading-tight"
                     >
                       Explore o Universo
                     </GradientText>
-                    <br />
-                    <span className="text-muted-foreground">do Tráfego pago</span>
+                    <span className="block text-muted-foreground -mt-2 md:-mt-4">do Tráfego pago</span>
                   </h1>
                   
                   <p className="mx-auto mt-8 max-w-2xl text-balance text-lg text-muted-foreground leading-relaxed">
