@@ -86,8 +86,7 @@ function Case() {
     ClientLogos.reiDoFrango,
     ClientLogos.clienteNovo,
     ClientLogos.cliente8,
-    ClientLogos.cliente9,
-    ClientLogos.cliente10
+    ClientLogos.cliente9
   ];
 
   useEffect(() => {
