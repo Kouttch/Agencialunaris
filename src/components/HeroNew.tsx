@@ -11,18 +11,17 @@ import { BackgroundBeams } from '@/components/ui/background-beams';
 import { cn } from '@/lib/utils';
 import { Link, useNavigate } from 'react-router-dom';
 import heroDashboard from "@/assets/hero-dashboard.jpg";
-
 export function HeroNew() {
   const navigate = useNavigate();
-
   const scrollToWhatsApp = () => {
     const whatsappSection = document.querySelector('.whatsapp-contact-section');
     if (whatsappSection) {
-      whatsappSection.scrollIntoView({ behavior: 'smooth' });
+      whatsappSection.scrollIntoView({
+        behavior: 'smooth'
+      });
     }
   };
-  return (
-    <>
+  return <>
       <main className="overflow-hidden">
         <section className="relative min-h-screen">
           <div className="relative pt-24 md:pt-36">
@@ -51,11 +50,7 @@ export function HeroNew() {
                   </Link>
         
                   <h1 className="mt-8 max-w-4xl mx-auto text-balance text-6xl md:text-7xl lg:mt-16 xl:text-[5.25rem] font-black leading-tight">
-                    <GradientText 
-                      colors={["#ff40aa", "#40aaff", "#ff40aa"]}
-                      animationSpeed={3}
-                      className="text-6xl md:text-7xl xl:text-[5.25rem] font-black leading-tight"
-                    >
+                    <GradientText colors={["#ff40aa", "#40aaff", "#ff40aa"]} animationSpeed={3} className="text-6xl md:text-7xl xl:text-[5.25rem] font-black leading-tight">
                       Explore o Universo
                     </GradientText>
                     <span className="block text-muted-foreground mt-1">do Tráfego pago</span>
@@ -67,21 +62,11 @@ export function HeroNew() {
                   </p>
                 </AnimatedGroup>
 
-                <AnimatedGroup
-                  preset="scale"
-                  className="mt-12 flex flex-col items-center justify-center gap-4 md:flex-row">
+                <AnimatedGroup preset="scale" className="mt-12 flex flex-col items-center justify-center gap-4 md:flex-row">
                   <div className="glass rounded-2xl border p-1">
-                    <ButtonColorful 
-                      label="Acessar Portal"
-                      className="rounded-xl px-8 py-3 text-base font-semibold cursor-pointer"
-                      onClick={() => navigate('/auth')}
-                    />
+                    <ButtonColorful label="Acessar Portal" className="rounded-xl px-8 py-3 text-base font-semibold cursor-pointer" onClick={() => navigate('/auth')} />
                   </div>
-                  <Button
-                    size="lg"
-                    variant="ghost"
-                    className="h-12 rounded-xl px-8 py-3 text-base glass"
-                    onClick={scrollToWhatsApp}>
+                  <Button size="lg" variant="ghost" className="h-12 rounded-xl px-8 py-3 text-base glass" onClick={scrollToWhatsApp}>
                     <span className="text-nowrap">Saiba Mais</span>
                   </Button>
                 </AnimatedGroup>
@@ -90,14 +75,7 @@ export function HeroNew() {
                 <div className="grid md:grid-cols-3 gap-6 mt-16">
                   <div className="relative min-h-[14rem] list-none">
                     <div className="relative h-full rounded-[1.25rem] border-[0.75px] border-border p-2 md:rounded-[1.5rem] md:p-3">
-                      <GlowingEffect
-                        spread={40}
-                        glow={true}
-                        disabled={false}
-                        proximity={64}
-                        inactiveZone={0.01}
-                        borderWidth={3}
-                      />
+                      <GlowingEffect spread={40} glow={true} disabled={false} proximity={64} inactiveZone={0.01} borderWidth={3} />
                       <div className="relative flex h-full flex-col justify-between gap-6 overflow-hidden rounded-xl border-[0.75px] bg-background p-6 shadow-sm dark:shadow-[0px_0px_27px_0px_rgba(45,45,45,0.3)] md:p-6">
                         <div className="relative flex flex-1 flex-col justify-between gap-3">
                           <div className="w-fit mx-auto rounded-lg border-[0.75px] border-border bg-muted p-4">
@@ -118,14 +96,7 @@ export function HeroNew() {
                   
                   <div className="relative min-h-[14rem] list-none">
                     <div className="relative h-full rounded-[1.25rem] border-[0.75px] border-border p-2 md:rounded-[1.5rem] md:p-3">
-                      <GlowingEffect
-                        spread={40}
-                        glow={true}
-                        disabled={false}
-                        proximity={64}
-                        inactiveZone={0.01}
-                        borderWidth={3}
-                      />
+                      <GlowingEffect spread={40} glow={true} disabled={false} proximity={64} inactiveZone={0.01} borderWidth={3} />
                       <div className="relative flex h-full flex-col justify-between gap-6 overflow-hidden rounded-xl border-[0.75px] bg-background p-6 shadow-sm dark:shadow-[0px_0px_27px_0px_rgba(45,45,45,0.3)] md:p-6">
                         <div className="relative flex flex-1 flex-col justify-between gap-3">
                           <div className="w-fit mx-auto rounded-lg border-[0.75px] border-border bg-muted p-4">
@@ -146,14 +117,7 @@ export function HeroNew() {
                   
                   <div className="relative min-h-[14rem] list-none">
                     <div className="relative h-full rounded-[1.25rem] border-[0.75px] border-border p-2 md:rounded-[1.5rem] md:p-3">
-                      <GlowingEffect
-                        spread={40}
-                        glow={true}
-                        disabled={false}
-                        proximity={64}
-                        inactiveZone={0.01}
-                        borderWidth={3}
-                      />
+                      <GlowingEffect spread={40} glow={true} disabled={false} proximity={64} inactiveZone={0.01} borderWidth={3} />
                       <div className="relative flex h-full flex-col justify-between gap-6 overflow-hidden rounded-xl border-[0.75px] bg-background p-6 shadow-sm dark:shadow-[0px_0px_27px_0px_rgba(45,45,45,0.3)] md:p-6">
                         <div className="relative flex flex-1 flex-col justify-between gap-3">
                           <div className="w-fit mx-auto rounded-lg border-[0.75px] border-border bg-muted p-4">
@@ -177,41 +141,16 @@ export function HeroNew() {
 
             <AnimatedGroup preset="blur-slide">
               <div className="relative -mr-56 mt-8 overflow-hidden px-2 sm:mr-0 sm:mt-12 md:mt-20">
-                <div
-                  aria-hidden
-                  className="bg-gradient-to-b to-background from-transparent from-35% absolute inset-0 z-10"
-                />
+                <div aria-hidden className="bg-gradient-to-b to-background from-transparent from-35% absolute inset-0 z-10" />
                 <div className="glass relative mx-auto max-w-6xl overflow-hidden rounded-2xl border p-4 shadow-lg ring-1 ring-border">
-                  <img
-                    className="bg-background aspect-[15/8] relative rounded-2xl"
-                    src="/lovable-uploads/95adacff-25e7-437d-8260-9d66ac110d9d.png"
-                    alt="Dashboard do portal"
-                    width="2700"
-                    height="1440"
-                  />
+                  <img className="bg-background aspect-[15/8] relative rounded-2xl" src="/lovable-uploads/95adacff-25e7-437d-8260-9d66ac110d9d.png" alt="Dashboard do portal" width="2700" height="1440" />
                 </div>
               </div>
             </AnimatedGroup>
           </div>
         </section>
         
-        <section className="bg-background pb-16 pt-16 md:pb-32">
-          <div className="mx-auto flex w-full max-w-screen-xl flex-col items-center space-y-12">
-            <div className="text-center">
-              <GradientHeading variant="secondary" size="lg">
-                Nossos Clientes
-              </GradientHeading>
-              <p className="mt-4 text-muted-foreground max-w-2xl mx-auto">
-                Confiança de empresas que escolheram nossa expertise em gestão de tráfego
-              </p>
-            </div>
-
-            <div className="w-full">
-              <MarqueeDemo />
-            </div>
-          </div>
-        </section>
+        
       </main>
-    </>
-  );
+    </>;
 }
