@@ -20,7 +20,7 @@ export const WhatsAppContactSection = () => {
               variant="green"
               label="Enviar via WhatsApp"
               className="px-8 py-3"
-              onClick={() => window.open('https://api.whatsapp.com/send?phone=5511974232091&text=Olá! vim pelo site, fiquei interessado no Tráfego pago, gostaria de mais informações.', '_blank')}
+              onClick={() => window.open('https://api.whatsapp.com/send?phone=5511974232091&text=Ol%C3%A1!%20vim%20pelo%20site,%20fiquei%20interessado%20no%20Tr%C3%A1fego%20pago,%20gostaria%20de%20mais%20informa%C3%A7%C3%B5es.', '_blank')}
             />
           </div>
         </div>
