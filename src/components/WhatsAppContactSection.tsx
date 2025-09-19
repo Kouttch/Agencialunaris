@@ -9,18 +9,20 @@ export const WhatsAppContactSection = () => {
         <h2 className="text-4xl md:text-6xl bg-clip-text text-transparent bg-gradient-to-b from-foreground to-muted-foreground text-center font-bold mb-4">
           Entre em Contato
         </h2>
-        <p className="text-muted-foreground max-w-lg mx-auto mb-8 text-center text-lg">
-          Envie sua mensagem diretamente pelo WhatsApp. 
-          Responderemos o mais breve possível.
-        </p>
-        
-        <div className="flex justify-center">
-          <ButtonColorful 
-            variant="green"
-            label="Enviar via WhatsApp"
-            className="px-8 py-3"
-            onClick={() => window.open('https://api.whatsapp.com/send?phone=5511974232091&text=Olá! vim pelo site, fiquei interessado no Tráfego pago, gostaria de mais informações.', '_blank')}
-          />
+        <div className="glass p-8 rounded-lg max-w-md mx-auto">
+          <p className="text-muted-foreground text-center text-lg mb-6">
+            Envie sua mensagem diretamente pelo WhatsApp. 
+            Responderemos o mais breve possível.
+          </p>
+          
+          <div className="flex justify-center">
+            <ButtonColorful 
+              variant="green"
+              label="Enviar via WhatsApp"
+              className="px-8 py-3"
+              onClick={() => window.open('https://api.whatsapp.com/send?phone=5511974232091&text=Olá! vim pelo site, fiquei interessado no Tráfego pago, gostaria de mais informações.', '_blank')}
+            />
+          </div>
         </div>
       </div>
       <BackgroundBeams />
