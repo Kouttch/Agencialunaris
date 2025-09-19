@@ -32,6 +32,22 @@ function Case() {
     }, 3000);
     return () => clearTimeout(timer);
   }, [api, current]);
-  return;
+  return (
+    <div className="w-full max-w-xs mx-auto">
+      <Carousel setApi={setApi} className="w-full">
+        <CarouselContent>
+          {logos.map((Logo, index) => (
+            <CarouselItem key={index}>
+              <div className="p-1">
+                <div className="flex aspect-square items-center justify-center p-6">
+                  <Logo />
+                </div>
+              </div>
+            </CarouselItem>
+          ))}
+        </CarouselContent>
+      </Carousel>
+    </div>
+  );
 }
 export { Case };
