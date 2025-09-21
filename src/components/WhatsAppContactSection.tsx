@@ -36,7 +36,7 @@ export const WhatsAppContactSection = () => {
           <div className="flex flex-col items-center gap-4">
             <ButtonColorful 
               variant="green"
-              label="💬 Fale no WhatsApp"
+              label="Fale pelo WhatsApp"
               className="px-8 py-3"
               onClick={handleWhatsAppClick}
             />
