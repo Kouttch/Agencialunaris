@@ -3,6 +3,7 @@ import { HeroNew } from "@/components/HeroNew";
 import { Features } from "@/components/Features";
 import { Footer } from "@/components/Footer";
 import { WhatsAppContactSection } from "@/components/WhatsAppContactSection";
+import { FloatingWhatsAppButton } from "@/components/FloatingWhatsAppButton";
 
 const Index = () => {
   return (
@@ -12,6 +13,7 @@ const Index = () => {
       <Features />
       <WhatsAppContactSection />
       <Footer />
+      <FloatingWhatsAppButton />
     </main>
   );
 };
