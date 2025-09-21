@@ -42,16 +42,16 @@ export const Footer = () => {
             <h3 className="font-semibold mb-4">Suporte</h3>
             <ul className="space-y-2 text-muted-foreground">
               <li>
-                <a href="#" className="hover:text-primary transition-colors">Central de Ajuda</a>
+                <a href="https://wa.me/5511974232091?text=Ol%C3%A1%2C%20eu%20estou%20tendo%20alguns%20problemas%2C%20gostaria%20de%20ajuda" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">Central de Ajuda</a>
               </li>
               <li>
-                <a href="#" className="hover:text-primary transition-colors">Contato</a>
+                <a href="/contact" className="hover:text-primary transition-colors">Contato</a>
               </li>
               <li>
-                <a href="#" className="hover:text-primary transition-colors">Termos de Uso</a>
+                <a href="/terms-of-use" className="hover:text-primary transition-colors">Termos de Uso</a>
               </li>
               <li>
-                <a href="#" className="hover:text-primary transition-colors">Privacidade</a>
+                <a href="/privacy" className="hover:text-primary transition-colors">Privacidade</a>
               </li>
             </ul>
           </div>

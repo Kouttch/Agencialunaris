@@ -17,6 +17,9 @@ import ClientsManagement from "./pages/ClientsManagement";
 import DashboardsManagement from "./pages/DashboardsManagement";
 import PaymentsManagement from "./pages/PaymentsManagement";
 import NotFound from "./pages/NotFound";
+import Contact from "./pages/Contact";
+import TermsOfUse from "./pages/TermsOfUse";
+import Privacy from "./pages/Privacy";
 
 const queryClient = new QueryClient();
 
@@ -31,6 +34,9 @@ const App = () => (
             <Routes>
               <Route path="/auth" element={<Auth />} />
               <Route path="/" element={<Index />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/terms-of-use" element={<TermsOfUse />} />
+              <Route path="/privacy" element={<Privacy />} />
               
               {/* Customer Dashboard Routes */}
               <Route 
