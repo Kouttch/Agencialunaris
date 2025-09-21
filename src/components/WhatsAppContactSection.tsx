@@ -2,6 +2,24 @@ import { ButtonColorful } from "@/components/ui/button-colorful";
 import { BackgroundBeams } from "@/components/ui/background-beams";
 
 export const WhatsAppContactSection = () => {
+  const handleWhatsAppClick = () => {
+    const whatsappUrl = "https://wa.me/5511974232091?text=Ol%C3%A1%2C%20vim%20pelo%20seu%20site%2C%20gostaria%20de%20saber%20mais%20sobre%20o%20seu%20tr%C3%A1fego%20pago.";
+    
+    try {
+      // Primeira tentativa: window.location.href (mais confiável)
+      window.location.href = whatsappUrl;
+    } catch (error) {
+      console.log('Erro com location.href, tentando location.assign:', error);
+      try {
+        // Segunda tentativa: window.location.assign
+        window.location.assign(whatsappUrl);
+      } catch (error2) {
+        console.log('Erro com location.assign, tentando window.open:', error2);
+        // Terceira tentativa: window.open como fallback
+        window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+      }
+    }
+  };
 
   return (
     <section className="whatsapp-contact-section min-h-screen w-full relative flex flex-col items-center justify-center antialiased py-20">
@@ -16,22 +34,12 @@ export const WhatsAppContactSection = () => {
           </p>
           
           <div className="flex flex-col items-center gap-4">
-            <a 
-              href="https://wa.me/5511974232091?text=Ol%C3%A1%2C%20vim%20pelo%20seu%20site%2C%20gostaria%20de%20saber%20mais%20sobre%20o%20seu%20tr%C3%A1fego%20pago."
-              target="_blank" 
-              rel="noopener noreferrer"
-              style={{
-                display: 'inline-block',
-                background: '#25D366',
-                color: '#fff',
-                padding: '12px 20px',
-                borderRadius: '8px',
-                textDecoration: 'none',
-                font: '600 16px/1.2 Arial, sans-serif'
-              }}
-            >
-              💬 Fale no WhatsApp
-            </a>
+            <ButtonColorful 
+              variant="green"
+              label="💬 Fale no WhatsApp"
+              className="px-8 py-3"
+              onClick={handleWhatsAppClick}
+            />
           </div>
         </div>
       </div>
