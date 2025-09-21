@@ -50,7 +50,7 @@ export function HeroNew() {
                   </Link>
         
                   <h1 className="mt-8 max-w-4xl mx-auto text-balance text-6xl md:text-7xl lg:mt-16 xl:text-[5.25rem] font-black leading-tight">
-                    <GradientText colors={["#ff40aa", "#40aaff", "#ff40aa"]} animationSpeed={3} className="text-6xl md:text-7xl xl:text-[5.25rem] font-black leading-tight">
+                    <GradientText colors={["#f59b46", "#e83950", "#f59b46"]} animationSpeed={3} className="text-6xl md:text-7xl xl:text-[5.25rem] font-black leading-tight">
                       Explore o Universo
                     </GradientText>
                     <span className="block text-muted-foreground mt-1">do Tráfego pago</span>
