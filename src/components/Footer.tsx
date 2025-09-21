@@ -8,9 +8,9 @@ export const Footer = () => {
           <div>
             <div className="mb-4">
               <img 
-                src="/lovable-uploads/icon-white.png" 
-                alt="AC Varejo Icon" 
-                className="h-[35px] w-auto object-contain"
+                src="/lunaris-logo.png" 
+                alt="Lunaris Logo" 
+                className="h-[34px] w-auto object-contain"
               />
             </div>
             <p className="text-muted-foreground">

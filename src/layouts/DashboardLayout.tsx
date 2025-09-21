@@ -26,8 +26,8 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           <div className="flex items-center gap-2">
             <SidebarTrigger />
             <img 
-              src="/lovable-uploads/9ff510c8-a3b6-40fc-8d68-a549f1a5daf1.png" 
-              alt="Logo" 
+              src="/lunaris-logo.png" 
+              alt="Lunaris Logo" 
               className="h-8 w-auto"
             />
           </div>
