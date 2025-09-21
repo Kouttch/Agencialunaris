@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 
 export const FloatingWhatsAppButton = () => {
   const handleWhatsAppClick = () => {
-    window.open("https://bit.ly/3W3Nd1O", '_blank');
+    window.open("https://wa.me/5511974232091?text=Ol%C3%A1%2C%20vim%20pelo%20seu%20site%2C%20gostaria%20de%20saber%20mais%20sobre%20o%20seu%20tr%C3%A1fego%20pago.", '_blank');
   };
 
   return (
