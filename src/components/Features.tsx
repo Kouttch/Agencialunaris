@@ -79,8 +79,72 @@ export const Features = () => {
           ))}
         </div>
 
+        {/* Advertising Platforms Section */}
+        <div className="mt-24">
+          <div className="text-center mb-12">
+            <h3 className="text-3xl md:text-4xl font-bold mb-4">
+              <span className="bg-gradient-to-r from-primary to-primary-glow bg-clip-text text-transparent">
+                Onde Anunciamos
+              </span>
+            </h3>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Expertise completa nas principais plataformas de publicidade digital
+            </p>
+          </div>
+          
+          <div className="grid md:grid-cols-3 gap-8 mb-16">
+            <Card className="glass border-glass-border hover:shadow-glow transition-all duration-500 group text-center">
+              <CardHeader>
+                <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center mb-4 group-hover:animate-pulse mx-auto">
+                  <span className="text-2xl font-bold text-white">f</span>
+                </div>
+                <CardTitle className="text-xl group-hover:text-primary transition-colors">
+                  Meta Ads
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <CardDescription className="text-muted-foreground">
+                  Facebook e Instagram Ads com segmentação avançada e otimização contínua para máximo ROI.
+                </CardDescription>
+              </CardContent>
+            </Card>
+
+            <Card className="glass border-glass-border hover:shadow-glow transition-all duration-500 group text-center">
+              <CardHeader>
+                <div className="w-16 h-16 bg-gradient-to-br from-red-500 to-yellow-500 rounded-lg flex items-center justify-center mb-4 group-hover:animate-pulse mx-auto">
+                  <span className="text-2xl font-bold text-white">G</span>
+                </div>
+                <CardTitle className="text-xl group-hover:text-primary transition-colors">
+                  Google Ads
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <CardDescription className="text-muted-foreground">
+                  Campanhas de busca, display e shopping otimizadas para capturar leads qualificados.
+                </CardDescription>
+              </CardContent>
+            </Card>
+
+            <Card className="glass border-glass-border hover:shadow-glow transition-all duration-500 group text-center">
+              <CardHeader>
+                <div className="w-16 h-16 bg-gradient-to-br from-pink-500 to-purple-600 rounded-lg flex items-center justify-center mb-4 group-hover:animate-pulse mx-auto">
+                  <TrendingUp className="w-8 h-8 text-white" />
+                </div>
+                <CardTitle className="text-xl group-hover:text-primary transition-colors">
+                  TikTok Ads Manager
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <CardDescription className="text-muted-foreground">
+                  Campanhas criativas e envolventes na plataforma que mais cresce no mundo digital.
+                </CardDescription>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+
         {/* Stats section */}
-        <div className="mt-24 grid md:grid-cols-4 gap-8">
+        <div className="mt-16 grid md:grid-cols-4 gap-8">
           {[
             { number: "+88%", label: "Taxa de aproveitamento de criativos" },
             { number: "20+", label: "Clientes Ativos" },
