@@ -45,13 +45,13 @@ export const Footer = () => {
                 <a href="https://wa.me/5511974232091?text=Ol%C3%A1%2C%20eu%20estou%20tendo%20alguns%20problemas%2C%20gostaria%20de%20ajuda" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">Central de Ajuda</a>
               </li>
               <li>
-                <a href="/contact" className="hover:text-primary transition-colors">Contato</a>
+                <a href="https://agencialunaris.com/contact" className="hover:text-primary transition-colors">Contato</a>
               </li>
               <li>
-                <a href="/terms-of-use" className="hover:text-primary transition-colors">Termos de Uso</a>
+                <a href="https://agencialunaris.com/terms-of-use" className="hover:text-primary transition-colors">Termos de Uso</a>
               </li>
               <li>
-                <a href="/privacy" className="hover:text-primary transition-colors">Privacidade</a>
+                <a href="https://agencialunaris.com/privacy" className="hover:text-primary transition-colors">Privacidade</a>
               </li>
             </ul>
           </div>
