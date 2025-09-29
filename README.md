@@ -1,72 +1,73 @@
-# Agência Lunaris - Portal de Tráfego Pago
+# Welcome to your Lovable project
 
-Portal exclusivo da Agência Lunaris para clientes com dashboards avançados e gestão completa de campanhas.
+## Project info
 
-## 🚀 Deploy no GitHub Pages
+**URL**: https://lovable.dev/projects/a51ebd63-21ca-4ba1-8af3-65d4ac15326c
 
-Para ativar o GitHub Pages e fazer o site funcionar corretamente:
+## How can I edit this code?
 
-### 1. Configurar GitHub Pages no repositório
-1. Vá em **Settings** do repositório
-2. Na seção **Pages** (menu lateral esquerdo)
-3. Em **Source**, selecione **"GitHub Actions"**
+There are several ways of editing your application.
 
-### 2. O Deploy Automático já está configurado
-- O arquivo `.github/workflows/deploy.yml` já está configurado
-- O deploy acontece automaticamente a cada push na branch `main`
-- O site será gerado na pasta `dist` e publicado no GitHub Pages
+**Use Lovable**
 
-### 3. Aguardar o primeiro deploy
-- Após configurar o Pages, faça um push na branch `main`
-- O workflow será executado automaticamente
-- O site estará disponível em: `https://seuusuario.github.io/nome-do-repo/`
+Simply visit the [Lovable Project](https://lovable.dev/projects/a51ebd63-21ca-4ba1-8af3-65d4ac15326c) and start prompting.
 
-### 4. Configurações importantes já aplicadas:
-- ✅ Arquivo `.nojekyll` criado (evita processamento Jekyll)
-- ✅ Arquivo `404.html` para SPA routing
-- ✅ Script no `index.html` para roteamento correto
-- ✅ Configuração do Vite otimizada para GitHub Pages
+Changes made via Lovable will be committed automatically to this repo.
 
-## 🛠️ Desenvolvimento Local
+**Use your preferred IDE**
 
-```bash
-# Instalar dependências
-npm install
+If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
 
-# Executar em desenvolvimento
+The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+
+Follow these steps:
+
+```sh
+# Step 1: Clone the repository using the project's Git URL.
+git clone <YOUR_GIT_URL>
+
+# Step 2: Navigate to the project directory.
+cd <YOUR_PROJECT_NAME>
+
+# Step 3: Install the necessary dependencies.
+npm i
+
+# Step 4: Start the development server with auto-reloading and an instant preview.
 npm run dev
-
-# Build para produção
-npm run build
-
-# Preview do build
-npm run preview
 ```
 
-## 📱 Tecnologias Utilizadas
+**Edit a file directly in GitHub**
 
-- React 18
-- TypeScript
-- Tailwind CSS  
+- Navigate to the desired file(s).
+- Click the "Edit" button (pencil icon) at the top right of the file view.
+- Make your changes and commit the changes.
+
+**Use GitHub Codespaces**
+
+- Navigate to the main page of your repository.
+- Click on the "Code" button (green button) near the top right.
+- Select the "Codespaces" tab.
+- Click on "New codespace" to launch a new Codespace environment.
+- Edit files directly within the Codespace and commit and push your changes once you're done.
+
+## What technologies are used for this project?
+
+This project is built with:
+
 - Vite
-- React Router
-- Radix UI
-- Framer Motion
-- Supabase
+- TypeScript
+- React
+- shadcn-ui
+- Tailwind CSS
 
-## 🎨 Recursos
+## How can I deploy this project?
 
-- Design responsivo e moderno
-- Sistema de autenticação
-- Dashboards interativos
-- Tema dark/light
-- Animações fluidas
-- SEO otimizado
+Simply open [Lovable](https://lovable.dev/projects/a51ebd63-21ca-4ba1-8af3-65d4ac15326c) and click on Share -> Publish.
 
----
+## Can I connect a custom domain to my Lovable project?
 
-## Como usar Lovable
+Yes, you can!
 
-**URL do Projeto**: https://lovable.dev/projects/a51ebd63-21ca-4ba1-8af3-65d4ac15326c
+To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
 
-Você pode editar este projeto diretamente no [Lovable](https://lovable.dev/projects/a51ebd63-21ca-4ba1-8af3-65d4ac15326c) ou usar seu IDE preferido clonando este repositório.
+Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
