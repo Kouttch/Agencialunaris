@@ -1,73 +1,72 @@
-# Welcome to your Lovable project
+# Agência Lunaris - Portal de Tráfego Pago
 
-## Project info
+Portal exclusivo da Agência Lunaris para clientes com dashboards avançados e gestão completa de campanhas.
 
-**URL**: https://lovable.dev/projects/a51ebd63-21ca-4ba1-8af3-65d4ac15326c
+## 🚀 Deploy no GitHub Pages
 
-## How can I edit this code?
+Para ativar o GitHub Pages e fazer o site funcionar corretamente:
 
-There are several ways of editing your application.
+### 1. Configurar GitHub Pages no repositório
+1. Vá em **Settings** do repositório
+2. Na seção **Pages** (menu lateral esquerdo)
+3. Em **Source**, selecione **"GitHub Actions"**
 
-**Use Lovable**
+### 2. O Deploy Automático já está configurado
+- O arquivo `.github/workflows/deploy.yml` já está configurado
+- O deploy acontece automaticamente a cada push na branch `main`
+- O site será gerado na pasta `dist` e publicado no GitHub Pages
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/a51ebd63-21ca-4ba1-8af3-65d4ac15326c) and start prompting.
+### 3. Aguardar o primeiro deploy
+- Após configurar o Pages, faça um push na branch `main`
+- O workflow será executado automaticamente
+- O site estará disponível em: `https://seuusuario.github.io/nome-do-repo/`
 
-Changes made via Lovable will be committed automatically to this repo.
+### 4. Configurações importantes já aplicadas:
+- ✅ Arquivo `.nojekyll` criado (evita processamento Jekyll)
+- ✅ Arquivo `404.html` para SPA routing
+- ✅ Script no `index.html` para roteamento correto
+- ✅ Configuração do Vite otimizada para GitHub Pages
 
-**Use your preferred IDE**
+## 🛠️ Desenvolvimento Local
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+```bash
+# Instalar dependências
+npm install
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Executar em desenvolvimento
 npm run dev
+
+# Build para produção
+npm run build
+
+# Preview do build
+npm run preview
 ```
 
-**Edit a file directly in GitHub**
+## 📱 Tecnologias Utilizadas
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
+- React 18
 - TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+- Tailwind CSS  
+- Vite
+- React Router
+- Radix UI
+- Framer Motion
+- Supabase
 
-## How can I deploy this project?
+## 🎨 Recursos
 
-Simply open [Lovable](https://lovable.dev/projects/a51ebd63-21ca-4ba1-8af3-65d4ac15326c) and click on Share -> Publish.
+- Design responsivo e moderno
+- Sistema de autenticação
+- Dashboards interativos
+- Tema dark/light
+- Animações fluidas
+- SEO otimizado
 
-## Can I connect a custom domain to my Lovable project?
+---
 
-Yes, you can!
+## Como usar Lovable
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+**URL do Projeto**: https://lovable.dev/projects/a51ebd63-21ca-4ba1-8af3-65d4ac15326c
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+Você pode editar este projeto diretamente no [Lovable](https://lovable.dev/projects/a51ebd63-21ca-4ba1-8af3-65d4ac15326c) ou usar seu IDE preferido clonando este repositório.
