@@ -4,6 +4,7 @@ on:
   push:
     branches: [ main ]
 
+# GARANTE que o GITHUB_TOKEN tenha permissão de escrita para conteúdos e Pages
 permissions:
   contents: write
   pages: write
@@ -31,14 +32,14 @@ jobs:
         run: npm run build
 
       - name: Create .nojekyll to disable Jekyll on GitHub Pages
-    
-  run: |
-    mkdir -p ./build
-    echo "" > ./build/.nojekyll
+        run: |
+          # cria arquivo vazio dentro do dist para evitar que o GitHub Pages execute Jekyll
+          mkdir -p ./dist
+          echo "" > ./dist/.nojekyll
 
       - name: Deploy to gh-pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./build
+          publish_dir: ./dist
           publish_branch: gh-pages
