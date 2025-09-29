@@ -15,7 +15,7 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
-  base: "/",
+  base: "/pulse-drive-hub/",
   build: {
     outDir: "dist",
     assetsDir: "assets",
