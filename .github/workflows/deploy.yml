@@ -4,7 +4,7 @@ on:
   push:
     branches: [ main ]
 
-# GARANTE que o GITHUB_TOKEN tenha permissão de escrita para conteúdos e Pages
+
 permissions:
   contents: write
   pages: write
@@ -31,15 +31,14 @@ jobs:
       - name: Build project
         run: npm run build
 
-- name: Create .nojekyll
-  run: echo "" > ./dist/.nojekyll
+      - name: Create .nojekyll
+        run: |
+          
+          
+          echo "" > ./dist/.nojekyll
 
-- name: Build
-  run: npm run build
-
-- name: Deploy
-  uses: peaceiris/actions-gh-pages@v3
-  with:
-    github_token: ${{ secrets.GITHUB_TOKEN }}
-    publish_dir: ./dist
-
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
