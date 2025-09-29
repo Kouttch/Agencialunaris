@@ -31,15 +31,15 @@ jobs:
       - name: Build project
         run: npm run build
 
-      - name: Create .nojekyll to disable Jekyll on GitHub Pages
-        run: |
-          # cria arquivo vazio dentro do dist para evitar que o GitHub Pages execute Jekyll
-          mkdir -p ./dist
-          echo "" > ./dist/.nojekyll
+- name: Create .nojekyll
+  run: echo "" > ./dist/.nojekyll
 
-      - name: Deploy to gh-pages
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dist
-          publish_branch: gh-pages
+- name: Build
+  run: npm run build
+
+- name: Deploy
+  uses: peaceiris/actions-gh-pages@v3
+  with:
+    github_token: ${{ secrets.GITHUB_TOKEN }}
+    publish_dir: ./dist
+
