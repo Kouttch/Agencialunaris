@@ -57,11 +57,11 @@ export function AppSidebar() {
   return <Sidebar collapsible="icon">
       <SidebarContent className="pt-8">
         <SidebarGroup>
-          <SidebarGroupLabel className="mb-2 my-[18px] py-[2px]">
+          <SidebarGroupLabel className="mb-2 mx-0 px-[8px] py-0 my-[12px]">
             {isAdmin ? "Administração" : "Menu Principal"}
           </SidebarGroupLabel>
 
-          <SidebarGroupContent>
+          <SidebarGroupContent className="mx-0 my-0">
             <SidebarMenu className="my-px py-0">
               {items.map(item => <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
