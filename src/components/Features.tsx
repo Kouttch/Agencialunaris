@@ -16,19 +16,16 @@ const features = [
     icon: BarChart3,
     title: "Dashboards Semanais e Mensais",
     description: "Visualize métricas detalhadas: conversas iniciadas, custo por conversa, alcance, impressões, frequência e muito mais.",
-    link: "/auth",
   },
   {
     icon: Download,
     title: "Estratégias Exclusivas",
     description: "Baixe materiais personalizados enviados pela equipe de gestores para otimizar suas campanhas.",
-    link: "/auth",
   },
   {
     icon: CreditCard,
     title: "Gestão de Pagamentos",
     description: "Acompanhe status de pagamentos, recargas via PIX e histórico financeiro completo em tempo real.",
-    link: "/auth",
   },
   {
     icon: MessageSquare,
@@ -69,8 +66,7 @@ export const Features = () => {
           {features.map((feature, index) => (
             <Card 
               key={index} 
-              className="glass border-glass-border hover:shadow-glow transition-all duration-500 group cursor-pointer"
-              onClick={() => feature.link && navigate(feature.link)}
+              className="glass border-glass-border hover:shadow-glow transition-all duration-500 group"
             >
               <CardHeader className="text-center">
                 <div className="w-12 h-12 bg-gradient-to-br from-primary to-primary-glow rounded-lg flex items-center justify-center mb-4 group-hover:animate-pulse mx-auto">
