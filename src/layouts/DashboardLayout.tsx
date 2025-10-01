@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { StatusBadge } from "@/components/StatusBadge";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -31,15 +32,19 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
               className="h-8 w-auto"
             />
           </div>
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={handleSignOut}
-            className="gap-2"
-          >
-            <LogOut className="h-4 w-4" />
-            Sair
-          </Button>
+          
+          <div className="flex items-center gap-4">
+            <StatusBadge status="active" />
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={handleSignOut}
+              className="gap-2"
+            >
+              <LogOut className="h-4 w-4" />
+              Sair
+            </Button>
+          </div>
         </header>
 
         <AppSidebar />

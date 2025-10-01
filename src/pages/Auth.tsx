@@ -19,10 +19,10 @@ const Auth = () => {
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
-  // Redirect authenticated users to home
+  // Redirect authenticated users to customer dashboard
   useEffect(() => {
     if (!loading && user) {
-      navigate("/");
+      navigate("/minha-conta");
     }
   }, [user, loading, navigate]);
 
@@ -89,7 +89,7 @@ const Auth = () => {
     e.preventDefault();
     const { error } = await signIn(email, password);
     if (!error) {
-      navigate("/");
+      navigate("/minha-conta");
     }
   };
 

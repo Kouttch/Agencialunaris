@@ -55,9 +55,9 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon">
-      <SidebarContent>
+      <SidebarContent className="pt-8">
         <SidebarGroup>
-          <SidebarGroupLabel>
+          <SidebarGroupLabel className="mb-2">
             {isAdmin ? "Administração" : "Menu Principal"}
           </SidebarGroupLabel>
 

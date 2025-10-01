@@ -16,6 +16,23 @@ Primary: Red accent for details | Black/White/Gray base colors
     /* Dark theme base - near black */
     --background: 0 0% 8%; /* Very dark gray, almost black */
     --foreground: 0 0% 95%; /* Off-white */
+  }
+
+  /* Light mode overrides */
+  .light-mode {
+    --background: 0 0% 98%; /* Almost white */
+    --foreground: 0 0% 8%; /* Dark text */
+    --card: 0 0% 100%; /* White cards */
+    --card-foreground: 0 0% 8%;
+    --border: 0 0% 85%; /* Light gray borders */
+    --input: 0 0% 95%;
+    --muted: 0 0% 90%;
+    --muted-foreground: 0 0% 40%;
+    --primary: 0 0% 8%; /* Dark for primary in light mode */
+    --primary-foreground: 0 0% 98%;
+  }
+
+  :root:not(.light-mode) {
     
     /* Glass effect colors */
     --glass: 0 0% 15% / 0.1;

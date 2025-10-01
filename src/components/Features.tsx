@@ -9,22 +9,26 @@ import {
   Users,
   Zap
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const features = [
   {
     icon: BarChart3,
     title: "Dashboards Semanais e Mensais",
     description: "Visualize métricas detalhadas: conversas iniciadas, custo por conversa, alcance, impressões, frequência e muito mais.",
+    link: "/minha-conta",
   },
   {
     icon: CreditCard,
     title: "Gestão de Pagamentos",
     description: "Acompanhe status de pagamentos, recargas via PIX e histórico financeiro completo em tempo real.",
+    link: "/minha-conta",
   },
   {
     icon: Download,
     title: "Estratégias Exclusivas",
     description: "Baixe materiais personalizados enviados pela equipe de gestores para otimizar suas campanhas.",
+    link: "/minha-conta",
   },
   {
     icon: MessageSquare,
@@ -44,6 +48,8 @@ const features = [
 ];
 
 export const Features = () => {
+  const navigate = useNavigate();
+
   return (
     <section className="py-24 px-4 bg-gradient-to-b from-background to-card/30">
       <div className="container mx-auto">
@@ -61,7 +67,11 @@ export const Features = () => {
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {features.map((feature, index) => (
-            <Card key={index} className="glass border-glass-border hover:shadow-glow transition-all duration-500 group">
+            <Card 
+              key={index} 
+              className="glass border-glass-border hover:shadow-glow transition-all duration-500 group cursor-pointer"
+              onClick={() => feature.link && navigate(feature.link)}
+            >
               <CardHeader className="text-center">
                 <div className="w-12 h-12 bg-gradient-to-br from-primary to-primary-glow rounded-lg flex items-center justify-center mb-4 group-hover:animate-pulse mx-auto">
                   <feature.icon className="w-6 h-6 text-primary-foreground" />

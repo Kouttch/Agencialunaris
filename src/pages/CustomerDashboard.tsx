@@ -1,6 +1,16 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
+import { Button } from "@/components/ui/button";
+import { Moon, Sun, Info } from "lucide-react";
+import { useState } from "react";
+import { CustomerAvatar } from "@/components/CustomerAvatar";
+import {
+  Tooltip as TooltipUI,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const weeklyData = [
   { name: 'Seg', conversas: 12, custo: 45.50, alcance: 1200 },
@@ -20,9 +30,22 @@ const monthlyData = [
 ];
 
 export default function CustomerDashboard() {
+  const [theme, setTheme] = useState<"light" | "dark">("dark");
+
+  const toggleTheme = () => {
+    const newTheme = theme === "dark" ? "light" : "dark";
+    setTheme(newTheme);
+    document.documentElement.classList.toggle("light-mode", newTheme === "light");
+  };
+
+  // Mock data - em produção virá do banco de dados
+  const managerName = "Carlos Silva";
+  const userName = "João Pedro";
+  const companyName = "Super Tênis";
+  
   return (
-    <div className="container mx-auto p-6">
-      <div className="mb-8">
+    <div className="container mx-auto p-6 pb-24">
+      <div className="mb-10">
         <h1 className="text-3xl font-bold mb-2">Minha Conta</h1>
         <p className="text-muted-foreground">Acompanhe o desempenho de suas campanhas</p>
       </div>
@@ -80,10 +103,27 @@ export default function CustomerDashboard() {
 
       {/* Dashboard Charts */}
       <Tabs defaultValue="weekly" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="weekly">Semanal</TabsTrigger>
-          <TabsTrigger value="monthly">Mensal</TabsTrigger>
-        </TabsList>
+        <div className="flex items-center gap-3 mb-4">
+          <TabsList>
+            <TabsTrigger value="weekly">Semanal</TabsTrigger>
+            <TabsTrigger value="monthly">Mensal</TabsTrigger>
+          </TabsList>
+          
+          <TooltipProvider>
+            <TooltipUI>
+              <TooltipTrigger asChild>
+                <Button variant="outline" size="sm" className="gap-2">
+                  <Info className="h-4 w-4" />
+                  Gestor Responsável
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p className="font-semibold">{managerName}</p>
+                <p className="text-xs text-muted-foreground">Seu gestor dedicado</p>
+              </TooltipContent>
+            </TooltipUI>
+          </TooltipProvider>
+        </div>
 
         <TabsContent value="weekly" className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -165,6 +205,22 @@ export default function CustomerDashboard() {
           </div>
         </TabsContent>
       </Tabs>
+
+      {/* Theme Toggle Button */}
+      <Button
+        onClick={toggleTheme}
+        size="icon"
+        variant="outline"
+        className="fixed bottom-6 right-6 z-50 h-12 w-12 rounded-full shadow-lg"
+      >
+        {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+      </Button>
+
+      {/* Customer Avatar */}
+      <CustomerAvatar 
+        userName={userName}
+        companyName={companyName}
+      />
     </div>
   );
 }
