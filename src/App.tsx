@@ -12,6 +12,7 @@ import Auth from "./pages/Auth";
 import CustomerDashboard from "./pages/CustomerDashboard";
 import CustomerProfile from "./pages/CustomerProfile";
 import CustomerRecharge from "./pages/CustomerRecharge";
+import CustomerStrategy from "./pages/CustomerStrategy";
 import AdminDashboard from "./pages/AdminDashboard";
 import ClientsManagement from "./pages/ClientsManagement";
 import DashboardsManagement from "./pages/DashboardsManagement";
@@ -65,6 +66,16 @@ const App = () => (
                   <ProtectedRoute>
                     <DashboardLayout>
                       <CustomerRecharge />
+                    </DashboardLayout>
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/minha-conta/estrategia" 
+                element={
+                  <ProtectedRoute>
+                    <DashboardLayout>
+                      <CustomerStrategy />
                     </DashboardLayout>
                   </ProtectedRoute>
                 } 

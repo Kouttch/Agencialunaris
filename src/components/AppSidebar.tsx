@@ -1,4 +1,4 @@
-import { BarChart3, Users, Settings, CreditCard, User, Home, MessageSquare, Shield, TrendingUp } from "lucide-react";
+import { BarChart3, Users, Settings, CreditCard, User, Home, MessageSquare, Shield, TrendingUp, FileText } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/components/ui/sidebar";
@@ -16,6 +16,10 @@ export function AppSidebar() {
     title: "Dashboard",
     url: "/minha-conta",
     icon: Home
+  }, {
+    title: "Estratégia",
+    url: "/minha-conta/estrategia",
+    icon: FileText
   }, {
     title: "Perfil",
     url: "/minha-conta/profile",
