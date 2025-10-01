@@ -1,17 +1,12 @@
-import { useState } from "react";
 import { BarChart3, Users, Settings, CreditCard, User, Home, MessageSquare, Shield, TrendingUp } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
+import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/components/ui/sidebar";
+
 export function AppSidebar() {
-  const {
-    open,
-    setOpen
-  } = useSidebar();
+  const { open, setOpen } = useSidebar();
   const location = useLocation();
-  const {
-    user
-  } = useAuth();
+  const { user } = useAuth();
   const currentPath = location.pathname;
 
   // TODO: Check user role from database
@@ -49,12 +44,20 @@ export function AppSidebar() {
   }];
   const items = isAdmin ? adminItems : customerItems;
   const isActive = (path: string) => currentPath === path;
-  const getNavCls = ({
-    isActive
-  }: {
-    isActive: boolean;
-  }) => isActive ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium" : "hover:bg-sidebar-accent/50";
-  return <Sidebar collapsible="icon">
+  const getNavCls = ({ isActive }: { isActive: boolean }) => 
+    isActive ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium" : "hover:bg-sidebar-accent/50";
+
+  const handleMouseEnter = () => setOpen(true);
+  const handleMouseLeave = () => setOpen(false);
+  const handleTouchStart = () => setOpen(!open);
+
+  return (
+    <Sidebar 
+      collapsible="icon"
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      onTouchStart={handleTouchStart}
+    >
       <SidebarContent className="pt-8">
         <SidebarGroup>
           <SidebarGroupLabel className="mb-2 mx-0 px-[8px] py-0 my-[12px]">
@@ -63,17 +66,20 @@ export function AppSidebar() {
 
           <SidebarGroupContent className="mx-0 my-0">
             <SidebarMenu className="my-px py-0">
-              {items.map(item => <SidebarMenuItem key={item.title}>
+              {items.map(item => (
+                <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
                     <NavLink to={item.url} end className={getNavCls}>
                       <item.icon />
                       <span>{item.title}</span>
                     </NavLink>
                   </SidebarMenuButton>
-                </SidebarMenuItem>)}
+                </SidebarMenuItem>
+              ))}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-    </Sidebar>;
+    </Sidebar>
+  );
 }
