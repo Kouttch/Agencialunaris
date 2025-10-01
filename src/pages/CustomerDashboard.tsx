@@ -5,33 +5,66 @@ import { Button } from "@/components/ui/button";
 import { Moon, Sun, Info } from "lucide-react";
 import { useState } from "react";
 import { CustomerAvatar } from "@/components/CustomerAvatar";
-import {
-  Tooltip as TooltipUI,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-
-const weeklyData = [
-  { name: 'Seg', conversas: 12, custo: 45.50, alcance: 1200 },
-  { name: 'Ter', conversas: 19, custo: 72.30, alcance: 1800 },
-  { name: 'Qua', conversas: 15, custo: 58.20, alcance: 1500 },
-  { name: 'Qui', conversas: 22, custo: 85.40, alcance: 2100 },
-  { name: 'Sex', conversas: 18, custo: 68.90, alcance: 1700 },
-  { name: 'Sab', conversas: 8, custo: 32.10, alcance: 900 },
-  { name: 'Dom', conversas: 5, custo: 21.80, alcance: 600 },
-];
-
-const monthlyData = [
-  { name: 'Sem 1', conversas: 89, custo: 342.50, alcance: 8900 },
-  { name: 'Sem 2', conversas: 112, custo: 428.30, alcance: 11200 },
-  { name: 'Sem 3', conversas: 95, custo: 365.80, alcance: 9500 },
-  { name: 'Sem 4', conversas: 128, custo: 492.60, alcance: 12800 },
-];
-
+import { Tooltip as TooltipUI, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+const weeklyData = [{
+  name: 'Seg',
+  conversas: 12,
+  custo: 45.50,
+  alcance: 1200
+}, {
+  name: 'Ter',
+  conversas: 19,
+  custo: 72.30,
+  alcance: 1800
+}, {
+  name: 'Qua',
+  conversas: 15,
+  custo: 58.20,
+  alcance: 1500
+}, {
+  name: 'Qui',
+  conversas: 22,
+  custo: 85.40,
+  alcance: 2100
+}, {
+  name: 'Sex',
+  conversas: 18,
+  custo: 68.90,
+  alcance: 1700
+}, {
+  name: 'Sab',
+  conversas: 8,
+  custo: 32.10,
+  alcance: 900
+}, {
+  name: 'Dom',
+  conversas: 5,
+  custo: 21.80,
+  alcance: 600
+}];
+const monthlyData = [{
+  name: 'Sem 1',
+  conversas: 89,
+  custo: 342.50,
+  alcance: 8900
+}, {
+  name: 'Sem 2',
+  conversas: 112,
+  custo: 428.30,
+  alcance: 11200
+}, {
+  name: 'Sem 3',
+  conversas: 95,
+  custo: 365.80,
+  alcance: 9500
+}, {
+  name: 'Sem 4',
+  conversas: 128,
+  custo: 492.60,
+  alcance: 12800
+}];
 export default function CustomerDashboard() {
   const [theme, setTheme] = useState<"light" | "dark">("dark");
-
   const toggleTheme = () => {
     const newTheme = theme === "dark" ? "light" : "dark";
     setTheme(newTheme);
@@ -42,9 +75,7 @@ export default function CustomerDashboard() {
   const managerName = "Carlos Silva";
   const userName = "João Pedro";
   const companyName = "Super Tênis";
-  
-  return (
-    <div className="container mx-auto p-6 pb-24">
+  return <div className="container mx-auto p-6 pb-24">
       <div className="mb-10">
         <h1 className="text-3xl font-bold mb-2">Minha Conta</h1>
         <p className="text-muted-foreground">Acompanhe o desempenho de suas campanhas</p>
@@ -207,20 +238,11 @@ export default function CustomerDashboard() {
       </Tabs>
 
       {/* Theme Toggle Button */}
-      <Button
-        onClick={toggleTheme}
-        size="icon"
-        variant="outline"
-        className="fixed bottom-6 right-6 z-50 h-12 w-12 rounded-full shadow-lg"
-      >
+      <Button onClick={toggleTheme} size="icon" variant="outline" className="fixed bottom-6 right-6 z-50 h-12 w-12 rounded-full shadow-lg mx-0 px-0">
         {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
       </Button>
 
       {/* Customer Avatar */}
-      <CustomerAvatar 
-        userName={userName}
-        companyName={companyName}
-      />
-    </div>
-  );
+      <CustomerAvatar userName={userName} companyName={companyName} />
+    </div>;
 }
