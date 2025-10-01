@@ -16,19 +16,19 @@ const features = [
     icon: BarChart3,
     title: "Dashboards Semanais e Mensais",
     description: "Visualize métricas detalhadas: conversas iniciadas, custo por conversa, alcance, impressões, frequência e muito mais.",
-    link: "/minha-conta",
+    link: "/auth",
   },
   {
     icon: Download,
     title: "Estratégias Exclusivas",
     description: "Baixe materiais personalizados enviados pela equipe de gestores para otimizar suas campanhas.",
-    link: "/minha-conta/estrategia",
+    link: "/auth",
   },
   {
     icon: CreditCard,
     title: "Gestão de Pagamentos",
     description: "Acompanhe status de pagamentos, recargas via PIX e histórico financeiro completo em tempo real.",
-    link: "/minha-conta/recargas",
+    link: "/auth",
   },
   {
     icon: MessageSquare,
