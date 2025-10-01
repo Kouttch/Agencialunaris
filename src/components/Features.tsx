@@ -22,13 +22,13 @@ const features = [
     icon: CreditCard,
     title: "Gestão de Pagamentos",
     description: "Acompanhe status de pagamentos, recargas via PIX e histórico financeiro completo em tempo real.",
-    link: "/minha-conta",
+    link: "/minha-conta/recargas",
   },
   {
     icon: Download,
     title: "Estratégias Exclusivas",
     description: "Baixe materiais personalizados enviados pela equipe de gestores para otimizar suas campanhas.",
-    link: "/minha-conta",
+    link: "/minha-conta/estrategia",
   },
   {
     icon: MessageSquare,
