@@ -21,7 +21,7 @@ export const Footer = () => {
                 <Link to="/auth" className="hover:text-primary transition-colors">Login</Link>
               </li>
               <li>
-                <a href="#" className="hover:text-primary transition-colors">Minha conta</a>
+                <Link to="/minha-conta" className="hover:text-primary transition-colors">Minha conta</Link>
               </li>
               <li>
                 
