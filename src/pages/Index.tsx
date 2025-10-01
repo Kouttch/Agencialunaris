@@ -4,6 +4,7 @@ import { Features } from "@/components/Features";
 import { Footer } from "@/components/Footer";
 import { WhatsAppContactSection } from "@/components/WhatsAppContactSection";
 import { FloatingWhatsAppButton } from "@/components/FloatingWhatsAppButton";
+import { ClientPortalSection } from "@/components/ClientPortalSection";
 
 const Index = () => {
   return (
@@ -12,6 +13,7 @@ const Index = () => {
       <HeroNew />
       <Features />
       <WhatsAppContactSection />
+      <ClientPortalSection />
       <Footer />
       <FloatingWhatsAppButton />
     </main>
