@@ -3,9 +3,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
 import { Button } from "@/components/ui/button";
 import { Moon, Sun, Info } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { CustomerAvatar } from "@/components/CustomerAvatar";
 import { Tooltip as TooltipUI, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 const weeklyData = [{
   name: 'Seg',
   conversas: 12,
@@ -64,17 +66,48 @@ const monthlyData = [{
   alcance: 12800
 }];
 export default function CustomerDashboard() {
+  const { user } = useAuth();
   const [theme, setTheme] = useState<"light" | "dark">("dark");
+  const [profileData, setProfileData] = useState({
+    userName: "",
+    companyName: "",
+    avatarUrl: ""
+  });
+
   const toggleTheme = () => {
     const newTheme = theme === "dark" ? "light" : "dark";
     setTheme(newTheme);
     document.documentElement.classList.toggle("light-mode", newTheme === "light");
   };
 
-  // Mock data - em produção virá do banco de dados
+  // Carregar dados do perfil
+  useEffect(() => {
+    if (user) {
+      loadProfile();
+    }
+  }, [user]);
+
+  const loadProfile = async () => {
+    try {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('full_name, company, avatar_url')
+        .eq('user_id', user?.id)
+        .single();
+
+      if (profile) {
+        setProfileData({
+          userName: profile.full_name || "",
+          companyName: profile.company || "",
+          avatarUrl: profile.avatar_url || ""
+        });
+      }
+    } catch (error) {
+      console.error('Erro ao carregar perfil:', error);
+    }
+  };
+
   const managerName = "Carlos Silva";
-  const userName = "João Pedro";
-  const companyName = "Super Tênis";
   return <div className="container mx-auto p-6 pb-24">
       <div className="mb-10">
         <h1 className="text-3xl font-bold mb-2">Minha Conta</h1>
@@ -243,6 +276,10 @@ export default function CustomerDashboard() {
       </Button>
 
       {/* Customer Avatar */}
-      <CustomerAvatar userName={userName} companyName={companyName} />
+      <CustomerAvatar 
+        userName={profileData.userName} 
+        companyName={profileData.companyName}
+        avatarUrl={profileData.avatarUrl}
+      />
     </div>;
 }
