@@ -56,6 +56,15 @@ Deno.serve(async (req) => {
 
     console.log('Creating user:', { email, fullName, company, role })
 
+    // Check if user with this email already exists
+    const { data: existingUsers } = await supabaseAdmin.auth.admin.listUsers()
+    const userExists = existingUsers?.users?.some(u => u.email === email)
+    
+    if (userExists) {
+      console.error('User already exists:', email)
+      throw new Error(`User with email ${email} already exists`)
+    }
+
     // Create user in auth
     const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
       email,
@@ -77,36 +86,46 @@ Deno.serve(async (req) => {
 
     console.log('Auth user created:', authData.user.id)
 
-    // Create profile
+    // Create profile with upsert to avoid conflicts
     const { error: profileError } = await supabaseAdmin
       .from('profiles')
-      .insert({
+      .upsert({
         user_id: authData.user.id,
         full_name: fullName,
         company: company
+      }, {
+        onConflict: 'user_id'
       })
 
     if (profileError) {
       console.error('Error creating profile:', profileError)
-      // Try to delete the auth user if profile creation fails
-      await supabaseAdmin.auth.admin.deleteUser(authData.user.id)
+      // Delete the auth user if profile creation fails
+      const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(authData.user.id)
+      if (deleteError) {
+        console.error('Error deleting auth user during rollback:', deleteError)
+      }
       throw profileError
     }
 
     console.log('Profile created')
 
-    // Set role
+    // Set role with upsert to avoid conflicts
     const { error: roleError } = await supabaseAdmin
       .from('user_roles')
-      .insert({
+      .upsert({
         user_id: authData.user.id,
         role: role as 'admin' | 'user'
+      }, {
+        onConflict: 'user_id,role'
       })
 
     if (roleError) {
       console.error('Error creating role:', roleError)
-      // Try to delete the auth user if role creation fails
-      await supabaseAdmin.auth.admin.deleteUser(authData.user.id)
+      // Delete the auth user if role creation fails
+      const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(authData.user.id)
+      if (deleteError) {
+        console.error('Error deleting auth user during rollback:', deleteError)
+      }
       throw roleError
     }
 
