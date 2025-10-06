@@ -101,39 +101,19 @@ export default function UsersManagement() {
     setCreating(true);
 
     try {
-      // Create user in auth
-      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
-        email: newUser.email,
-        password: newUser.password,
-        email_confirm: true,
-        user_metadata: {
-          full_name: newUser.fullName
+      // Call edge function to create user
+      const { data, error } = await supabase.functions.invoke('create-user', {
+        body: {
+          email: newUser.email,
+          password: newUser.password,
+          fullName: newUser.fullName,
+          company: newUser.company,
+          role: newUser.role
         }
       });
 
-      if (authError) throw authError;
-      if (!authData.user) throw new Error("Usuário não foi criado");
-
-      // Create profile
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .insert({
-          user_id: authData.user.id,
-          full_name: newUser.fullName,
-          company: newUser.company
-        });
-
-      if (profileError) throw profileError;
-
-      // Set role
-      const { error: roleError } = await supabase
-        .from('user_roles')
-        .insert([{
-          user_id: authData.user.id,
-          role: newUser.role as "admin" | "user"
-        }]);
-
-      if (roleError) throw roleError;
+      if (error) throw error;
+      if (!data.success) throw new Error(data.error || "Erro ao criar usuário");
 
       toast({
         title: "Sucesso",
