@@ -58,6 +58,72 @@ export type Database = {
           },
         ]
       }
+      campaign_data: {
+        Row: {
+          amount_spent: number | null
+          campaign_name: string
+          conversations_started: number | null
+          cost_per_conversation: number | null
+          cost_per_result: number | null
+          cpc: number | null
+          cpm: number | null
+          created_at: string | null
+          ctr: number | null
+          frequency: number | null
+          id: string
+          impressions: number | null
+          link_clicks: number | null
+          reach: number | null
+          results: number | null
+          updated_at: string | null
+          user_id: string
+          week_end: string | null
+          week_start: string | null
+        }
+        Insert: {
+          amount_spent?: number | null
+          campaign_name: string
+          conversations_started?: number | null
+          cost_per_conversation?: number | null
+          cost_per_result?: number | null
+          cpc?: number | null
+          cpm?: number | null
+          created_at?: string | null
+          ctr?: number | null
+          frequency?: number | null
+          id?: string
+          impressions?: number | null
+          link_clicks?: number | null
+          reach?: number | null
+          results?: number | null
+          updated_at?: string | null
+          user_id: string
+          week_end?: string | null
+          week_start?: string | null
+        }
+        Update: {
+          amount_spent?: number | null
+          campaign_name?: string
+          conversations_started?: number | null
+          cost_per_conversation?: number | null
+          cost_per_result?: number | null
+          cpc?: number | null
+          cpm?: number | null
+          created_at?: string | null
+          ctr?: number | null
+          frequency?: number | null
+          id?: string
+          impressions?: number | null
+          link_clicks?: number | null
+          reach?: number | null
+          results?: number | null
+          updated_at?: string | null
+          user_id?: string
+          week_end?: string | null
+          week_start?: string | null
+        }
+        Relationships: []
+      }
       campaigns: {
         Row: {
           budget: number | null

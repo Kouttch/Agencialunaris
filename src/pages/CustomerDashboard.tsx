@@ -8,71 +8,32 @@ import { CustomerAvatar } from "@/components/CustomerAvatar";
 import { Tooltip as TooltipUI, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-const weeklyData = [{
-  name: 'Seg',
-  conversas: 12,
-  custo: 45.50,
-  alcance: 1200
-}, {
-  name: 'Ter',
-  conversas: 19,
-  custo: 72.30,
-  alcance: 1800
-}, {
-  name: 'Qua',
-  conversas: 15,
-  custo: 58.20,
-  alcance: 1500
-}, {
-  name: 'Qui',
-  conversas: 22,
-  custo: 85.40,
-  alcance: 2100
-}, {
-  name: 'Sex',
-  conversas: 18,
-  custo: 68.90,
-  alcance: 1700
-}, {
-  name: 'Sab',
-  conversas: 8,
-  custo: 32.10,
-  alcance: 900
-}, {
-  name: 'Dom',
-  conversas: 5,
-  custo: 21.80,
-  alcance: 600
-}];
-const monthlyData = [{
-  name: 'Sem 1',
-  conversas: 89,
-  custo: 342.50,
-  alcance: 8900
-}, {
-  name: 'Sem 2',
-  conversas: 112,
-  custo: 428.30,
-  alcance: 11200
-}, {
-  name: 'Sem 3',
-  conversas: 95,
-  custo: 365.80,
-  alcance: 9500
-}, {
-  name: 'Sem 4',
-  conversas: 128,
-  custo: 492.60,
-  alcance: 12800
-}];
+import { useToast } from "@/hooks/use-toast";
+interface ChartData {
+  name: string;
+  conversas: number;
+  custo: number;
+  alcance: number;
+}
 export default function CustomerDashboard() {
   const { user } = useAuth();
+  const { toast } = useToast();
   const [theme, setTheme] = useState<"light" | "dark">("dark");
   const [profileData, setProfileData] = useState({
     userName: "",
     companyName: "",
     avatarUrl: ""
   });
+  
+  const [weeklyData, setWeeklyData] = useState<ChartData[]>([]);
+  const [monthlyData, setMonthlyData] = useState<ChartData[]>([]);
+  const [metrics, setMetrics] = useState({
+    conversasIniciadas: 0,
+    custoPorConversa: 0,
+    alcanceTotal: 0,
+    orcamentoRestante: 0
+  });
+  const [loading, setLoading] = useState(true);
 
   const toggleTheme = () => {
     const newTheme = theme === "dark" ? "light" : "dark";
@@ -80,10 +41,11 @@ export default function CustomerDashboard() {
     document.documentElement.classList.toggle("light-mode", newTheme === "light");
   };
 
-  // Carregar dados do perfil
+  // Carregar dados do perfil e campanha
   useEffect(() => {
     if (user) {
       loadProfile();
+      loadCampaignData();
     }
   }, [user]);
 
@@ -107,6 +69,85 @@ export default function CustomerDashboard() {
     }
   };
 
+  const loadCampaignData = async () => {
+    try {
+      setLoading(true);
+      
+      const { data: campaignData, error } = await supabase
+        .from('campaign_data')
+        .select('*')
+        .eq('user_id', user?.id)
+        .order('week_start', { ascending: false });
+
+      if (error) throw error;
+
+      if (!campaignData || campaignData.length === 0) {
+        // Se não houver dados, mostrar tudo zerado
+        setWeeklyData([]);
+        setMonthlyData([]);
+        setMetrics({
+          conversasIniciadas: 0,
+          custoPorConversa: 0,
+          alcanceTotal: 0,
+          orcamentoRestante: 0
+        });
+        setLoading(false);
+        return;
+      }
+
+      // Processar dados para gráficos diários (últimos 7 registros)
+      const last7Days = campaignData.slice(0, 7);
+      const weeklyChartData: ChartData[] = last7Days.map((item, index) => ({
+        name: ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab'][index % 7],
+        conversas: item.conversations_started || 0,
+        custo: parseFloat(item.amount_spent?.toString() || '0'),
+        alcance: item.reach || 0
+      })).reverse();
+
+      // Processar dados mensais (agrupar por semana)
+      const weeklyGroups: { [key: string]: any[] } = {};
+      campaignData.forEach(item => {
+        const weekKey = item.week_start?.toString() || 'unknown';
+        if (!weeklyGroups[weekKey]) {
+          weeklyGroups[weekKey] = [];
+        }
+        weeklyGroups[weekKey].push(item);
+      });
+
+      const monthlyChartData: ChartData[] = Object.entries(weeklyGroups)
+        .slice(0, 4)
+        .map(([week, items], index) => ({
+          name: `Sem ${index + 1}`,
+          conversas: items.reduce((sum, item) => sum + (item.conversations_started || 0), 0),
+          custo: items.reduce((sum, item) => sum + parseFloat(item.amount_spent?.toString() || '0'), 0),
+          alcance: items.reduce((sum, item) => sum + (item.reach || 0), 0)
+        }));
+
+      // Calcular métricas totais
+      const totalConversas = campaignData.reduce((sum, item) => sum + (item.conversations_started || 0), 0);
+      const totalGasto = campaignData.reduce((sum, item) => sum + parseFloat(item.amount_spent?.toString() || '0'), 0);
+      const totalAlcance = campaignData.reduce((sum, item) => sum + (item.reach || 0), 0);
+      const custoPorConversa = totalConversas > 0 ? totalGasto / totalConversas : 0;
+
+      setWeeklyData(weeklyChartData);
+      setMonthlyData(monthlyChartData);
+      setMetrics({
+        conversasIniciadas: totalConversas,
+        custoPorConversa: custoPorConversa,
+        alcanceTotal: totalAlcance,
+        orcamentoRestante: 0 // Este valor pode ser configurado depois
+      });
+    } catch (error: any) {
+      toast({
+        title: "Erro ao carregar dados",
+        description: error.message,
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const managerName = "Carlos Silva";
   return <div className="container mx-auto p-6 pb-24">
       <div className="mb-10">
@@ -123,8 +164,7 @@ export default function CustomerDashboard() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">324</div>
-            <p className="text-xs text-green-600 mt-1">+12% vs mês anterior</p>
+            <div className="text-2xl font-bold">{metrics.conversasIniciadas}</div>
           </CardContent>
         </Card>
 
@@ -135,8 +175,9 @@ export default function CustomerDashboard() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">R$ 4,32</div>
-            <p className="text-xs text-red-600 mt-1">+5% vs mês anterior</p>
+            <div className="text-2xl font-bold">
+              R$ {metrics.custoPorConversa.toFixed(2)}
+            </div>
           </CardContent>
         </Card>
 
@@ -147,8 +188,11 @@ export default function CustomerDashboard() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">45.2K</div>
-            <p className="text-xs text-green-600 mt-1">+18% vs mês anterior</p>
+            <div className="text-2xl font-bold">
+              {metrics.alcanceTotal >= 1000 
+                ? `${(metrics.alcanceTotal / 1000).toFixed(1)}K` 
+                : metrics.alcanceTotal}
+            </div>
           </CardContent>
         </Card>
 
@@ -159,8 +203,7 @@ export default function CustomerDashboard() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">R$ 1.248</div>
-            <p className="text-xs text-muted-foreground mt-1">de R$ 2.000</p>
+            <div className="text-2xl font-bold">R$ {metrics.orcamentoRestante.toFixed(2)}</div>
           </CardContent>
         </Card>
       </div>

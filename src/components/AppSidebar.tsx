@@ -45,6 +45,10 @@ export function AppSidebar() {
     title: "Pagamentos",
     url: "/fulladmin/payments",
     icon: MessageSquare
+  }, {
+    title: "Usuários",
+    url: "/fulladmin/users",
+    icon: Shield
   }];
   const items = isAdmin ? adminItems : customerItems;
   const isActive = (path: string) => currentPath === path;

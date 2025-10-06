@@ -1,5 +1,4 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Building2 } from "lucide-react";
 
 interface CustomerAvatarProps {
   avatarUrl?: string;
@@ -33,8 +32,7 @@ export const CustomerAvatar = ({
             {userName || "Usuário"}
           </span>
           {companyName && (
-            <span className="text-xs text-muted-foreground flex items-center gap-1">
-              <Building2 className="h-3 w-3" />
+            <span className="text-xs text-muted-foreground">
               {companyName}
             </span>
           )}
