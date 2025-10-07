@@ -41,51 +41,14 @@ export default function UsersManagement() {
     try {
       setLoading(true);
       
-      // Get all profiles with their roles
-      const { data: profiles, error: profilesError } = await supabase
-        .from('profiles')
-        .select(`
-          user_id,
-          full_name,
-          company
-        `);
-
-      if (profilesError) throw profilesError;
-
-      // Get all user roles
-      const { data: roles, error: rolesError } = await supabase
-        .from('user_roles')
-        .select('user_id, role');
-
-      if (rolesError) throw rolesError;
-
-      // Combine data - we'll get emails through a different approach
-      // since auth.admin.listUsers() requires service role
-      const combinedUsers: User[] = await Promise.all(
-        (profiles || []).map(async (profile) => {
-          const userRole = roles?.find(r => r.user_id === profile.user_id);
-          
-          // Try to get email from metadata if available
-          let email = "";
-          try {
-            const { data: { user: userData } } = await supabase.auth.admin.getUserById(profile.user_id);
-            email = userData?.email || "";
-          } catch {
-            // If fails, we'll show without email
-            email = "Email não disponível";
-          }
-          
-          return {
-            id: profile.user_id,
-            email: email,
-            full_name: profile.full_name || "",
-            company: profile.company || "",
-            role: userRole?.role || "user"
-          };
-        })
-      );
-
-      setUsers(combinedUsers);
+      // Call edge function to get all users with emails
+      const { data, error } = await supabase.functions.invoke('list-users');
+      
+      if (error) throw error;
+      
+      if (data?.users) {
+        setUsers(data.users);
+      }
     } catch (error: any) {
       toast({
         title: "Erro ao carregar usuários",

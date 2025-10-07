@@ -203,6 +203,10 @@ export default function ChecklistManagement() {
   };
 
   const handleToggleComplete = async (itemId: string, currentStatus: boolean) => {
+    const action = !currentStatus ? "concluir" : "reabrir";
+    
+    if (!confirm(`Tem certeza que deseja ${action} esta tarefa?`)) return;
+
     try {
       const { error } = await supabase
         .from('checklist_items')
@@ -452,7 +456,7 @@ export default function ChecklistManagement() {
       </div>
 
       {/* Items List */}
-      <div className="space-y-4">
+      <div className="space-y-6">
         {loading ? (
           <div className="flex justify-center items-center py-8">
             <Loader2 className="h-8 w-8 animate-spin" />
@@ -464,7 +468,19 @@ export default function ChecklistManagement() {
             </CardContent>
           </Card>
         ) : (
-          items.map((item) => (
+          <>
+            {/* Pending Tasks */}
+            <div>
+              <h2 className="text-xl font-semibold mb-4">Tarefas Pendentes</h2>
+              <div className="space-y-4">
+                {items.filter(item => !item.is_completed).length === 0 ? (
+                  <Card>
+                    <CardContent className="py-6 text-center text-muted-foreground">
+                      Nenhuma tarefa pendente 🎉
+                    </CardContent>
+                  </Card>
+                ) : (
+                  items.filter(item => !item.is_completed).map((item) => (
             <Card key={item.id} className={item.is_completed ? 'opacity-60' : ''}>
               <CardContent className="pt-6">
                 <div className="flex items-start gap-4">
@@ -535,7 +551,92 @@ export default function ChecklistManagement() {
                 </div>
               </CardContent>
             </Card>
-          ))
+                  ))
+                )}
+              </div>
+            </div>
+
+            {/* Completed Tasks */}
+            {items.filter(item => item.is_completed).length > 0 && (
+              <div>
+                <h2 className="text-xl font-semibold mb-4 text-green-600">Tarefas Concluídas</h2>
+                <div className="space-y-4">
+                  {items.filter(item => item.is_completed).map((item) => (
+                    <Card key={item.id} className="opacity-60 border-green-200">
+                      <CardContent className="pt-6">
+                        <div className="flex items-start gap-4">
+                          <Checkbox
+                            checked={item.is_completed}
+                            onCheckedChange={() => handleToggleComplete(item.id, item.is_completed)}
+                            className="mt-1"
+                          />
+                          
+                          <div className="flex-1">
+                            <div className="flex items-start justify-between gap-4">
+                              <div className="flex-1">
+                                <h3 className="font-semibold mb-1 line-through">
+                                  {item.title}
+                                </h3>
+                                {item.description && (
+                                  <p className="text-sm text-muted-foreground mb-2">{item.description}</p>
+                                )}
+                                
+                                <div className="flex flex-wrap gap-2 mb-2">
+                                  <Badge className={getPriorityColor(item.priority)}>
+                                    {getPriorityLabel(item.priority)}
+                                  </Badge>
+                                  {item.category && (
+                                    <Badge variant="outline">{item.category}</Badge>
+                                  )}
+                                  {item.assigned_name && (
+                                    <Badge variant="secondary">
+                                      Atribuído: {item.assigned_name}
+                                    </Badge>
+                                  )}
+                                </div>
+
+                                <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
+                                  {item.due_date && (
+                                    <div className="flex items-center gap-1">
+                                      <CalendarIcon className="h-4 w-4" />
+                                      {format(new Date(item.due_date), "dd/MM/yyyy")}
+                                      {item.due_time && (
+                                        <>
+                                          <Clock className="h-4 w-4 ml-2" />
+                                          {item.due_time}
+                                        </>
+                                      )}
+                                    </div>
+                                  )}
+                                  <div>
+                                    Criado por: {item.creator_name}
+                                  </div>
+                                  {item.completed_at && (
+                                    <div className="flex items-center gap-1 text-green-500">
+                                      <CheckCircle2 className="h-4 w-4" />
+                                      Concluído em {format(new Date(item.completed_at), "dd/MM/yyyy 'às' HH:mm")}
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleDeleteItem(item.id)}
+                              >
+                                <Trash2 className="h-4 w-4 text-destructive" />
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>
