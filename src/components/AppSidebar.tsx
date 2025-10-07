@@ -1,4 +1,4 @@
-import { BarChart3, Users, Settings, CreditCard, User, Home, MessageSquare, Shield, TrendingUp, FileText } from "lucide-react";
+import { BarChart3, Users, Settings, CreditCard, User, Home, MessageSquare, Shield, TrendingUp, FileText, CheckCircle2 } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -44,6 +44,10 @@ export function AppSidebar() {
     title: "Dados",
     url: "/fulladmin/data",
     icon: FileText
+  }, {
+    title: "Checklist",
+    url: "/fulladmin/checklist",
+    icon: CheckCircle2
   }, {
     title: "Usuários",
     url: "/fulladmin/users",

@@ -19,6 +19,7 @@ import DashboardsManagement from "./pages/DashboardsManagement";
 import PaymentsManagement from "./pages/PaymentsManagement";
 import UsersManagement from "./pages/UsersManagement";
 import DataManagement from "./pages/DataManagement";
+import ChecklistManagement from "./pages/ChecklistManagement";
 import NotFound from "./pages/NotFound";
 import Contact from "./pages/Contact";
 import TermsOfUse from "./pages/TermsOfUse";
@@ -140,6 +141,16 @@ const App = () => (
                   <ProtectedRoute>
                     <DashboardLayout>
                       <DataManagement />
+                    </DashboardLayout>
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/fulladmin/checklist" 
+                element={
+                  <ProtectedRoute>
+                    <DashboardLayout>
+                      <ChecklistManagement />
                     </DashboardLayout>
                   </ProtectedRoute>
                 } 

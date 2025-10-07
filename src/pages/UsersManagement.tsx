@@ -41,10 +41,14 @@ export default function UsersManagement() {
     try {
       setLoading(true);
       
-      // Get all profiles
+      // Get all profiles with their roles
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
-        .select('user_id, full_name, company');
+        .select(`
+          user_id,
+          full_name,
+          company
+        `);
 
       if (profilesError) throw profilesError;
 
@@ -55,24 +59,31 @@ export default function UsersManagement() {
 
       if (rolesError) throw rolesError;
 
-      // Get all users from auth
-      const { data: { users: authUsers }, error: authError } = await supabase.auth.admin.listUsers();
-      
-      if (authError) throw authError;
-
-      // Combine data
-      const combinedUsers: User[] = authUsers.map(authUser => {
-        const profile = profiles?.find(p => p.user_id === authUser.id);
-        const userRole = roles?.find(r => r.user_id === authUser.id);
-        
-        return {
-          id: authUser.id,
-          email: authUser.email || "",
-          full_name: profile?.full_name || "",
-          company: profile?.company || "",
-          role: userRole?.role || "user"
-        };
-      });
+      // Combine data - we'll get emails through a different approach
+      // since auth.admin.listUsers() requires service role
+      const combinedUsers: User[] = await Promise.all(
+        (profiles || []).map(async (profile) => {
+          const userRole = roles?.find(r => r.user_id === profile.user_id);
+          
+          // Try to get email from metadata if available
+          let email = "";
+          try {
+            const { data: { user: userData } } = await supabase.auth.admin.getUserById(profile.user_id);
+            email = userData?.email || "";
+          } catch {
+            // If fails, we'll show without email
+            email = "Email não disponível";
+          }
+          
+          return {
+            id: profile.user_id,
+            email: email,
+            full_name: profile.full_name || "",
+            company: profile.company || "",
+            role: userRole?.role || "user"
+          };
+        })
+      );
 
       setUsers(combinedUsers);
     } catch (error: any) {
