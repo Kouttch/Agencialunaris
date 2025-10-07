@@ -42,6 +42,10 @@ export function AppSidebar() {
     url: "/fulladmin/dashboards",
     icon: TrendingUp
   }, {
+    title: "Dados",
+    url: "/fulladmin/data",
+    icon: FileText
+  }, {
     title: "Pagamentos",
     url: "/fulladmin/payments",
     icon: MessageSquare

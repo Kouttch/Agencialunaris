@@ -18,6 +18,7 @@ import ClientsManagement from "./pages/ClientsManagement";
 import DashboardsManagement from "./pages/DashboardsManagement";
 import PaymentsManagement from "./pages/PaymentsManagement";
 import UsersManagement from "./pages/UsersManagement";
+import DataManagement from "./pages/DataManagement";
 import NotFound from "./pages/NotFound";
 import Contact from "./pages/Contact";
 import TermsOfUse from "./pages/TermsOfUse";
@@ -129,6 +130,16 @@ const App = () => (
                   <ProtectedRoute>
                     <DashboardLayout>
                       <UsersManagement />
+                    </DashboardLayout>
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/fulladmin/data" 
+                element={
+                  <ProtectedRoute>
+                    <DashboardLayout>
+                      <DataManagement />
                     </DashboardLayout>
                   </ProtectedRoute>
                 } 

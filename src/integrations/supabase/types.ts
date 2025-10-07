@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      account_managers: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          photo_url: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          photo_url?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          photo_url?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       ad_recharges: {
         Row: {
           amount: number
@@ -264,6 +288,7 @@ export type Database = {
           created_at: string
           full_name: string | null
           id: string
+          manager_id: string | null
           phone: string | null
           updated_at: string
           user_id: string
@@ -275,6 +300,7 @@ export type Database = {
           created_at?: string
           full_name?: string | null
           id?: string
+          manager_id?: string | null
           phone?: string | null
           updated_at?: string
           user_id: string
@@ -286,7 +312,43 @@ export type Database = {
           created_at?: string
           full_name?: string | null
           id?: string
+          manager_id?: string | null
           phone?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_manager_id_fkey"
+            columns: ["manager_id"]
+            isOneToOne: false
+            referencedRelation: "account_managers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sheets_sync_config: {
+        Row: {
+          created_at: string
+          id: string
+          last_sync: string | null
+          sheet_url: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          last_sync?: string | null
+          sheet_url: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          last_sync?: string | null
+          sheet_url?: string
           updated_at?: string
           user_id?: string
         }

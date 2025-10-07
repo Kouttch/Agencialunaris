@@ -31,7 +31,12 @@ export default function CustomerDashboard() {
     conversasIniciadas: 0,
     custoPorConversa: 0,
     alcanceTotal: 0,
-    orcamentoRestante: 0
+    impressoesTotais: 0,
+    frequenciaMedia: 0
+  });
+  const [managerData, setManagerData] = useState({
+    name: "",
+    photoUrl: ""
   });
   const [loading, setLoading] = useState(true);
 
@@ -53,7 +58,16 @@ export default function CustomerDashboard() {
     try {
       const { data: profile } = await supabase
         .from('profiles')
-        .select('full_name, company, avatar_url')
+        .select(`
+          full_name, 
+          company, 
+          avatar_url,
+          manager_id,
+          account_managers (
+            name,
+            photo_url
+          )
+        `)
         .eq('user_id', user?.id)
         .single();
 
@@ -63,6 +77,15 @@ export default function CustomerDashboard() {
           companyName: profile.company || "",
           avatarUrl: profile.avatar_url || ""
         });
+
+        // Load manager data
+        if (profile.account_managers) {
+          const manager = profile.account_managers as any;
+          setManagerData({
+            name: manager.name || "",
+            photoUrl: manager.photo_url || ""
+          });
+        }
       }
     } catch (error) {
       console.error('Erro ao carregar perfil:', error);
@@ -89,7 +112,8 @@ export default function CustomerDashboard() {
           conversasIniciadas: 0,
           custoPorConversa: 0,
           alcanceTotal: 0,
-          orcamentoRestante: 0
+          impressoesTotais: 0,
+          frequenciaMedia: 0
         });
         setLoading(false);
         return;
@@ -127,7 +151,11 @@ export default function CustomerDashboard() {
       const totalConversas = campaignData.reduce((sum, item) => sum + (item.conversations_started || 0), 0);
       const totalGasto = campaignData.reduce((sum, item) => sum + parseFloat(item.amount_spent?.toString() || '0'), 0);
       const totalAlcance = campaignData.reduce((sum, item) => sum + (item.reach || 0), 0);
+      const totalImpressoes = campaignData.reduce((sum, item) => sum + (item.impressions || 0), 0);
       const custoPorConversa = totalConversas > 0 ? totalGasto / totalConversas : 0;
+      const frequenciaMedia = campaignData.length > 0 
+        ? campaignData.reduce((sum, item) => sum + (parseFloat(item.frequency?.toString() || '0')), 0) / campaignData.length 
+        : 0;
 
       setWeeklyData(weeklyChartData);
       setMonthlyData(monthlyChartData);
@@ -135,7 +163,8 @@ export default function CustomerDashboard() {
         conversasIniciadas: totalConversas,
         custoPorConversa: custoPorConversa,
         alcanceTotal: totalAlcance,
-        orcamentoRestante: 0 // Este valor pode ser configurado depois
+        impressoesTotais: totalImpressoes,
+        frequenciaMedia: frequenciaMedia
       });
     } catch (error: any) {
       toast({
@@ -148,7 +177,6 @@ export default function CustomerDashboard() {
     }
   };
 
-  const managerName = "Carlos Silva";
   return <div className="container mx-auto p-6 pb-24">
       <div className="mb-10">
         <h1 className="text-3xl font-bold mb-2">Minha Conta</h1>
@@ -156,7 +184,7 @@ export default function CustomerDashboard() {
       </div>
 
       {/* Key Metrics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -199,11 +227,26 @@ export default function CustomerDashboard() {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Orçamento Restante
+              Impressões Totais
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">R$ {metrics.orcamentoRestante.toFixed(2)}</div>
+            <div className="text-2xl font-bold">
+              {metrics.impressoesTotais >= 1000 
+                ? `${(metrics.impressoesTotais / 1000).toFixed(1)}K` 
+                : metrics.impressoesTotais}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Frequência Média
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{metrics.frequenciaMedia.toFixed(2)}</div>
           </CardContent>
         </Card>
       </div>
@@ -216,20 +259,24 @@ export default function CustomerDashboard() {
             <TabsTrigger value="monthly">Mensal</TabsTrigger>
           </TabsList>
           
-          <TooltipProvider>
-            <TooltipUI>
-              <TooltipTrigger asChild>
-                <Button variant="outline" size="sm" className="gap-2">
-                  <Info className="h-4 w-4" />
-                  Gestor Responsável
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p className="font-semibold">{managerName}</p>
-                <p className="text-xs text-muted-foreground">Seu gestor dedicado</p>
-              </TooltipContent>
-            </TooltipUI>
-          </TooltipProvider>
+          {managerData.name && (
+            <div className="flex items-center gap-3 px-4 py-2 border rounded-lg bg-card">
+              <div className="flex items-center gap-2">
+                <Info className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm font-medium">Gestor Responsável:</span>
+              </div>
+              <div className="flex items-center gap-2">
+                {managerData.photoUrl && (
+                  <img 
+                    src={managerData.photoUrl} 
+                    alt={managerData.name}
+                    className="h-8 w-8 rounded-full object-cover"
+                  />
+                )}
+                <span className="text-sm font-semibold">{managerData.name}</span>
+              </div>
+            </div>
+          )}
         </div>
 
         <TabsContent value="weekly" className="space-y-6">
