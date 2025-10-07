@@ -434,6 +434,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      sync_all_google_sheets: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
