@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,33 +9,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Send, Copy, Check, MessageSquare, CreditCard } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
-const mockPaymentRequests = [
-  {
-    id: 1,
-    client: "João Silva",
-    company: "Empresa XYZ",
-    amount: 500,
-    status: "Pendente",
-    created_at: "2024-01-07",
-    pix_code: "PIX123456789",
-  },
-  {
-    id: 2,
-    client: "Maria Santos", 
-    company: "StartUp ABC",
-    amount: 300,
-    status: "Pago",
-    created_at: "2024-01-05",
-    pix_code: "PIX987654321",
-  },
-];
-
-const mockClients = [
-  { id: 1, name: "João Silva", company: "Empresa XYZ" },
-  { id: 2, name: "Maria Santos", company: "StartUp ABC" },
-  { id: 3, name: "Carlos Oliveira", company: "Comércio 123" },
-];
+interface UserProfile {
+  user_id: string;
+  full_name: string;
+  company: string;
+}
 
 export default function PaymentsManagement() {
   const [selectedClient, setSelectedClient] = useState("");
@@ -43,7 +23,21 @@ export default function PaymentsManagement() {
   const [pixCode, setPixCode] = useState("");
   const [message, setMessage] = useState("");
   const [copiedCode, setCopiedCode] = useState("");
+  const [users, setUsers] = useState<UserProfile[]>([]);
   const { toast } = useToast();
+
+  useEffect(() => {
+    loadUsers();
+  }, []);
+
+  const loadUsers = async () => {
+    const { data } = await supabase
+      .from('profiles')
+      .select('user_id, full_name, company')
+      .order('full_name');
+    
+    if (data) setUsers(data);
+  };
 
   const handleSendPixCode = () => {
     if (!selectedClient || !amount || !pixCode) {
@@ -136,9 +130,9 @@ export default function PaymentsManagement() {
                   <SelectValue placeholder="Selecione um cliente..." />
                 </SelectTrigger>
                 <SelectContent>
-                  {mockClients.map((client) => (
-                    <SelectItem key={client.id} value={client.id.toString()}>
-                      {client.name} - {client.company}
+                  {users.map((user) => (
+                    <SelectItem key={user.user_id} value={user.user_id}>
+                      {user.full_name} {user.company ? `- ${user.company}` : ''}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -192,9 +186,9 @@ export default function PaymentsManagement() {
                   <SelectValue placeholder="Selecione um cliente..." />
                 </SelectTrigger>
                 <SelectContent>
-                  {mockClients.map((client) => (
-                    <SelectItem key={client.id} value={client.id.toString()}>
-                      {client.name} - {client.company}
+                  {users.map((user) => (
+                    <SelectItem key={user.user_id} value={user.user_id}>
+                      {user.full_name} {user.company ? `- ${user.company}` : ''}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -225,52 +219,13 @@ export default function PaymentsManagement() {
         <CardHeader>
           <CardTitle>Histórico de Solicitações</CardTitle>
           <CardDescription>
-            Códigos PIX enviados e status dos pagamentos
+            Em breve você verá aqui o histórico de códigos PIX enviados
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Cliente</TableHead>
-                <TableHead>Empresa</TableHead>
-                <TableHead>Valor</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Data</TableHead>
-                <TableHead>Código PIX</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {mockPaymentRequests.map((request) => (
-                <TableRow key={request.id}>
-                  <TableCell className="font-medium">{request.client}</TableCell>
-                  <TableCell>{request.company}</TableCell>
-                  <TableCell>R$ {request.amount.toFixed(2)}</TableCell>
-                  <TableCell>{getStatusBadge(request.status)}</TableCell>
-                  <TableCell>{new Date(request.created_at).toLocaleDateString()}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <span className="font-mono text-sm bg-muted px-2 py-1 rounded">
-                        {request.pix_code}
-                      </span>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => copyPixCode(request.pix_code)}
-                        className="h-8 w-8 p-0"
-                      >
-                        {copiedCode === request.pix_code ? (
-                          <Check className="h-4 w-4 text-green-600" />
-                        ) : (
-                          <Copy className="h-4 w-4" />
-                        )}
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          <p className="text-center text-muted-foreground py-8">
+            Nenhum pagamento registrado ainda
+          </p>
         </CardContent>
       </Card>
     </div>

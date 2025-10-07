@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,7 +29,10 @@ export default function DataManagement() {
   const [sheetUrl, setSheetUrl] = useState("");
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [managers, setManagers] = useState<Manager[]>([]);
-  const [newManager, setNewManager] = useState({ name: "", photo_url: "" });
+  const [newManager, setNewManager] = useState({ name: "" });
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [selectedPhoto, setSelectedPhoto] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     loadUsers();
@@ -39,7 +42,8 @@ export default function DataManagement() {
   const loadUsers = async () => {
     const { data } = await supabase
       .from('profiles')
-      .select('user_id, full_name, company');
+      .select('user_id, full_name, company')
+      .order('full_name');
     
     if (data) setUsers(data);
   };
@@ -98,19 +102,74 @@ export default function DataManagement() {
     }
   };
 
+  const handlePhotoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        toast({
+          title: "Arquivo muito grande",
+          description: "A foto deve ter no máximo 5MB",
+          variant: "destructive"
+        });
+        return;
+      }
+      setSelectedPhoto(file);
+    }
+  };
+
+  const uploadPhoto = async (): Promise<string | null> => {
+    if (!selectedPhoto) return null;
+
+    try {
+      setUploadingPhoto(true);
+      const fileExt = selectedPhoto.name.split('.').pop();
+      const fileName = `${Math.random().toString(36).substring(2)}.${fileExt}`;
+      const filePath = `${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('manager-photos')
+        .upload(filePath, selectedPhoto);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('manager-photos')
+        .getPublicUrl(filePath);
+
+      return publicUrl;
+    } catch (error: any) {
+      toast({
+        title: "Erro no upload",
+        description: error.message,
+        variant: "destructive"
+      });
+      return null;
+    } finally {
+      setUploadingPhoto(false);
+    }
+  };
+
   const handleCreateManager = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newManager.name) return;
 
     try {
+      let photoUrl = null;
+      if (selectedPhoto) {
+        photoUrl = await uploadPhoto();
+        if (!photoUrl) return;
+      }
+
       const { error } = await supabase
         .from('account_managers')
-        .insert([{ name: newManager.name, photo_url: newManager.photo_url }]);
+        .insert([{ name: newManager.name, photo_url: photoUrl }]);
 
       if (error) throw error;
 
       toast({ title: "Gestor criado com sucesso" });
-      setNewManager({ name: "", photo_url: "" });
+      setNewManager({ name: "" });
+      setSelectedPhoto(null);
+      if (fileInputRef.current) fileInputRef.current.value = '';
       loadManagers();
     } catch (error: any) {
       toast({
@@ -237,17 +296,33 @@ export default function DataManagement() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="managerPhoto">URL da Foto</Label>
-                <Input
-                  id="managerPhoto"
-                  placeholder="https://..."
-                  value={newManager.photo_url}
-                  onChange={(e) => setNewManager({ ...newManager, photo_url: e.target.value })}
-                />
+                <Label htmlFor="managerPhoto">Foto do Gestor</Label>
+                <div className="flex gap-2">
+                  <Input
+                    ref={fileInputRef}
+                    id="managerPhoto"
+                    type="file"
+                    accept="image/*"
+                    onChange={handlePhotoSelect}
+                  />
+                  {selectedPhoto && (
+                    <Avatar className="h-10 w-10">
+                      <AvatarImage src={URL.createObjectURL(selectedPhoto)} />
+                      <AvatarFallback><User className="h-5 w-5" /></AvatarFallback>
+                    </Avatar>
+                  )}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Máximo 5MB - JPG, PNG, WEBP
+                </p>
               </div>
               <div className="flex items-end">
-                <Button type="submit" className="w-full">
-                  <Plus className="mr-2 h-4 w-4" />
+                <Button type="submit" className="w-full" disabled={uploadingPhoto}>
+                  {uploadingPhoto ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <Plus className="mr-2 h-4 w-4" />
+                  )}
                   Adicionar Gestor
                 </Button>
               </div>

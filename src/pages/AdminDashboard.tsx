@@ -140,8 +140,8 @@ export default function AdminDashboard() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">120</div>
-            <p className="text-xs text-green-600 mt-1">+8% vs mês anterior</p>
+            <div className="text-2xl font-bold">{users.length}</div>
+            <p className="text-xs text-green-600 mt-1">Clientes cadastrados</p>
           </CardContent>
         </Card>
       </div>
