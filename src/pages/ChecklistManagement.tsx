@@ -376,12 +376,12 @@ export default function ChecklistManagement() {
 
                   <div className="space-y-2">
                     <Label htmlFor="assigned">Atribuir para</Label>
-                    <Select value={newItem.assigned_to} onValueChange={(value) => setNewItem({ ...newItem, assigned_to: value })}>
+                    <Select value={newItem.assigned_to || "unassigned"} onValueChange={(value) => setNewItem({ ...newItem, assigned_to: value === "unassigned" ? "" : value })}>
                       <SelectTrigger>
                         <SelectValue placeholder="Selecione um usuário" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">Nenhum</SelectItem>
+                        <SelectItem value="unassigned">Nenhum</SelectItem>
                         {users.map((u) => (
                           <SelectItem key={u.user_id} value={u.user_id}>
                             {u.full_name || 'Sem nome'}
