@@ -1,16 +1,15 @@
 import { BarChart3, Users, Settings, CreditCard, User, Home, MessageSquare, Shield, TrendingUp, FileText } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { useUserRole } from "@/hooks/useUserRole";
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/components/ui/sidebar";
 
 export function AppSidebar() {
   const { open, setOpen } = useSidebar();
   const location = useLocation();
   const { user } = useAuth();
+  const { isAdmin } = useUserRole();
   const currentPath = location.pathname;
-
-  // TODO: Check user role from database
-  const isAdmin = false; // This should be fetched from user_roles table
 
   const customerItems = [{
     title: "Dashboard",
@@ -46,13 +45,13 @@ export function AppSidebar() {
     url: "/fulladmin/data",
     icon: FileText
   }, {
-    title: "Pagamentos",
-    url: "/fulladmin/payments",
-    icon: MessageSquare
-  }, {
     title: "Usuários",
     url: "/fulladmin/users",
     icon: Shield
+  }, {
+    title: "Pagamentos",
+    url: "/fulladmin/payments",
+    icon: MessageSquare
   }];
   const items = isAdmin ? adminItems : customerItems;
   const isActive = (path: string) => currentPath === path;

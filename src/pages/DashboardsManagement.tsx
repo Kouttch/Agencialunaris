@@ -1,141 +1,154 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Edit, Save, X } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useUserRole } from "@/hooks/useUserRole";
+import { useToast } from "@/hooks/use-toast";
+import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from "date-fns";
 
-const mockClientData = [
-  {
-    id: 1,
-    name: "João Silva",
-    company: "Empresa XYZ",
-    weeklyData: {
-      conversas: 45,
-      custo: 195.80,
-      alcance: 4500,
-      impressoes: 8900,
-      frequencia: 2.1,
-      orcamento: 500,
-      investido: 450
-    },
-    monthlyData: {
-      conversas: 180,
-      custo: 720.50,
-      alcance: 18000,
-      impressoes: 35600,
-      frequencia: 2.3,
-      orcamento: 2000,
-      investido: 1850
-    }
-  },
-  {
-    id: 2,
-    name: "Maria Santos",
-    company: "StartUp ABC",
-    weeklyData: {
-      conversas: 32,
-      custo: 145.20,
-      alcance: 3200,
-      impressoes: 6400,
-      frequencia: 1.9,
-      orcamento: 400,
-      investido: 380
-    },
-    monthlyData: {
-      conversas: 128,
-      custo: 580.80,
-      alcance: 12800,
-      impressoes: 25600,
-      frequencia: 2.0,
-      orcamento: 1600,
-      investido: 1520
-    }
-  }
-];
+interface UserProfile {
+  user_id: string;
+  full_name: string;
+  company: string;
+}
+
+interface CampaignData {
+  conversations_started: number;
+  cost_per_conversation: number;
+  reach: number;
+  impressions: number;
+  frequency: number;
+  amount_spent: number;
+}
 
 export default function DashboardsManagement() {
-  const [selectedClient, setSelectedClient] = useState<string>("");
-  const [editingField, setEditingField] = useState<string>("");
-  const [editValues, setEditValues] = useState<any>({});
+  const { isAdmin } = useUserRole();
+  const { toast } = useToast();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [users, setUsers] = useState<UserProfile[]>([]);
+  const [selectedUserId, setSelectedUserId] = useState<string>(searchParams.get('user') || "");
+  const [weeklyData, setWeeklyData] = useState<CampaignData | null>(null);
+  const [monthlyData, setMonthlyData] = useState<CampaignData | null>(null);
+  const [dailyData, setDailyData] = useState<CampaignData | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  const handleEdit = (field: string, currentValue: any) => {
-    setEditingField(field);
-    setEditValues({ [field]: currentValue });
+  useEffect(() => {
+    loadUsers();
+  }, []);
+
+  useEffect(() => {
+    if (selectedUserId) {
+      setSearchParams({ user: selectedUserId });
+      loadUserData(selectedUserId);
+    }
+  }, [selectedUserId]);
+
+  const loadUsers = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('user_id, full_name, company')
+        .order('full_name');
+
+      if (error) throw error;
+      setUsers(data || []);
+    } catch (error) {
+      console.error('Error loading users:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível carregar os usuários",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleSave = (clientId: number, field: string) => {
-    // TODO: Save to database
-    console.log(`Saving ${field} for client ${clientId}:`, editValues[field]);
-    setEditingField("");
-    setEditValues({});
+  const loadUserData = async (userId: string) => {
+    setLoading(true);
+    try {
+      const now = new Date();
+      
+      // Weekly data
+      const weekStart = startOfWeek(now, { weekStartsOn: 1 });
+      const weekEnd = endOfWeek(now, { weekStartsOn: 1 });
+      
+      const { data: weekData } = await supabase
+        .from('campaign_data')
+        .select('*')
+        .eq('user_id', userId)
+        .gte('week_start', format(weekStart, 'yyyy-MM-dd'))
+        .lte('week_end', format(weekEnd, 'yyyy-MM-dd'));
+
+      // Monthly data
+      const monthStart = startOfMonth(now);
+      const monthEnd = endOfMonth(now);
+      
+      const { data: monthData } = await supabase
+        .from('campaign_data')
+        .select('*')
+        .eq('user_id', userId)
+        .gte('week_start', format(monthStart, 'yyyy-MM-dd'))
+        .lte('week_end', format(monthEnd, 'yyyy-MM-dd'));
+
+      // Daily data (only for admins)
+      if (isAdmin) {
+        const today = format(now, 'yyyy-MM-dd');
+        const { data: dayData } = await supabase
+          .from('campaign_data')
+          .select('*')
+          .eq('user_id', userId)
+          .eq('week_start', today);
+
+        if (dayData && dayData.length > 0) {
+          setDailyData(aggregateData(dayData));
+        } else {
+          setDailyData(null);
+        }
+      }
+
+      if (weekData) setWeeklyData(aggregateData(weekData));
+      if (monthData) setMonthlyData(aggregateData(monthData));
+      
+    } catch (error) {
+      console.error('Error loading user data:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível carregar os dados do usuário",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleCancel = () => {
-    setEditingField("");
-    setEditValues({});
+  const aggregateData = (data: any[]): CampaignData => {
+    return data.reduce((acc, curr) => ({
+      conversations_started: acc.conversations_started + (curr.conversations_started || 0),
+      cost_per_conversation: acc.cost_per_conversation + (curr.cost_per_conversation || 0),
+      reach: acc.reach + (curr.reach || 0),
+      impressions: acc.impressions + (curr.impressions || 0),
+      frequency: acc.frequency + (curr.frequency || 0),
+      amount_spent: acc.amount_spent + (curr.amount_spent || 0),
+    }), {
+      conversations_started: 0,
+      cost_per_conversation: 0,
+      reach: 0,
+      impressions: 0,
+      frequency: 0,
+      amount_spent: 0,
+    });
   };
 
-  const selectedClientData = mockClientData.find(client => client.id.toString() === selectedClient);
-
-  const renderEditableField = (
-    clientId: number,
-    field: string,
-    value: any,
-    label: string,
-    type: string = "text"
-  ) => {
-    const isEditing = editingField === `${clientId}-${field}`;
-    
-    return (
-      <div className="flex items-center gap-2">
-        <Label className="min-w-[120px] text-sm">{label}:</Label>
-        {isEditing ? (
-          <div className="flex items-center gap-2 flex-1">
-            <Input
-              type={type}
-              value={editValues[`${clientId}-${field}`] || value}
-              onChange={(e) => setEditValues({
-                ...editValues,
-                [`${clientId}-${field}`]: e.target.value
-              })}
-              className="flex-1"
-            />
-            <Button 
-              size="sm" 
-              onClick={() => handleSave(clientId, field)}
-              className="h-8 w-8 p-0"
-            >
-              <Save className="h-4 w-4" />
-            </Button>
-            <Button 
-              size="sm" 
-              variant="outline" 
-              onClick={handleCancel}
-              className="h-8 w-8 p-0"
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
-        ) : (
-          <div className="flex items-center gap-2 flex-1">
-            <span className="flex-1">{value}</span>
-            <Button 
-              size="sm" 
-              variant="ghost" 
-              onClick={() => handleEdit(`${clientId}-${field}`, value)}
-              className="h-8 w-8 p-0"
-            >
-              <Edit className="h-4 w-4" />
-            </Button>
-          </div>
-        )}
-      </div>
-    );
-  };
+  const renderDataRow = (label: string, value: string | number) => (
+    <TableRow>
+      <TableCell className="font-medium">{label}</TableCell>
+      <TableCell className="text-right">{value}</TableCell>
+    </TableRow>
+  );
 
   return (
     <div className="container mx-auto p-6">
@@ -151,18 +164,18 @@ export default function DashboardsManagement() {
         <CardHeader>
           <CardTitle>Selecionar Cliente</CardTitle>
           <CardDescription>
-            Escolha um cliente para editar os dados do dashboard
+            Escolha um cliente para visualizar os dados do dashboard
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Select value={selectedClient} onValueChange={setSelectedClient}>
+          <Select value={selectedUserId} onValueChange={setSelectedUserId}>
             <SelectTrigger className="max-w-sm">
               <SelectValue placeholder="Selecione um cliente..." />
             </SelectTrigger>
             <SelectContent>
-              {mockClientData.map((client) => (
-                <SelectItem key={client.id} value={client.id.toString()}>
-                  {client.name} - {client.company}
+              {users.map((user) => (
+                <SelectItem key={user.user_id} value={user.user_id}>
+                  {user.full_name} {user.company ? `- ${user.company}` : ''}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -171,145 +184,99 @@ export default function DashboardsManagement() {
       </Card>
 
       {/* Client Dashboard Data */}
-      {selectedClientData && (
+      {selectedUserId && (
         <Card>
           <CardHeader>
             <CardTitle>
-              Dashboard: {selectedClientData.name} - {selectedClientData.company}
+              Dashboard do Cliente
             </CardTitle>
             <CardDescription>
-              Edite os dados que serão exibidos no dashboard do cliente
+              Visualize os dados do dashboard do cliente
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Tabs defaultValue="weekly" className="space-y-4">
-              <TabsList>
-                <TabsTrigger value="weekly">Dados Semanais</TabsTrigger>
-                <TabsTrigger value="monthly">Dados Mensais</TabsTrigger>
-              </TabsList>
+            {loading ? (
+              <div className="text-center py-8">Carregando dados...</div>
+            ) : (
+              <Tabs defaultValue="weekly" className="space-y-4">
+                <TabsList>
+                  <TabsTrigger value="weekly">Dados Semanais</TabsTrigger>
+                  <TabsTrigger value="monthly">Dados Mensais</TabsTrigger>
+                  {isAdmin && <TabsTrigger value="daily">Dados Diários</TabsTrigger>}
+                </TabsList>
 
-              <TabsContent value="weekly" className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-4">
-                    <h3 className="font-semibold text-lg">Métricas de Performance</h3>
-                    {renderEditableField(
-                      selectedClientData.id,
-                      "weekly-conversas",
-                      selectedClientData.weeklyData.conversas,
-                      "Conversas Iniciadas",
-                      "number"
-                    )}
-                    {renderEditableField(
-                      selectedClientData.id,
-                      "weekly-custo",
-                      `R$ ${selectedClientData.weeklyData.custo}`,
-                      "Custo Total"
-                    )}
-                    {renderEditableField(
-                      selectedClientData.id,
-                      "weekly-alcance",
-                      selectedClientData.weeklyData.alcance.toLocaleString(),
-                      "Alcance",
-                      "number"
-                    )}
-                    {renderEditableField(
-                      selectedClientData.id,
-                      "weekly-impressoes",
-                      selectedClientData.weeklyData.impressoes.toLocaleString(),
-                      "Impressões",
-                      "number"
-                    )}
-                  </div>
-                  
-                  <div className="space-y-4">
-                    <h3 className="font-semibold text-lg">Dados Financeiros</h3>
-                    {renderEditableField(
-                      selectedClientData.id,
-                      "weekly-frequencia",
-                      selectedClientData.weeklyData.frequencia,
-                      "Frequência",
-                      "number"
-                    )}
-                    {renderEditableField(
-                      selectedClientData.id,
-                      "weekly-orcamento",
-                      `R$ ${selectedClientData.weeklyData.orcamento}`,
-                      "Orçamento Diário"
-                    )}
-                    {renderEditableField(
-                      selectedClientData.id,
-                      "weekly-investido",
-                      `R$ ${selectedClientData.weeklyData.investido}`,
-                      "Valor Investido"
-                    )}
-                  </div>
-                </div>
-              </TabsContent>
+                <TabsContent value="weekly">
+                  {weeklyData ? (
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Métrica</TableHead>
+                          <TableHead className="text-right">Valor</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {renderDataRow("Conversas Iniciadas", weeklyData.conversations_started)}
+                        {renderDataRow("Custo por Conversa", `R$ ${weeklyData.cost_per_conversation.toFixed(2)}`)}
+                        {renderDataRow("Alcance", weeklyData.reach.toLocaleString())}
+                        {renderDataRow("Impressões", weeklyData.impressions.toLocaleString())}
+                        {renderDataRow("Frequência", weeklyData.frequency.toFixed(2))}
+                        {renderDataRow("Valor Investido", `R$ ${weeklyData.amount_spent.toFixed(2)}`)}
+                      </TableBody>
+                    </Table>
+                  ) : (
+                    <p className="text-center text-muted-foreground py-8">Nenhum dado semanal disponível</p>
+                  )}
+                </TabsContent>
 
-              <TabsContent value="monthly" className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-4">
-                    <h3 className="font-semibold text-lg">Métricas de Performance</h3>
-                    {renderEditableField(
-                      selectedClientData.id,
-                      "monthly-conversas",
-                      selectedClientData.monthlyData.conversas,
-                      "Conversas Iniciadas",
-                      "number"
-                    )}
-                    {renderEditableField(
-                      selectedClientData.id,
-                      "monthly-custo",
-                      `R$ ${selectedClientData.monthlyData.custo}`,
-                      "Custo Total"
-                    )}
-                    {renderEditableField(
-                      selectedClientData.id,
-                      "monthly-alcance",
-                      selectedClientData.monthlyData.alcance.toLocaleString(),
-                      "Alcance",
-                      "number"
-                    )}
-                    {renderEditableField(
-                      selectedClientData.id,
-                      "monthly-impressoes",
-                      selectedClientData.monthlyData.impressoes.toLocaleString(),
-                      "Impressões",
-                      "number"
-                    )}
-                  </div>
-                  
-                  <div className="space-y-4">
-                    <h3 className="font-semibold text-lg">Dados Financeiros</h3>
-                    {renderEditableField(
-                      selectedClientData.id,
-                      "monthly-frequencia",
-                      selectedClientData.monthlyData.frequencia,
-                      "Frequência",
-                      "number"
-                    )}
-                    {renderEditableField(
-                      selectedClientData.id,
-                      "monthly-orcamento",
-                      `R$ ${selectedClientData.monthlyData.orcamento}`,
-                      "Orçamento Mensal"
-                    )}
-                    {renderEditableField(
-                      selectedClientData.id,
-                      "monthly-investido",
-                      `R$ ${selectedClientData.monthlyData.investido}`,
-                      "Valor Investido"
-                    )}
-                  </div>
-                </div>
-              </TabsContent>
-            </Tabs>
+                <TabsContent value="monthly">
+                  {monthlyData ? (
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Métrica</TableHead>
+                          <TableHead className="text-right">Valor</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {renderDataRow("Conversas Iniciadas", monthlyData.conversations_started)}
+                        {renderDataRow("Custo por Conversa", `R$ ${monthlyData.cost_per_conversation.toFixed(2)}`)}
+                        {renderDataRow("Alcance", monthlyData.reach.toLocaleString())}
+                        {renderDataRow("Impressões", monthlyData.impressions.toLocaleString())}
+                        {renderDataRow("Frequência", monthlyData.frequency.toFixed(2))}
+                        {renderDataRow("Valor Investido", `R$ ${monthlyData.amount_spent.toFixed(2)}`)}
+                      </TableBody>
+                    </Table>
+                  ) : (
+                    <p className="text-center text-muted-foreground py-8">Nenhum dado mensal disponível</p>
+                  )}
+                </TabsContent>
 
-            <div className="mt-6 pt-6 border-t">
-              <Button className="w-full">
-                Salvar Todas as Alterações
-              </Button>
-            </div>
+                {isAdmin && (
+                  <TabsContent value="daily">
+                    {dailyData ? (
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Métrica</TableHead>
+                            <TableHead className="text-right">Valor</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {renderDataRow("Conversas Iniciadas", dailyData.conversations_started)}
+                          {renderDataRow("Custo por Conversa", `R$ ${dailyData.cost_per_conversation.toFixed(2)}`)}
+                          {renderDataRow("Alcance", dailyData.reach.toLocaleString())}
+                          {renderDataRow("Impressões", dailyData.impressions.toLocaleString())}
+                          {renderDataRow("Frequência", dailyData.frequency.toFixed(2))}
+                          {renderDataRow("Valor Investido", `R$ ${dailyData.amount_spent.toFixed(2)}`)}
+                        </TableBody>
+                      </Table>
+                    ) : (
+                      <p className="text-center text-muted-foreground py-8">Nenhum dado diário disponível para hoje</p>
+                    )}
+                  </TabsContent>
+                )}
+              </Tabs>
+            )}
           </CardContent>
         </Card>
       )}

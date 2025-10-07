@@ -1,6 +1,17 @@
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
+import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
+
+interface UserProfile {
+  user_id: string;
+  full_name: string;
+  company: string;
+}
 
 const overviewData = [
   { name: 'Jan', conversas: 245, custo: 1250, alcance: 25000, impressoes: 45000 },
@@ -18,12 +29,71 @@ const clientStatusData = [
 ];
 
 export default function AdminDashboard() {
+  const navigate = useNavigate();
+  const [users, setUsers] = useState<UserProfile[]>([]);
+  const [selectedUserId, setSelectedUserId] = useState<string>("");
+
+  useEffect(() => {
+    loadUsers();
+  }, []);
+
+  const loadUsers = async () => {
+    try {
+      const { data } = await supabase
+        .from('profiles')
+        .select('user_id, full_name, company')
+        .order('full_name');
+
+      setUsers(data || []);
+    } catch (error) {
+      console.error('Error loading users:', error);
+    }
+  };
+
+  const handleViewUserDashboard = () => {
+    if (selectedUserId) {
+      navigate(`/fulladmin/dashboards?user=${selectedUserId}`);
+    }
+  };
+
   return (
     <div className="container mx-auto p-6">
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">Painel Administrativo</h1>
         <p className="text-muted-foreground">Visão geral de todos os clientes e campanhas</p>
       </div>
+
+      {/* User Dashboard Access */}
+      <Card className="mb-8">
+        <CardHeader>
+          <CardTitle>Acessar Dashboard de Cliente</CardTitle>
+          <CardDescription>
+            Selecione um cliente para visualizar seus dados em tempo real
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex gap-4">
+            <Select value={selectedUserId} onValueChange={setSelectedUserId}>
+              <SelectTrigger className="flex-1 max-w-sm">
+                <SelectValue placeholder="Selecione um cliente..." />
+              </SelectTrigger>
+              <SelectContent>
+                {users.map((user) => (
+                  <SelectItem key={user.user_id} value={user.user_id}>
+                    {user.full_name} {user.company ? `- ${user.company}` : ''}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button 
+              onClick={handleViewUserDashboard} 
+              disabled={!selectedUserId}
+            >
+              Visualizar Dashboard
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Key Metrics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">

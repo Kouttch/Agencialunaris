@@ -8,10 +8,12 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 import { Mail, Lock, Eye, EyeOff, ArrowRight } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { useUserRole } from "@/hooks/useUserRole";
 
 const Auth = () => {
   const navigate = useNavigate();
   const { signIn, user, loading } = useAuth();
+  const { isAdmin, loading: roleLoading } = useUserRole();
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -19,12 +21,16 @@ const Auth = () => {
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
-  // Redirect authenticated users to customer dashboard
+  // Redirect authenticated users based on their role
   useEffect(() => {
-    if (!loading && user) {
-      navigate("/minha-conta");
+    if (!loading && !roleLoading && user) {
+      if (isAdmin) {
+        navigate("/fulladmin");
+      } else {
+        navigate("/minha-conta");
+      }
     }
-  }, [user, loading, navigate]);
+  }, [user, loading, isAdmin, roleLoading, navigate]);
 
   // Animated particles effect
   useEffect(() => {
@@ -88,12 +94,10 @@ const Auth = () => {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     const { error } = await signIn(email, password);
-    if (!error) {
-      navigate("/minha-conta");
-    }
+    // Navigation will be handled by useEffect based on user role
   };
 
-  if (loading) {
+  if (loading || roleLoading) {
     return (
       <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
         <div className="animate-pulse text-zinc-50">Carregando...</div>
