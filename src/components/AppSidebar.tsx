@@ -38,10 +38,6 @@ export function AppSidebar() {
     url: "/fulladmin/clients",
     icon: Users
   }, {
-    title: "Dashboards",
-    url: "/fulladmin/dashboards",
-    icon: TrendingUp
-  }, {
     title: "Checklist",
     url: "/fulladmin/checklist",
     icon: CheckCircle2
@@ -67,10 +63,6 @@ export function AppSidebar() {
     title: "Clientes",
     url: "/fulladmin/clients",
     icon: Users
-  }, {
-    title: "Dashboards",
-    url: "/fulladmin/dashboards",
-    icon: TrendingUp
   }, {
     title: "Dados",
     url: "/fulladmin/data",

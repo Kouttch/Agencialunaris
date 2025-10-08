@@ -107,17 +107,7 @@ const App = () => (
                 } 
               />
               <Route 
-                path="/fulladmin/dashboards" 
-                element={
-                  <ProtectedRoute>
-                    <DashboardLayout>
-                      <DashboardsManagement />
-                    </DashboardLayout>
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/fulladmin/payments" 
+                path="/fulladmin/payments"
                 element={
                   <ProtectedRoute>
                     <DashboardLayout>
@@ -169,17 +159,7 @@ const App = () => (
               
               {/* Moderator Dashboard Routes */}
               <Route 
-                path="/moderator/dashboards" 
-                element={
-                  <ProtectedRoute>
-                    <DashboardLayout>
-                      <DashboardsManagement />
-                    </DashboardLayout>
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/moderator/checklist" 
+                path="/moderator/checklist"
                 element={
                   <ProtectedRoute>
                     <DashboardLayout>

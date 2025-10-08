@@ -208,7 +208,12 @@ export type Database = {
           due_time: string | null
           id: string
           is_completed: boolean | null
+          is_recurring: boolean | null
+          last_occurrence_date: string | null
           priority: string | null
+          recurrence_days: Json | null
+          recurrence_interval: number | null
+          recurrence_type: string | null
           title: string
           updated_at: string | null
         }
@@ -223,7 +228,12 @@ export type Database = {
           due_time?: string | null
           id?: string
           is_completed?: boolean | null
+          is_recurring?: boolean | null
+          last_occurrence_date?: string | null
           priority?: string | null
+          recurrence_days?: Json | null
+          recurrence_interval?: number | null
+          recurrence_type?: string | null
           title: string
           updated_at?: string | null
         }
@@ -238,7 +248,12 @@ export type Database = {
           due_time?: string | null
           id?: string
           is_completed?: boolean | null
+          is_recurring?: boolean | null
+          last_occurrence_date?: string | null
           priority?: string | null
+          recurrence_days?: Json | null
+          recurrence_interval?: number | null
+          recurrence_type?: string | null
           title?: string
           updated_at?: string | null
         }

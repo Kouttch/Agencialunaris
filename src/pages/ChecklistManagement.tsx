@@ -12,7 +12,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
-import { Plus, Trash2, CalendarIcon, Clock, CheckCircle2, Circle, Loader2 } from "lucide-react";
+import { Plus, Trash2, CalendarIcon, Clock, CheckCircle2, Circle, Loader2, Repeat } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -29,6 +29,11 @@ interface ChecklistItem {
   created_at: string;
   created_by: string;
   assigned_to: string | null;
+  is_recurring: boolean;
+  recurrence_type: string | null;
+  recurrence_days: number[] | null;
+  recurrence_interval: number;
+  last_occurrence_date: string | null;
   creator_name?: string;
   assigned_name?: string;
 }
@@ -54,7 +59,11 @@ export default function ChecklistManagement() {
     priority: "medium",
     category: "",
     due_time: "",
-    assigned_to: ""
+    assigned_to: "",
+    is_recurring: false,
+    recurrence_type: "daily",
+    recurrence_interval: 1,
+    recurrence_days: [] as number[]
   });
 
   useEffect(() => {
@@ -127,9 +136,10 @@ export default function ChecklistManagement() {
 
           return {
             ...item,
+            recurrence_days: (Array.isArray(item.recurrence_days) ? item.recurrence_days : []) as number[],
             creator_name: creatorProfile?.full_name || 'Usuário',
             assigned_name: assignedName
-          };
+          } as ChecklistItem;
         })
       );
 
@@ -170,7 +180,11 @@ export default function ChecklistManagement() {
           due_date: selectedDate ? format(selectedDate, 'yyyy-MM-dd') : null,
           due_time: newItem.due_time || null,
           created_by: user?.id,
-          assigned_to: newItem.assigned_to || null
+          assigned_to: newItem.assigned_to || null,
+          is_recurring: newItem.is_recurring,
+          recurrence_type: newItem.is_recurring ? newItem.recurrence_type : null,
+          recurrence_interval: newItem.is_recurring ? newItem.recurrence_interval : 1,
+          recurrence_days: newItem.is_recurring ? newItem.recurrence_days : []
         });
 
       if (error) throw error;
@@ -186,7 +200,11 @@ export default function ChecklistManagement() {
         priority: "medium",
         category: "",
         due_time: "",
-        assigned_to: ""
+        assigned_to: "",
+        is_recurring: false,
+        recurrence_type: "daily",
+        recurrence_interval: 1,
+        recurrence_days: []
       });
       setSelectedDate(undefined);
       setShowNewItemForm(false);
@@ -431,6 +449,107 @@ export default function ChecklistManagement() {
                   </div>
                 </div>
 
+                {/* Recurring Task Options */}
+                <div className="space-y-4 border-t pt-4">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="recurring"
+                      checked={newItem.is_recurring}
+                      onCheckedChange={(checked) => setNewItem({ ...newItem, is_recurring: checked as boolean })}
+                    />
+                    <Label htmlFor="recurring" className="flex items-center gap-2 cursor-pointer">
+                      <Repeat className="h-4 w-4" />
+                      Tarefa Recorrente
+                    </Label>
+                  </div>
+
+                  {newItem.is_recurring && (
+                    <div className="space-y-4 pl-6 border-l-2 border-primary/20">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label>Tipo de Recorrência</Label>
+                          <Select value={newItem.recurrence_type} onValueChange={(value) => setNewItem({ ...newItem, recurrence_type: value, recurrence_days: [] })}>
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="daily">Diariamente</SelectItem>
+                              <SelectItem value="weekly">Semanalmente</SelectItem>
+                              <SelectItem value="monthly">Mensalmente</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label>Repetir a cada</Label>
+                          <div className="flex items-center gap-2">
+                            <Input
+                              type="number"
+                              min="1"
+                              value={newItem.recurrence_interval}
+                              onChange={(e) => setNewItem({ ...newItem, recurrence_interval: parseInt(e.target.value) || 1 })}
+                              className="w-20"
+                            />
+                            <span className="text-sm text-muted-foreground">
+                              {newItem.recurrence_type === 'daily' && 'dia(s)'}
+                              {newItem.recurrence_type === 'weekly' && 'semana(s)'}
+                              {newItem.recurrence_type === 'monthly' && 'mês(es)'}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {newItem.recurrence_type === 'weekly' && (
+                        <div className="space-y-2">
+                          <Label>Dias da Semana</Label>
+                          <div className="flex flex-wrap gap-2">
+                            {['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].map((day, index) => (
+                              <Button
+                                key={index}
+                                type="button"
+                                variant={newItem.recurrence_days.includes(index) ? "default" : "outline"}
+                                size="sm"
+                                onClick={() => {
+                                  const days = newItem.recurrence_days.includes(index)
+                                    ? newItem.recurrence_days.filter(d => d !== index)
+                                    : [...newItem.recurrence_days, index].sort();
+                                  setNewItem({ ...newItem, recurrence_days: days });
+                                }}
+                              >
+                                {day}
+                              </Button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {newItem.recurrence_type === 'monthly' && (
+                        <div className="space-y-2">
+                          <Label>Dias do Mês (1-31)</Label>
+                          <div className="flex flex-wrap gap-2">
+                            {Array.from({ length: 31 }, (_, i) => i + 1).map((day) => (
+                              <Button
+                                key={day}
+                                type="button"
+                                variant={newItem.recurrence_days.includes(day) ? "default" : "outline"}
+                                size="sm"
+                                onClick={() => {
+                                  const days = newItem.recurrence_days.includes(day)
+                                    ? newItem.recurrence_days.filter(d => d !== day)
+                                    : [...newItem.recurrence_days, day].sort((a, b) => a - b);
+                                  setNewItem({ ...newItem, recurrence_days: days });
+                                }}
+                              >
+                                {day}
+                              </Button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+
                 <div className="flex gap-2">
                   <Button type="submit" disabled={creating}>
                     {creating ? (
@@ -512,6 +631,12 @@ export default function ChecklistManagement() {
                               Atribuído: {item.assigned_name}
                             </Badge>
                           )}
+                          {item.is_recurring && (
+                            <Badge variant="default" className="bg-purple-500">
+                              <Repeat className="h-3 w-3 mr-1" />
+                              Recorrente
+                            </Badge>
+                          )}
                         </div>
 
                         <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
@@ -591,6 +716,12 @@ export default function ChecklistManagement() {
                                   {item.assigned_name && (
                                     <Badge variant="secondary">
                                       Atribuído: {item.assigned_name}
+                                    </Badge>
+                                  )}
+                                  {item.is_recurring && (
+                                    <Badge variant="default" className="bg-purple-500">
+                                      <Repeat className="h-3 w-3 mr-1" />
+                                      Recorrente
                                     </Badge>
                                   )}
                                 </div>
