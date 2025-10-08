@@ -147,15 +147,9 @@ export default function UsersManagement() {
 
   return (
     <div className="container mx-auto p-6 pb-24">
-      <div className="mb-10 flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold mb-2">Gerenciamento de Usuários</h1>
-          <p className="text-muted-foreground">Crie e gerencie contas de usuários</p>
-        </div>
-        <Button onClick={() => navigate('/fulladmin/data')}>
-          <Plus className="h-4 w-4 mr-2" />
-          Novo Cliente
-        </Button>
+      <div className="mb-10">
+        <h1 className="text-3xl font-bold mb-2">Gerenciamento de Usuários</h1>
+        <p className="text-muted-foreground">Crie e gerencie contas de usuários</p>
       </div>
 
       {/* Create User Form */}
