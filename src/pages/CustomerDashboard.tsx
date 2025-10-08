@@ -180,7 +180,7 @@ export default function CustomerDashboard() {
     }
   };
 
-  const isDeactivated = profileData.accountStatus !== 'active';
+  const isDeactivated = profileData.accountStatus !== 'active' && profileData.accountStatus !== 'pending';
 
   return <div className="container mx-auto p-6 pb-24">
       <div className="mb-10">

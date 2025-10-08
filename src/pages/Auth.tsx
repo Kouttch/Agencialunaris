@@ -13,7 +13,7 @@ import { useUserRole } from "@/hooks/useUserRole";
 const Auth = () => {
   const navigate = useNavigate();
   const { signIn, user, loading } = useAuth();
-  const { isAdmin, loading: roleLoading } = useUserRole();
+  const { isAdmin, isModerator, loading: roleLoading } = useUserRole();
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -24,13 +24,13 @@ const Auth = () => {
   // Redirect authenticated users based on their role
   useEffect(() => {
     if (!loading && !roleLoading && user) {
-      if (isAdmin) {
+      if (isAdmin || isModerator) {
         navigate("/fulladmin");
       } else {
         navigate("/minha-conta");
       }
     }
-  }, [user, loading, isAdmin, roleLoading, navigate]);
+  }, [user, loading, isAdmin, isModerator, roleLoading, navigate]);
 
   // Animated particles effect
   useEffect(() => {
