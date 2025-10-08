@@ -40,12 +40,27 @@ export default function DataManagement() {
   }, []);
 
   const loadUsers = async () => {
-    const { data } = await supabase
+    // Get all profiles
+    const { data: profilesData } = await supabase
       .from('profiles')
       .select('user_id, full_name, company')
       .order('full_name');
     
-    if (data) setUsers(data);
+    if (!profilesData) return;
+
+    // Get user roles to filter out admins and moderators
+    const { data: rolesData } = await supabase
+      .from('user_roles')
+      .select('user_id, role')
+      .in('user_id', profilesData.map(p => p.user_id));
+
+    // Filter to only show regular users (not admins or moderators)
+    const regularUsers = profilesData.filter(profile => {
+      const userRole = rolesData?.find(r => r.user_id === profile.user_id);
+      return userRole?.role === 'user';
+    });
+    
+    setUsers(regularUsers);
   };
 
   const loadManagers = async () => {
