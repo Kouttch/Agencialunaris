@@ -109,14 +109,18 @@ Deno.serve(async (req) => {
 
     console.log('Profile created')
 
-    // Set role with upsert to avoid conflicts
+    // Delete existing role first (created by trigger) and insert the correct one
+    await supabaseAdmin
+      .from('user_roles')
+      .delete()
+      .eq('user_id', authData.user.id)
+    
+    // Set the correct role
     const { error: roleError } = await supabaseAdmin
       .from('user_roles')
-      .upsert({
+      .insert({
         user_id: authData.user.id,
-        role: role as 'admin' | 'user'
-      }, {
-        onConflict: 'user_id,role'
+        role: role as 'admin' | 'moderator' | 'user'
       })
 
     if (roleError) {
