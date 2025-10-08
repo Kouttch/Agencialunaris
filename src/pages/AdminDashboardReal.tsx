@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell, Legend } from 'recharts';
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { useUserRole } from "@/hooks/useUserRole";
 
 interface UserProfile {
   user_id: string;
@@ -26,6 +27,7 @@ interface CampaignData {
 export default function AdminDashboard() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const { isModerator } = useUserRole();
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [selectedUserId, setSelectedUserId] = useState<string>(searchParams.get('user') || "");
   const [campaignData, setCampaignData] = useState<CampaignData[]>([]);
@@ -47,12 +49,29 @@ export default function AdminDashboard() {
 
   const loadUsers = async () => {
     try {
-      const { data } = await supabase
-        .from('profiles')
-        .select('user_id, full_name, company')
-        .order('full_name');
+      const { data: authData } = await supabase.auth.getUser();
+      const { data: rolesData } = await supabase
+        .from('user_roles')
+        .select('user_id, role');
 
-      setUsers(data || []);
+      let query = supabase
+        .from('profiles')
+        .select('user_id, full_name, company');
+
+      // Se for moderador, filtrar apenas clientes gerenciados
+      if (isModerator && authData.user) {
+        query = query.eq('manager_id', authData.user.id);
+      }
+
+      const { data } = await query.order('full_name');
+
+      if (data && rolesData) {
+        const rolesMap = new Map(rolesData.map(r => [r.user_id, r.role]));
+        const clientUsers = data.filter(profile => 
+          rolesMap.get(profile.user_id) === 'user'
+        );
+        setUsers(clientUsers);
+      }
     } catch (error) {
       console.error('Error loading users:', error);
     }

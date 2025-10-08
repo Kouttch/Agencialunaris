@@ -71,7 +71,7 @@ export default function ClientsManagement() {
           company
         )
       `)
-      .eq('role', 'moderator');
+      .in('role', ['admin', 'moderator']);
     
     if (data) {
       const managerProfiles = data

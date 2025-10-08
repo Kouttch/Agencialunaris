@@ -27,7 +27,7 @@ interface CampaignData {
 }
 
 export default function DashboardsManagement() {
-  const { isAdmin } = useUserRole();
+  const { isAdmin, isModerator } = useUserRole();
   const { toast } = useToast();
   const [searchParams, setSearchParams] = useSearchParams();
   const [users, setUsers] = useState<UserProfile[]>([]);
@@ -50,13 +50,31 @@ export default function DashboardsManagement() {
 
   const loadUsers = async () => {
     try {
-      const { data, error } = await supabase
+      const { data: authData } = await supabase.auth.getUser();
+      const { data: rolesData } = await supabase
+        .from('user_roles')
+        .select('user_id, role');
+
+      let query = supabase
         .from('profiles')
-        .select('user_id, full_name, company')
-        .order('full_name');
+        .select('user_id, full_name, company');
+
+      // Se for moderador, filtrar apenas clientes gerenciados
+      if (isModerator && authData.user) {
+        query = query.eq('manager_id', authData.user.id);
+      }
+
+      const { data, error } = await query.order('full_name');
 
       if (error) throw error;
-      setUsers(data || []);
+
+      if (data && rolesData) {
+        const rolesMap = new Map(rolesData.map(r => [r.user_id, r.role]));
+        const clientUsers = data.filter(profile => 
+          rolesMap.get(profile.user_id) === 'user'
+        );
+        setUsers(clientUsers);
+      }
     } catch (error) {
       console.error('Error loading users:', error);
       toast({

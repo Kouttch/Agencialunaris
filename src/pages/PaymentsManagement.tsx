@@ -62,7 +62,7 @@ export default function PaymentsManagement() {
   };
 
   const loadPaymentHistory = async () => {
-    const { data } = await supabase
+    let query = supabase
       .from('payment_requests')
       .select(`
         id,
@@ -76,8 +76,14 @@ export default function PaymentsManagement() {
           full_name,
           company
         )
-      `)
-      .order('created_at', { ascending: false });
+      `);
+
+    // Se for moderador, filtrar apenas pagamentos de clientes gerenciados
+    if (isModerator && managedClients.length > 0) {
+      query = query.in('user_id', managedClients);
+    }
+
+    const { data } = await query.order('created_at', { ascending: false });
     
     if (data) setPaymentHistory(data as any);
   };
@@ -183,12 +189,27 @@ export default function PaymentsManagement() {
 
   const handleUpdateStatus = async (paymentId: string, newStatus: string) => {
     try {
+      const payment = paymentHistory.find(p => p.id === paymentId);
+      
       const { error } = await supabase
         .from('payment_requests')
         .update({ status: newStatus })
         .eq('id', paymentId);
 
       if (error) throw error;
+
+      // Se pagamento foi confirmado, enviar notificação ao cliente
+      if (newStatus === 'paid' && payment) {
+        await supabase
+          .from('notifications')
+          .insert({
+            user_id: payment.user_id,
+            title: 'Pagamento Confirmado',
+            message: `Seu pagamento de R$ ${payment.amount.toFixed(2)} foi confirmado! O saldo já está disponível para uso.`,
+            type: 'success',
+            is_read: false
+          });
+      }
 
       toast({
         title: "Status atualizado",
