@@ -9,6 +9,7 @@ import { Search, Plus, MoreHorizontal, Eye, Edit, Trash2, UserCog } from "lucide
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger } from "@/components/ui/dropdown-menu";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 interface UserProfile {
   user_id: string;
@@ -24,6 +25,7 @@ export default function ClientsManagement() {
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [managers, setManagers] = useState<UserProfile[]>([]);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
     loadUsers();
@@ -135,7 +137,7 @@ export default function ClientsManagement() {
             <h1 className="text-3xl font-bold mb-2">Gerenciamento de Clientes</h1>
             <p className="text-muted-foreground">Lista completa de usuários e seus status</p>
           </div>
-          <Button>
+          <Button onClick={() => navigate('/fulladmin/data')}>
             <Plus className="h-4 w-4 mr-2" />
             Novo Cliente
           </Button>
