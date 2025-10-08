@@ -5,6 +5,7 @@ import { Footer } from "@/components/Footer";
 import { WhatsAppContactSection } from "@/components/WhatsAppContactSection";
 import { FloatingWhatsAppButton } from "@/components/FloatingWhatsAppButton";
 import { ClientPortalSection } from "@/components/ClientPortalSection";
+import { NotificationPopup } from "@/components/NotificationPopup";
 
 const Index = () => {
   return (
@@ -16,6 +17,7 @@ const Index = () => {
       <ClientPortalSection />
       <Footer />
       <FloatingWhatsAppButton />
+      <NotificationPopup />
     </main>
   );
 };
