@@ -46,7 +46,7 @@ export default function PaymentsManagement() {
   useEffect(() => {
     loadUsers();
     loadPaymentHistory();
-  }, []);
+  }, [isModerator, managedClients]);
 
   const loadUsers = async () => {
     let query = supabase
@@ -62,30 +62,45 @@ export default function PaymentsManagement() {
   };
 
   const loadPaymentHistory = async () => {
-    let query = supabase
-      .from('payment_requests')
-      .select(`
-        id,
-        user_id,
-        amount,
-        pix_code,
-        message,
-        status,
-        created_at,
-        profiles:user_id (
-          full_name,
-          company
-        )
-      `);
+    try {
+      let query = supabase
+        .from('payment_requests')
+        .select(`
+          id,
+          user_id,
+          amount,
+          pix_code,
+          message,
+          status,
+          created_at,
+          profiles!payment_requests_user_id_fkey (
+            full_name,
+            company
+          )
+        `);
 
-    // Se for moderador, filtrar apenas pagamentos de clientes gerenciados
-    if (isModerator && managedClients.length > 0) {
-      query = query.in('user_id', managedClients);
+      // Se for moderador, filtrar apenas pagamentos de clientes gerenciados
+      if (isModerator && managedClients.length > 0) {
+        query = query.in('user_id', managedClients);
+      }
+
+      const { data, error } = await query.order('created_at', { ascending: false });
+      
+      if (error) {
+        console.error('Error loading payment history:', error);
+        toast({
+          title: "Erro ao carregar histórico",
+          description: error.message,
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      console.log('Payment history loaded:', data);
+      if (data) setPaymentHistory(data as any);
+    } catch (error) {
+      console.error('Error loading payment history:', error);
     }
-
-    const { data } = await query.order('created_at', { ascending: false });
-    
-    if (data) setPaymentHistory(data as any);
   };
 
   const handleSendPixCode = async () => {
@@ -112,7 +127,10 @@ export default function PaymentsManagement() {
           status: 'pending'
         });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error inserting payment request:', error);
+        throw error;
+      }
 
       toast({
         title: "Código PIX enviado",
@@ -125,12 +143,13 @@ export default function PaymentsManagement() {
       setPixCode("");
       setMessage("");
       
-      loadPaymentHistory();
-    } catch (error) {
+      // Reload payment history
+      await loadPaymentHistory();
+    } catch (error: any) {
       console.error('Error sending PIX code:', error);
       toast({
         title: "Erro ao enviar",
-        description: "Não foi possível enviar o código PIX.",
+        description: error.message || "Não foi possível enviar o código PIX.",
         variant: "destructive"
       });
     }
