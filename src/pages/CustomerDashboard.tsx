@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Moon, Sun, Info } from "lucide-react";
 import { useState, useEffect } from "react";
 import { CustomerAvatar } from "@/components/CustomerAvatar";
-import { DeactivatedAccount } from "@/components/DeactivatedAccount";
 import { Tooltip as TooltipUI, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -181,10 +180,7 @@ export default function CustomerDashboard() {
     }
   };
 
-  // Check if account is deactivated
-  if (profileData.accountStatus !== 'active') {
-    return <DeactivatedAccount />;
-  }
+  const isDeactivated = profileData.accountStatus !== 'active';
 
   return <div className="container mx-auto p-6 pb-24">
       <div className="mb-10">
@@ -192,8 +188,19 @@ export default function CustomerDashboard() {
         <p className="text-muted-foreground">Acompanhe o desempenho de suas campanhas</p>
       </div>
 
-      {/* Key Metrics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+      {/* Dashboard content wrapper with blur when deactivated */}
+      <div className="relative">
+        {isDeactivated && (
+          <div className="absolute inset-0 z-50 backdrop-blur-md bg-background/80 flex items-center justify-center rounded-lg min-h-[500px]">
+            <div className="text-center space-y-2 p-8">
+              <h2 className="text-3xl font-bold text-destructive">Dashboard Indisponível</h2>
+              <p className="text-muted-foreground text-lg">Sua conta está desativada. Entre em contato com o suporte.</p>
+            </div>
+          </div>
+        )}
+
+        {/* Key Metrics Cards */}
+        <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8 ${isDeactivated ? 'pointer-events-none select-none' : ''}`}>
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -368,6 +375,7 @@ export default function CustomerDashboard() {
           </div>
         </TabsContent>
       </Tabs>
+      </div>
 
       {/* Theme Toggle Button */}
       <Button onClick={toggleTheme} size="icon" variant="outline" className="fixed bottom-6 right-6 z-50 h-12 w-12 rounded-full shadow-lg mx-0 px-0">
