@@ -25,9 +25,9 @@ const Auth = () => {
   useEffect(() => {
     if (!loading && !roleLoading && user) {
       if (isAdmin || isModerator) {
-        navigate("/fulladmin");
+        navigate("/fulladmin", { replace: true });
       } else {
-        navigate("/minha-conta");
+        navigate("/minha-conta", { replace: true });
       }
     }
   }, [user, loading, isAdmin, isModerator, roleLoading, navigate]);

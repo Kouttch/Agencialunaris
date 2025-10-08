@@ -373,44 +373,6 @@ export default function CustomerProfile() {
         </Card>
       </div>
 
-      {/* Account Settings */}
-      <Card className="mt-6">
-        <CardHeader>
-          <CardTitle>Configurações da Conta</CardTitle>
-          <CardDescription>
-            Gerencie preferências e segurança da conta
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-4">
-              <h4 className="font-semibold">Preferências</h4>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between p-3 border rounded-md">
-                  <span>Notificações por email</span>
-                  <Badge variant="outline">Ativo</Badge>
-                </div>
-                <div className="flex items-center justify-between p-3 border rounded-md">
-                  <span>Relatórios semanais</span>
-                  <Badge variant="outline">Ativo</Badge>
-                </div>
-              </div>
-            </div>
-            
-            <div className="space-y-4">
-              <h4 className="font-semibold">Segurança</h4>
-              <div className="space-y-2">
-                <Button variant="outline" className="w-full justify-start">
-                  Alterar senha
-                </Button>
-                <Button variant="outline" className="w-full justify-start">
-                  Configurar 2FA
-                </Button>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 }

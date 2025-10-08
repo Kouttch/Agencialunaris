@@ -49,6 +49,10 @@ export function AppSidebar() {
     title: "Pagamentos",
     url: "/fulladmin/payments",
     icon: CreditCard
+  }, {
+    title: "Perfil",
+    url: "/minha-conta/profile",
+    icon: User
   }];
   
   const adminItems = [{
@@ -79,6 +83,10 @@ export function AppSidebar() {
     title: "Pagamentos",
     url: "/fulladmin/payments",
     icon: CreditCard
+  }, {
+    title: "Perfil",
+    url: "/minha-conta/profile",
+    icon: User
   }];
   
   const items = isAdmin ? adminItems : (isModerator ? moderatorItems : customerItems);
