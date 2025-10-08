@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Moon, Sun, Info } from "lucide-react";
 import { useState, useEffect } from "react";
 import { CustomerAvatar } from "@/components/CustomerAvatar";
+import { DeactivatedAccount } from "@/components/DeactivatedAccount";
 import { Tooltip as TooltipUI, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -22,7 +23,8 @@ export default function CustomerDashboard() {
   const [profileData, setProfileData] = useState({
     userName: "",
     companyName: "",
-    avatarUrl: ""
+    avatarUrl: "",
+    accountStatus: "active"
   });
   
   const [weeklyData, setWeeklyData] = useState<ChartData[]>([]);
@@ -62,6 +64,7 @@ export default function CustomerDashboard() {
           full_name, 
           company, 
           avatar_url,
+          account_status,
           manager_id,
           account_managers (
             name,
@@ -75,7 +78,8 @@ export default function CustomerDashboard() {
         setProfileData({
           userName: profile.full_name || "",
           companyName: profile.company || "",
-          avatarUrl: profile.avatar_url || ""
+          avatarUrl: profile.avatar_url || "",
+          accountStatus: profile.account_status || "active"
         });
 
         // Load manager data
@@ -176,6 +180,11 @@ export default function CustomerDashboard() {
       setLoading(false);
     }
   };
+
+  // Check if account is deactivated
+  if (profileData.accountStatus !== 'active') {
+    return <DeactivatedAccount />;
+  }
 
   return <div className="container mx-auto p-6 pb-24">
       <div className="mb-10">
@@ -370,6 +379,7 @@ export default function CustomerDashboard() {
         userName={profileData.userName} 
         companyName={profileData.companyName}
         avatarUrl={profileData.avatarUrl}
+        accountStatus={profileData.accountStatus}
       />
     </div>;
 }

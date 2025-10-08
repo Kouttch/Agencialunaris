@@ -1,15 +1,18 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 
 interface CustomerAvatarProps {
   avatarUrl?: string;
   companyName?: string;
   userName?: string;
+  accountStatus?: string;
 }
 
 export const CustomerAvatar = ({
   avatarUrl,
   companyName,
-  userName
+  userName,
+  accountStatus = 'active'
 }: CustomerAvatarProps) => {
   const initials = (userName || companyName || "U")
     .split(" ")
@@ -17,6 +20,8 @@ export const CustomerAvatar = ({
     .join("")
     .toUpperCase()
     .slice(0, 2);
+
+  const isActive = accountStatus === 'active';
 
   return (
     <div className="fixed bottom-6 left-6 z-50 flex flex-col gap-2">
@@ -37,6 +42,12 @@ export const CustomerAvatar = ({
             </span>
           )}
         </div>
+        <Badge 
+          variant={isActive ? "default" : "destructive"}
+          className={isActive ? "bg-green-500 hover:bg-green-600" : ""}
+        >
+          {isActive ? "Ativo" : "Desativado"}
+        </Badge>
       </div>
     </div>
   );

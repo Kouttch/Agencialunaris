@@ -8,6 +8,8 @@ import { Copy, Check, Clock, CheckCircle, XCircle, CreditCard, QrCode } from "lu
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useAccountStatus } from "@/hooks/useAccountStatus";
+import { DeactivatedAccount } from "@/components/DeactivatedAccount";
 
 interface PaymentRequest {
   id: string;
@@ -25,6 +27,7 @@ export default function CustomerRecharge() {
   const [unreadCount, setUnreadCount] = useState(0);
   const { toast } = useToast();
   const { user } = useAuth();
+  const { accountStatus, isActive } = useAccountStatus();
 
   useEffect(() => {
     if (user) {
@@ -132,6 +135,10 @@ export default function CustomerRecharge() {
   };
 
   const pendingRecharges = paymentRequests.filter(r => r.status === 'pending' || (r.status === 'pending' && r.client_confirmed_at));
+
+  if (!isActive) {
+    return <DeactivatedAccount />;
+  }
 
   return (
     <div className="container mx-auto p-6">

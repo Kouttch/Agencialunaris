@@ -1,6 +1,8 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Download, FileText, Calendar } from "lucide-react";
+import { useAccountStatus } from "@/hooks/useAccountStatus";
+import { DeactivatedAccount } from "@/components/DeactivatedAccount";
 
 // TODO: Fetch from database
 const mockDocuments = [
@@ -31,10 +33,16 @@ const mockDocuments = [
 ];
 
 export default function CustomerStrategy() {
+  const { isActive } = useAccountStatus();
+  
   const handleDownload = (doc: typeof mockDocuments[0]) => {
     // TODO: Implement actual download logic
     console.log("Downloading:", doc.title);
   };
+
+  if (!isActive) {
+    return <DeactivatedAccount />;
+  }
 
   return (
     <div className="p-6 space-y-6">

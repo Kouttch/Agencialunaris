@@ -10,9 +10,12 @@ import { Edit, Save, X, Camera, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useAccountStatus } from "@/hooks/useAccountStatus";
+import { DeactivatedAccount } from "@/components/DeactivatedAccount";
 
 export default function CustomerProfile() {
   const { user } = useAuth();
+  const { accountStatus, loading: statusLoading } = useAccountStatus();
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -208,12 +211,16 @@ export default function CustomerProfile() {
     }
   };
 
-  if (isLoading) {
+  if (isLoading || statusLoading) {
     return (
       <div className="container mx-auto p-6 max-w-4xl flex items-center justify-center min-h-[400px]">
         <Loader2 className="h-8 w-8 animate-spin" />
       </div>
     );
+  }
+
+  if (accountStatus !== 'active') {
+    return <DeactivatedAccount />;
   }
 
   return (
