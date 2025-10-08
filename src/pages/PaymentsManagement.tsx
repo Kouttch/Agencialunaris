@@ -10,11 +10,26 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Send, Copy, Check, MessageSquare, CreditCard } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useUserRole } from "@/hooks/useUserRole";
 
 interface UserProfile {
   user_id: string;
   full_name: string;
   company: string;
+}
+
+interface PaymentRequest {
+  id: string;
+  user_id: string;
+  amount: number;
+  pix_code: string;
+  message: string | null;
+  status: string;
+  created_at: string;
+  profiles: {
+    full_name: string;
+    company: string;
+  };
 }
 
 export default function PaymentsManagement() {
@@ -24,22 +39,50 @@ export default function PaymentsManagement() {
   const [message, setMessage] = useState("");
   const [copiedCode, setCopiedCode] = useState("");
   const [users, setUsers] = useState<UserProfile[]>([]);
+  const [paymentHistory, setPaymentHistory] = useState<PaymentRequest[]>([]);
   const { toast } = useToast();
+  const { isModerator, managedClients } = useUserRole();
 
   useEffect(() => {
     loadUsers();
+    loadPaymentHistory();
   }, []);
 
   const loadUsers = async () => {
-    const { data } = await supabase
+    let query = supabase
       .from('profiles')
-      .select('user_id, full_name, company')
-      .order('full_name');
-    
+      .select('user_id, full_name, company');
+
+    if (isModerator && managedClients.length > 0) {
+      query = query.in('user_id', managedClients);
+    }
+
+    const { data } = await query.order('full_name');
     if (data) setUsers(data);
   };
 
-  const handleSendPixCode = () => {
+  const loadPaymentHistory = async () => {
+    const { data } = await supabase
+      .from('payment_requests')
+      .select(`
+        id,
+        user_id,
+        amount,
+        pix_code,
+        message,
+        status,
+        created_at,
+        profiles:user_id (
+          full_name,
+          company
+        )
+      `)
+      .order('created_at', { ascending: false });
+    
+    if (data) setPaymentHistory(data as any);
+  };
+
+  const handleSendPixCode = async () => {
     if (!selectedClient || !amount || !pixCode) {
       toast({
         title: "Campos obrigatórios",
@@ -49,17 +92,42 @@ export default function PaymentsManagement() {
       return;
     }
 
-    // TODO: Save payment request to database and send notification
-    toast({
-      title: "Código PIX enviado",
-      description: "O código PIX foi enviado ao cliente com sucesso.",
-    });
+    try {
+      const { data: authData } = await supabase.auth.getUser();
+      
+      const { error } = await supabase
+        .from('payment_requests')
+        .insert({
+          user_id: selectedClient,
+          amount: parseFloat(amount),
+          pix_code: pixCode,
+          message: message || null,
+          created_by: authData.user?.id,
+          status: 'pending'
+        });
 
-    // Reset form
-    setSelectedClient("");
-    setAmount("");
-    setPixCode("");
-    setMessage("");
+      if (error) throw error;
+
+      toast({
+        title: "Código PIX enviado",
+        description: "O código PIX foi enviado ao cliente com sucesso.",
+      });
+
+      // Reset form
+      setSelectedClient("");
+      setAmount("");
+      setPixCode("");
+      setMessage("");
+      
+      loadPaymentHistory();
+    } catch (error) {
+      console.error('Error sending PIX code:', error);
+      toast({
+        title: "Erro ao enviar",
+        description: "Não foi possível enviar o código PIX.",
+        variant: "destructive"
+      });
+    }
   };
 
   const handleSendMessage = () => {
@@ -219,13 +287,55 @@ export default function PaymentsManagement() {
         <CardHeader>
           <CardTitle>Histórico de Solicitações</CardTitle>
           <CardDescription>
-            Em breve você verá aqui o histórico de códigos PIX enviados
+            {paymentHistory.length} solicitação(ões) registrada(s)
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <p className="text-center text-muted-foreground py-8">
-            Nenhum pagamento registrado ainda
-          </p>
+          {paymentHistory.length === 0 ? (
+            <p className="text-center text-muted-foreground py-8">
+              Nenhum pagamento registrado ainda
+            </p>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Cliente</TableHead>
+                  <TableHead>Valor</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Data</TableHead>
+                  <TableHead>Ações</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {paymentHistory.map((payment) => (
+                  <TableRow key={payment.id}>
+                    <TableCell>
+                      {payment.profiles.full_name}
+                      {payment.profiles.company && ` - ${payment.profiles.company}`}
+                    </TableCell>
+                    <TableCell>R$ {payment.amount.toFixed(2)}</TableCell>
+                    <TableCell>{getStatusBadge(payment.status)}</TableCell>
+                    <TableCell>
+                      {new Date(payment.created_at).toLocaleDateString('pt-BR')}
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => copyPixCode(payment.pix_code)}
+                      >
+                        {copiedCode === payment.pix_code ? (
+                          <Check className="h-4 w-4" />
+                        ) : (
+                          <Copy className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
         </CardContent>
       </Card>
     </div>

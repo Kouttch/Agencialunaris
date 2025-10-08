@@ -8,7 +8,7 @@ export function AppSidebar() {
   const { open, setOpen } = useSidebar();
   const location = useLocation();
   const { user } = useAuth();
-  const { isAdmin } = useUserRole();
+  const { isAdmin, isModerator } = useUserRole();
   const currentPath = location.pathname;
 
   const customerItems = [{
@@ -28,6 +28,25 @@ export function AppSidebar() {
     url: "/minha-conta/recargas",
     icon: CreditCard
   }];
+  
+  const moderatorItems = [{
+    title: "Dashboards",
+    url: "/moderator/dashboards",
+    icon: TrendingUp
+  }, {
+    title: "Checklist",
+    url: "/moderator/checklist",
+    icon: CheckCircle2
+  }, {
+    title: "Pagamentos",
+    url: "/moderator/payments",
+    icon: CreditCard
+  }, {
+    title: "Estratégia",
+    url: "/moderator/strategy",
+    icon: FileText
+  }];
+  
   const adminItems = [{
     title: "Visão Geral",
     url: "/fulladmin",
@@ -55,9 +74,10 @@ export function AppSidebar() {
   }, {
     title: "Pagamentos",
     url: "/fulladmin/payments",
-    icon: MessageSquare
+    icon: CreditCard
   }];
-  const items = isAdmin ? adminItems : customerItems;
+  
+  const items = isAdmin ? adminItems : (isModerator ? moderatorItems : customerItems);
   const isActive = (path: string) => currentPath === path;
   const getNavCls = ({ isActive }: { isActive: boolean }) => 
     isActive ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium" : "hover:bg-sidebar-accent/50";
@@ -76,7 +96,7 @@ export function AppSidebar() {
       <SidebarContent className="pt-8">
         <SidebarGroup>
           <SidebarGroupLabel className="mb-2 mx-0 px-[8px] py-0 my-[12px]">
-            {isAdmin ? "Administração" : "Menu Principal"}
+            {isAdmin ? "Administração" : (isModerator ? "Gestão" : "Menu Principal")}
           </SidebarGroupLabel>
 
           <SidebarGroupContent className="mx-0 my-0">

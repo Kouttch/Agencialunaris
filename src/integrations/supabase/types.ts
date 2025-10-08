@@ -328,8 +328,45 @@ export type Database = {
         }
         Relationships: []
       }
+      payment_requests: {
+        Row: {
+          amount: number
+          created_at: string | null
+          created_by: string
+          id: string
+          message: string | null
+          pix_code: string
+          status: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string | null
+          created_by: string
+          id?: string
+          message?: string | null
+          pix_code: string
+          status?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string | null
+          created_by?: string
+          id?: string
+          message?: string | null
+          pix_code?: string
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
+          account_status: string | null
           avatar_url: string | null
           bio: string | null
           company: string | null
@@ -342,6 +379,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          account_status?: string | null
           avatar_url?: string | null
           bio?: string | null
           company?: string | null
@@ -354,6 +392,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          account_status?: string | null
           avatar_url?: string | null
           bio?: string | null
           company?: string | null

@@ -10,7 +10,7 @@ interface ProtectedRouteProps {
 
 export const ProtectedRoute = ({ children, adminOnly = false }: ProtectedRouteProps) => {
   const { user, loading: authLoading } = useAuth();
-  const { isAdmin, loading: roleLoading } = useUserRole();
+  const { isAdmin, isModerator, loading: roleLoading } = useUserRole();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -22,14 +22,21 @@ export const ProtectedRoute = ({ children, adminOnly = false }: ProtectedRoutePr
 
     // Redirect admins to admin panel from customer pages
     if (!authLoading && !roleLoading && user && isAdmin) {
-      if (location.pathname.startsWith('/minha-conta')) {
+      if (location.pathname.startsWith('/minha-conta') || location.pathname.startsWith('/moderator')) {
         navigate("/fulladmin");
       }
     }
 
-    // Redirect users to customer dashboard from admin pages
-    if (!authLoading && !roleLoading && user && !isAdmin) {
-      if (location.pathname.startsWith('/fulladmin')) {
+    // Redirect moderators to moderator panel from customer/admin pages
+    if (!authLoading && !roleLoading && user && !isAdmin && isModerator) {
+      if (location.pathname.startsWith('/minha-conta') || location.pathname.startsWith('/fulladmin')) {
+        navigate("/moderator/dashboards");
+      }
+    }
+
+    // Redirect users to customer dashboard from admin/moderator pages
+    if (!authLoading && !roleLoading && user && !isAdmin && !isModerator) {
+      if (location.pathname.startsWith('/fulladmin') || location.pathname.startsWith('/moderator')) {
         navigate("/minha-conta");
       }
     }

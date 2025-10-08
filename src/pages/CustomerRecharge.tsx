@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -6,42 +6,46 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Copy, Check, Clock, CheckCircle, XCircle, CreditCard, QrCode } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
-const mockRecharges = [
-  {
-    id: 1,
-    amount: 500,
-    status: "Pago",
-    pix_code: "PIX123456789ABCDEF",
-    created_at: "2024-01-07",
-    processed_at: "2024-01-07",
-    transaction_id: "TXN001"
-  },
-  {
-    id: 2,
-    amount: 300,
-    status: "Pendente",
-    pix_code: "PIX987654321FEDCBA",
-    created_at: "2024-01-05",
-    processed_at: null,
-    transaction_id: null
-  },
-  {
-    id: 3,
-    amount: 750,
-    status: "Cancelado",
-    pix_code: "PIX555444333GHIJK",
-    created_at: "2024-01-03",
-    processed_at: null,
-    transaction_id: null
-  }
-];
-
-const pendingRecharges = mockRecharges.filter(r => r.status === "Pendente");
+interface PaymentRequest {
+  id: string;
+  amount: number;
+  pix_code: string;
+  message: string | null;
+  status: string;
+  created_at: string;
+}
 
 export default function CustomerRecharge() {
+  const [paymentRequests, setPaymentRequests] = useState<PaymentRequest[]>([]);
   const [copiedCode, setCopiedCode] = useState("");
+  const [unreadCount, setUnreadCount] = useState(0);
   const { toast } = useToast();
+  const { user } = useAuth();
+
+  useEffect(() => {
+    if (user) {
+      loadPaymentRequests();
+    }
+  }, [user]);
+
+  const loadPaymentRequests = async () => {
+    if (!user) return;
+
+    const { data } = await supabase
+      .from('payment_requests')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false });
+    
+    if (data) {
+      setPaymentRequests(data);
+      const pending = data.filter(p => p.status === 'pending').length;
+      setUnreadCount(pending);
+    }
+  };
 
   const copyPixCode = (code: string) => {
     navigator.clipboard.writeText(code);
@@ -54,22 +58,17 @@ export default function CustomerRecharge() {
   };
 
   const getStatusBadge = (status: string) => {
-    const variants = {
-      "Pago": "default",
-      "Pendente": "secondary",
-      "Cancelado": "destructive"
-    } as const;
-    
-    const icons = {
-      "Pago": <CheckCircle className="h-3 w-3 mr-1" />,
-      "Pendente": <Clock className="h-3 w-3 mr-1" />,
-      "Cancelado": <XCircle className="h-3 w-3 mr-1" />
+    const config = {
+      pending: { variant: "secondary" as const, label: "Pendente", icon: <Clock className="h-3 w-3 mr-1" /> },
+      paid: { variant: "default" as const, label: "Pago", icon: <CheckCircle className="h-3 w-3 mr-1" /> },
+      cancelled: { variant: "destructive" as const, label: "Cancelado", icon: <XCircle className="h-3 w-3 mr-1" /> }
     };
     
+    const statusConfig = config[status as keyof typeof config] || config.pending;
     return (
-      <Badge variant={variants[status as keyof typeof variants] || "outline"} className="flex items-center">
-        {icons[status as keyof typeof icons]}
-        {status}
+      <Badge variant={statusConfig.variant} className="flex items-center">
+        {statusConfig.icon}
+        {statusConfig.label}
       </Badge>
     );
   };
@@ -81,29 +80,27 @@ export default function CustomerRecharge() {
     }).format(value);
   };
 
+  const pendingRecharges = paymentRequests.filter(r => r.status === 'pending');
+
   return (
     <div className="container mx-auto p-6">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Recargas de Anúncios</h1>
+        <div className="flex items-center gap-3 mb-2">
+          <CreditCard className="h-8 w-8 text-primary" />
+          <h1 className="text-3xl font-bold">Recargas de Anúncios</h1>
+          {unreadCount > 0 && (
+            <Badge variant="destructive" className="rounded-full">
+              {unreadCount}
+            </Badge>
+          )}
+        </div>
         <p className="text-muted-foreground">
-          Gerencie suas recargas e acompanhe pagamentos via PIX
+          Visualize e pague suas solicitações de recarga
         </p>
       </div>
 
-      {/* Balance Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Saldo Atual
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600">R$ 1.248,50</div>
-            <p className="text-xs text-muted-foreground mt-1">Disponível para campanhas</p>
-          </CardContent>
-        </Card>
-
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -123,12 +120,12 @@ export default function CustomerRecharge() {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Total Investido (Mês)
+              Total de Solicitações
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">R$ 3.450,00</div>
-            <p className="text-xs text-green-600 mt-1">+15% vs mês anterior</p>
+            <div className="text-2xl font-bold">{paymentRequests.length}</div>
+            <p className="text-xs text-muted-foreground mt-1">Todas as recargas</p>
           </CardContent>
         </Card>
       </div>
@@ -153,7 +150,7 @@ export default function CustomerRecharge() {
                           Recarga de {formatCurrency(recharge.amount)}
                         </CardTitle>
                         <CardDescription>
-                          Criado em {new Date(recharge.created_at).toLocaleDateString()}
+                          Criado em {new Date(recharge.created_at).toLocaleDateString('pt-BR')}
                         </CardDescription>
                       </div>
                       {getStatusBadge(recharge.status)}
@@ -161,6 +158,13 @@ export default function CustomerRecharge() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
+                      {recharge.message && (
+                        <div className="p-3 bg-muted rounded-lg">
+                          <p className="text-sm font-medium mb-1">Mensagem:</p>
+                          <p className="text-sm text-muted-foreground">{recharge.message}</p>
+                        </div>
+                      )}
+                      
                       <div>
                         <h4 className="font-semibold mb-2 flex items-center gap-2">
                           <QrCode className="h-4 w-4" />
@@ -207,7 +211,7 @@ export default function CustomerRecharge() {
             </div>
           ) : (
             <Card>
-              <CardContent className="py-8">
+              <CardContent className="py-12">
                 <div className="text-center">
                   <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-4" />
                   <h3 className="text-lg font-semibold mb-2">Nenhum pagamento pendente</h3>
@@ -226,63 +230,65 @@ export default function CustomerRecharge() {
             <CardHeader>
               <CardTitle>Histórico de Recargas</CardTitle>
               <CardDescription>
-                Acompanhe todas as suas transações
+                {paymentRequests.length} solicitação(ões) de recarga
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Valor</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Data Criação</TableHead>
-                    <TableHead>Data Processamento</TableHead>
-                    <TableHead>ID Transação</TableHead>
-                    <TableHead>Código PIX</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {mockRecharges.map((recharge) => (
-                    <TableRow key={recharge.id}>
-                      <TableCell className="font-medium">
-                        {formatCurrency(recharge.amount)}
-                      </TableCell>
-                      <TableCell>{getStatusBadge(recharge.status)}</TableCell>
-                      <TableCell>
-                        {new Date(recharge.created_at).toLocaleDateString()}
-                      </TableCell>
-                      <TableCell>
-                        {recharge.processed_at 
-                          ? new Date(recharge.processed_at).toLocaleDateString()
-                          : "-"
-                        }
-                      </TableCell>
-                      <TableCell>
-                        {recharge.transaction_id || "-"}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <code className="text-xs bg-muted px-2 py-1 rounded">
-                            {recharge.pix_code.substring(0, 10)}...
-                          </code>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => copyPixCode(recharge.pix_code)}
-                            className="h-6 w-6 p-0"
-                          >
-                            {copiedCode === recharge.pix_code ? (
-                              <Check className="h-3 w-3 text-green-600" />
-                            ) : (
-                              <Copy className="h-3 w-3" />
-                            )}
-                          </Button>
-                        </div>
-                      </TableCell>
+              {paymentRequests.length === 0 ? (
+                <div className="text-center py-12">
+                  <CreditCard className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                  <p className="text-muted-foreground">
+                    Nenhuma solicitação de recarga ainda
+                  </p>
+                </div>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Valor</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Data</TableHead>
+                      <TableHead>Mensagem</TableHead>
+                      <TableHead>Código PIX</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {paymentRequests.map((recharge) => (
+                      <TableRow key={recharge.id}>
+                        <TableCell className="font-bold">
+                          {formatCurrency(recharge.amount)}
+                        </TableCell>
+                        <TableCell>{getStatusBadge(recharge.status)}</TableCell>
+                        <TableCell>
+                          {new Date(recharge.created_at).toLocaleDateString('pt-BR')}
+                        </TableCell>
+                        <TableCell className="max-w-xs truncate">
+                          {recharge.message || '-'}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <code className="text-xs bg-muted px-2 py-1 rounded">
+                              {recharge.pix_code.substring(0, 10)}...
+                            </code>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => copyPixCode(recharge.pix_code)}
+                              className="h-6 w-6 p-0"
+                            >
+                              {copiedCode === recharge.pix_code ? (
+                                <Check className="h-3 w-3 text-green-600" />
+                              ) : (
+                                <Copy className="h-3 w-3" />
+                              )}
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
             </CardContent>
           </Card>
         </TabsContent>

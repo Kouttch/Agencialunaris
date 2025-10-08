@@ -6,6 +6,7 @@ export const useUserRole = () => {
   const { user } = useAuth();
   const [role, setRole] = useState<'admin' | 'moderator' | 'user' | null>(null);
   const [loading, setLoading] = useState(true);
+  const [managedClients, setManagedClients] = useState<string[]>([]);
 
   useEffect(() => {
     const checkUserRole = async () => {
@@ -27,6 +28,18 @@ export const useUserRole = () => {
           setRole('user');
         } else {
           setRole(data?.role || 'user');
+          
+          // If moderator, fetch managed clients
+          if (data?.role === 'moderator') {
+            const { data: profileData } = await supabase
+              .from('profiles')
+              .select('manager_id, user_id')
+              .eq('manager_id', user.id);
+            
+            if (profileData) {
+              setManagedClients(profileData.map(p => p.user_id));
+            }
+          }
         }
       } catch (error) {
         console.error('Error checking user role:', error);
@@ -39,5 +52,11 @@ export const useUserRole = () => {
     checkUserRole();
   }, [user]);
 
-  return { role, isAdmin: role === 'admin', loading };
+  return { 
+    role, 
+    isAdmin: role === 'admin', 
+    isModerator: role === 'moderator',
+    loading,
+    managedClients
+  };
 };

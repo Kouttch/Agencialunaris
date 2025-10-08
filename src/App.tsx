@@ -13,7 +13,7 @@ import CustomerDashboard from "./pages/CustomerDashboard";
 import CustomerProfile from "./pages/CustomerProfile";
 import CustomerRecharge from "./pages/CustomerRecharge";
 import CustomerStrategy from "./pages/CustomerStrategy";
-import AdminDashboard from "./pages/AdminDashboard";
+import AdminDashboard from "./pages/AdminDashboardReal";
 import ClientsManagement from "./pages/ClientsManagement";
 import DashboardsManagement from "./pages/DashboardsManagement";
 import PaymentsManagement from "./pages/PaymentsManagement";
@@ -151,6 +151,48 @@ const App = () => (
                   <ProtectedRoute>
                     <DashboardLayout>
                       <ChecklistManagement />
+                    </DashboardLayout>
+                  </ProtectedRoute>
+                } 
+              />
+              
+              {/* Moderator Dashboard Routes */}
+              <Route 
+                path="/moderator/dashboards" 
+                element={
+                  <ProtectedRoute>
+                    <DashboardLayout>
+                      <DashboardsManagement />
+                    </DashboardLayout>
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/moderator/checklist" 
+                element={
+                  <ProtectedRoute>
+                    <DashboardLayout>
+                      <ChecklistManagement />
+                    </DashboardLayout>
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/moderator/payments" 
+                element={
+                  <ProtectedRoute>
+                    <DashboardLayout>
+                      <PaymentsManagement />
+                    </DashboardLayout>
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/moderator/strategy" 
+                element={
+                  <ProtectedRoute>
+                    <DashboardLayout>
+                      <CustomerStrategy />
                     </DashboardLayout>
                   </ProtectedRoute>
                 } 
