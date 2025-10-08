@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Send, Copy, Check, MessageSquare, CreditCard, Clock, CheckCircle } from "lucide-react";
+import { Send, Copy, Check, MessageSquare, CreditCard, Clock, CheckCircle, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -47,6 +47,27 @@ export default function PaymentsManagement() {
   useEffect(() => {
     loadUsers();
     loadPaymentHistory();
+    
+    // Configurar realtime para atualizar automaticamente quando houver mudanças
+    const channel = supabase
+      .channel('payment_requests_changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'payment_requests'
+        },
+        () => {
+          console.log('Payment request changed, reloading...');
+          loadPaymentHistory();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [isModerator, managedClients]);
 
   const loadUsers = async () => {
@@ -214,6 +235,35 @@ export default function PaymentsManagement() {
       title: "Código copiado",
       description: "Código PIX copiado para a área de transferência.",
     });
+  };
+
+  const handleDeletePayment = async (paymentId: string) => {
+    if (!confirm('Tem certeza que deseja excluir esta solicitação de pagamento? Esta ação não pode ser desfeita.')) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('payment_requests')
+        .delete()
+        .eq('id', paymentId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Solicitação excluída",
+        description: "A solicitação de pagamento foi excluída com sucesso.",
+      });
+
+      loadPaymentHistory();
+    } catch (error: any) {
+      console.error('Error deleting payment:', error);
+      toast({
+        title: "Erro ao excluir",
+        description: error.message || "Não foi possível excluir a solicitação.",
+        variant: "destructive"
+      });
+    }
   };
 
   const handleUpdateStatus = async (paymentId: string, newStatus: string) => {
@@ -501,6 +551,14 @@ export default function PaymentsManagement() {
                           disabled={payment.status === 'pending' && !payment.client_confirmed_at}
                         >
                           Pendente
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDeletePayment(payment.id)}
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        >
+                          <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
                     </TableCell>
