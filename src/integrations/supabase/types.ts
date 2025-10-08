@@ -331,6 +331,7 @@ export type Database = {
       payment_requests: {
         Row: {
           amount: number
+          client_confirmed_at: string | null
           created_at: string | null
           created_by: string
           id: string
@@ -342,6 +343,7 @@ export type Database = {
         }
         Insert: {
           amount: number
+          client_confirmed_at?: string | null
           created_at?: string | null
           created_by: string
           id?: string
@@ -353,6 +355,7 @@ export type Database = {
         }
         Update: {
           amount?: number
+          client_confirmed_at?: string | null
           created_at?: string | null
           created_by?: string
           id?: string

@@ -16,6 +16,7 @@ interface PaymentRequest {
   message: string | null;
   status: string;
   created_at: string;
+  client_confirmed_at: string | null;
 }
 
 export default function CustomerRecharge() {
@@ -61,14 +62,14 @@ export default function CustomerRecharge() {
     try {
       const { error } = await supabase
         .from('payment_requests')
-        .update({ status: 'paid' })
+        .update({ client_confirmed_at: new Date().toISOString() })
         .eq('id', paymentId);
 
       if (error) throw error;
 
       toast({
         title: "Notificação enviada",
-        description: "O gestor foi notificado sobre seu pagamento.",
+        description: "O gestor foi notificado sobre seu pagamento e irá validá-lo em breve.",
       });
 
       loadPaymentRequests();
@@ -82,16 +83,41 @@ export default function CustomerRecharge() {
     }
   };
 
-  const getStatusBadge = (status: string) => {
+  const getStatusBadge = (status: string, clientConfirmedAt: string | null) => {
+    // Se o cliente confirmou mas ainda não foi marcado como pago pelo admin
+    if (clientConfirmedAt && status === 'pending') {
+      return (
+        <Badge className="bg-orange-500 hover:bg-orange-600 flex items-center">
+          <Clock className="h-3 w-3 mr-1" />
+          Aguardando Confirmação do Gestor
+        </Badge>
+      );
+    }
+    
     const config = {
-      pending: { variant: "secondary" as const, label: "Aguardando Pagamento", icon: <Clock className="h-3 w-3 mr-1" /> },
-      paid: { variant: "default" as const, label: "Pago", icon: <CheckCircle className="h-3 w-3 mr-1" /> },
-      cancelled: { variant: "destructive" as const, label: "Cancelado", icon: <XCircle className="h-3 w-3 mr-1" /> }
+      pending: { 
+        variant: "secondary" as const, 
+        label: "Aguardando Pagamento", 
+        icon: <Clock className="h-3 w-3 mr-1" />,
+        className: "bg-blue-500"
+      },
+      paid: { 
+        variant: "default" as const, 
+        label: "Pago e Confirmado", 
+        icon: <CheckCircle className="h-3 w-3 mr-1" />,
+        className: "bg-green-500 hover:bg-green-600"
+      },
+      cancelled: { 
+        variant: "destructive" as const, 
+        label: "Cancelado", 
+        icon: <XCircle className="h-3 w-3 mr-1" />,
+        className: "bg-red-500"
+      }
     };
     
     const statusConfig = config[status as keyof typeof config] || config.pending;
     return (
-      <Badge variant={statusConfig.variant} className="flex items-center">
+      <Badge variant={statusConfig.variant} className={`flex items-center ${statusConfig.className}`}>
         {statusConfig.icon}
         {statusConfig.label}
       </Badge>
@@ -105,7 +131,7 @@ export default function CustomerRecharge() {
     }).format(value);
   };
 
-  const pendingRecharges = paymentRequests.filter(r => r.status === 'pending');
+  const pendingRecharges = paymentRequests.filter(r => r.status === 'pending' || (r.status === 'pending' && r.client_confirmed_at));
 
   return (
     <div className="container mx-auto p-6">
@@ -178,7 +204,7 @@ export default function CustomerRecharge() {
                           Criado em {new Date(recharge.created_at).toLocaleDateString('pt-BR')}
                         </CardDescription>
                       </div>
-                      {getStatusBadge(recharge.status)}
+                      {getStatusBadge(recharge.status, recharge.client_confirmed_at)}
                     </div>
                   </CardHeader>
                   <CardContent>
@@ -234,9 +260,10 @@ export default function CustomerRecharge() {
                         className="w-full mt-4" 
                         variant="default"
                         onClick={() => handleNotifyPayment(recharge.id)}
+                        disabled={!!recharge.client_confirmed_at}
                       >
                         <CheckCircle className="h-4 w-4 mr-2" />
-                        Avisar que já paguei
+                        {recharge.client_confirmed_at ? 'Aguardando confirmação do gestor' : 'Avisar que já paguei'}
                       </Button>
                     </div>
                   </CardContent>
@@ -292,7 +319,7 @@ export default function CustomerRecharge() {
                         <TableCell className="font-bold">
                           {formatCurrency(recharge.amount)}
                         </TableCell>
-                        <TableCell>{getStatusBadge(recharge.status)}</TableCell>
+                        <TableCell>{getStatusBadge(recharge.status, recharge.client_confirmed_at)}</TableCell>
                         <TableCell>
                           {new Date(recharge.created_at).toLocaleDateString('pt-BR')}
                         </TableCell>

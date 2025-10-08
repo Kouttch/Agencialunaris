@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Send, Copy, Check, MessageSquare, CreditCard } from "lucide-react";
+import { Send, Copy, Check, MessageSquare, CreditCard, Clock, CheckCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -26,6 +26,7 @@ interface PaymentRequest {
   message: string | null;
   status: string;
   created_at: string;
+  client_confirmed_at: string | null;
   profiles: {
     full_name: string;
     company: string;
@@ -219,9 +220,17 @@ export default function PaymentsManagement() {
     try {
       const payment = paymentHistory.find(p => p.id === paymentId);
       
+      // Preparar os dados de atualização
+      const updateData: any = { status: newStatus };
+      
+      // Se estiver marcando como pago, limpar a confirmação do cliente
+      if (newStatus === 'paid') {
+        updateData.client_confirmed_at = null;
+      }
+      
       const { error } = await supabase
         .from('payment_requests')
-        .update({ status: newStatus })
+        .update(updateData)
         .eq('id', paymentId);
 
       if (error) throw error;
@@ -232,8 +241,8 @@ export default function PaymentsManagement() {
           .from('notifications')
           .insert({
             user_id: payment.user_id,
-            title: 'Pagamento Confirmado',
-            message: `Seu pagamento de R$ ${payment.amount.toFixed(2)} foi confirmado! O saldo já está disponível para uso.`,
+            title: 'Pagamento Confirmado ✅',
+            message: `Seu pagamento de R$ ${payment.amount.toFixed(2)} foi confirmado! O saldo já está disponível para uso em suas campanhas.`,
             type: 'success',
             is_read: false
           });
@@ -255,7 +264,16 @@ export default function PaymentsManagement() {
     }
   };
 
-  const getStatusBadge = (status: string) => {
+  const getStatusBadge = (status: string, clientConfirmedAt: string | null) => {
+    // Se o cliente confirmou mas ainda não foi marcado como pago pelo admin
+    if (clientConfirmedAt && status === 'pending') {
+      return (
+        <Badge className="bg-orange-500 hover:bg-orange-600">
+          Cliente Confirmou Pagamento
+        </Badge>
+      );
+    }
+    
     const variants = {
       "pending": "secondary",
       "paid": "default",
@@ -268,9 +286,20 @@ export default function PaymentsManagement() {
       "cancelled": "Cancelado"
     } as const;
     
-    return <Badge variant={variants[status as keyof typeof variants] || "outline"}>
-      {labels[status as keyof typeof labels] || status}
-    </Badge>;
+    const colors = {
+      "pending": "bg-blue-500",
+      "paid": "bg-green-500 hover:bg-green-600",
+      "cancelled": "bg-red-500"
+    } as const;
+    
+    return (
+      <Badge 
+        variant={variants[status as keyof typeof variants] || "outline"}
+        className={colors[status as keyof typeof colors] || ""}
+      >
+        {labels[status as keyof typeof labels] || status}
+      </Badge>
+    );
   };
 
   return (
@@ -406,20 +435,34 @@ export default function PaymentsManagement() {
                   <TableHead>Cliente</TableHead>
                   <TableHead>Valor</TableHead>
                   <TableHead>Status</TableHead>
+                  <TableHead>Cliente Confirmou?</TableHead>
                   <TableHead>Data</TableHead>
                   <TableHead>Código PIX</TableHead>
                   <TableHead>Ações</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {paymentHistory.map((payment) => (
+                 {paymentHistory.map((payment) => (
                   <TableRow key={payment.id}>
                     <TableCell>
                       {payment.profiles.full_name}
                       {payment.profiles.company && ` - ${payment.profiles.company}`}
                     </TableCell>
                     <TableCell>R$ {payment.amount.toFixed(2)}</TableCell>
-                    <TableCell>{getStatusBadge(payment.status)}</TableCell>
+                    <TableCell>{getStatusBadge(payment.status, payment.client_confirmed_at)}</TableCell>
+                    <TableCell>
+                      {payment.client_confirmed_at ? (
+                        <Badge className="bg-orange-500 hover:bg-orange-600">
+                          <CheckCircle className="h-3 w-3 mr-1" />
+                          Sim - {new Date(payment.client_confirmed_at).toLocaleDateString('pt-BR')}
+                        </Badge>
+                      ) : (
+                        <Badge variant="secondary">
+                          <Clock className="h-3 w-3 mr-1" />
+                          Não
+                        </Badge>
+                      )}
+                    </TableCell>
                     <TableCell>
                       {new Date(payment.created_at).toLocaleDateString('pt-BR')}
                     </TableCell>
@@ -455,7 +498,7 @@ export default function PaymentsManagement() {
                           variant="ghost"
                           size="sm"
                           onClick={() => handleUpdateStatus(payment.id, 'pending')}
-                          disabled={payment.status === 'pending'}
+                          disabled={payment.status === 'pending' && !payment.client_confirmed_at}
                         >
                           Pendente
                         </Button>
