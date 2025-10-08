@@ -58,6 +58,7 @@ export default function ClientsManagement() {
   };
 
   const regularUsersCount = users.length; // Now users array only contains actual clients
+  const activeUsersCount = users.filter(u => u.account_status === 'active').length;
 
   const loadManagers = async () => {
     const { data } = await supabase
@@ -182,11 +183,11 @@ export default function ClientsManagement() {
           </Card>
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Total Geral</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">Contas Ativas</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-primary">{users.length}</div>
-              <p className="text-xs text-muted-foreground mt-1">Todos os perfis</p>
+              <div className="text-2xl font-bold text-primary">{activeUsersCount}</div>
+              <p className="text-xs text-muted-foreground mt-1">Clientes ativos</p>
             </CardContent>
           </Card>
         </div>

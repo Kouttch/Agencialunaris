@@ -30,21 +30,25 @@ export function AppSidebar() {
   }];
   
   const moderatorItems = [{
+    title: "Visão Geral",
+    url: "/fulladmin",
+    icon: BarChart3
+  }, {
+    title: "Clientes",
+    url: "/fulladmin/clients",
+    icon: Users
+  }, {
     title: "Dashboards",
-    url: "/moderator/dashboards",
+    url: "/fulladmin/dashboards",
     icon: TrendingUp
   }, {
     title: "Checklist",
-    url: "/moderator/checklist",
+    url: "/fulladmin/checklist",
     icon: CheckCircle2
   }, {
     title: "Pagamentos",
-    url: "/moderator/payments",
+    url: "/fulladmin/payments",
     icon: CreditCard
-  }, {
-    title: "Estratégia",
-    url: "/moderator/strategy",
-    icon: FileText
   }];
   
   const adminItems = [{
