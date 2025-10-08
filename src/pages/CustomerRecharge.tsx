@@ -57,9 +57,34 @@ export default function CustomerRecharge() {
     });
   };
 
+  const handleNotifyPayment = async (paymentId: string) => {
+    try {
+      const { error } = await supabase
+        .from('payment_requests')
+        .update({ status: 'paid' })
+        .eq('id', paymentId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Notificação enviada",
+        description: "O gestor foi notificado sobre seu pagamento.",
+      });
+
+      loadPaymentRequests();
+    } catch (error) {
+      console.error('Error notifying payment:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível enviar a notificação.",
+        variant: "destructive"
+      });
+    }
+  };
+
   const getStatusBadge = (status: string) => {
     const config = {
-      pending: { variant: "secondary" as const, label: "Pendente", icon: <Clock className="h-3 w-3 mr-1" /> },
+      pending: { variant: "secondary" as const, label: "Aguardando Pagamento", icon: <Clock className="h-3 w-3 mr-1" /> },
       paid: { variant: "default" as const, label: "Pago", icon: <CheckCircle className="h-3 w-3 mr-1" /> },
       cancelled: { variant: "destructive" as const, label: "Cancelado", icon: <XCircle className="h-3 w-3 mr-1" /> }
     };
@@ -204,6 +229,15 @@ export default function CustomerRecharge() {
                           💡 O saldo será creditado automaticamente após a confirmação do pagamento.
                         </p>
                       </div>
+
+                      <Button 
+                        className="w-full mt-4" 
+                        variant="default"
+                        onClick={() => handleNotifyPayment(recharge.id)}
+                      >
+                        <CheckCircle className="h-4 w-4 mr-2" />
+                        Avisar que já paguei
+                      </Button>
                     </div>
                   </CardContent>
                 </Card>

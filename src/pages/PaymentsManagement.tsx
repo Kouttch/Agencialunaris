@@ -130,7 +130,7 @@ export default function PaymentsManagement() {
     }
   };
 
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     if (!selectedClient || !message) {
       toast({
         title: "Campos obrigatórios",
@@ -140,13 +140,35 @@ export default function PaymentsManagement() {
       return;
     }
 
-    // TODO: Send notification to client
-    toast({
-      title: "Mensagem enviada",
-      description: "A mensagem foi enviada ao cliente com sucesso.",
-    });
+    try {
+      const { data: authData } = await supabase.auth.getUser();
+      
+      const { error } = await supabase
+        .from('notifications')
+        .insert({
+          user_id: selectedClient,
+          title: 'Nova Mensagem',
+          message: message,
+          type: 'info',
+          is_read: false
+        });
 
-    setMessage("");
+      if (error) throw error;
+
+      toast({
+        title: "Mensagem enviada",
+        description: "A mensagem foi enviada ao cliente com sucesso.",
+      });
+
+      setMessage("");
+    } catch (error) {
+      console.error('Error sending message:', error);
+      toast({
+        title: "Erro ao enviar",
+        description: "Não foi possível enviar a mensagem.",
+        variant: "destructive"
+      });
+    }
   };
 
   const copyPixCode = (code: string) => {
@@ -159,14 +181,47 @@ export default function PaymentsManagement() {
     });
   };
 
+  const handleUpdateStatus = async (paymentId: string, newStatus: string) => {
+    try {
+      const { error } = await supabase
+        .from('payment_requests')
+        .update({ status: newStatus })
+        .eq('id', paymentId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Status atualizado",
+        description: `Pagamento marcado como ${newStatus === 'paid' ? 'pago' : 'pendente'}.`,
+      });
+
+      loadPaymentHistory();
+    } catch (error) {
+      console.error('Error updating status:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível atualizar o status.",
+        variant: "destructive"
+      });
+    }
+  };
+
   const getStatusBadge = (status: string) => {
     const variants = {
-      "Pendente": "secondary",
-      "Pago": "default",
-      "Cancelado": "destructive"
+      "pending": "secondary",
+      "paid": "default",
+      "cancelled": "destructive"
     } as const;
     
-    return <Badge variant={variants[status as keyof typeof variants] || "outline"}>{status}</Badge>;
+    const labels = {
+      "pending": "Aguardando Pagamento",
+      "paid": "Pago",
+      "cancelled": "Cancelado"
+    } as const;
+    
+    return <Badge variant={variants[status as keyof typeof variants] || "outline"}>
+      {labels[status as keyof typeof labels] || status}
+    </Badge>;
   };
 
   return (
@@ -303,6 +358,7 @@ export default function PaymentsManagement() {
                   <TableHead>Valor</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Data</TableHead>
+                  <TableHead>Código PIX</TableHead>
                   <TableHead>Ações</TableHead>
                 </TableRow>
               </TableHeader>
@@ -319,17 +375,42 @@ export default function PaymentsManagement() {
                       {new Date(payment.created_at).toLocaleDateString('pt-BR')}
                     </TableCell>
                     <TableCell>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => copyPixCode(payment.pix_code)}
-                      >
-                        {copiedCode === payment.pix_code ? (
-                          <Check className="h-4 w-4" />
-                        ) : (
-                          <Copy className="h-4 w-4" />
-                        )}
-                      </Button>
+                      <div className="flex items-center gap-2">
+                        <code className="text-xs bg-muted px-2 py-1 rounded">
+                          {payment.pix_code.substring(0, 15)}...
+                        </code>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => copyPixCode(payment.pix_code)}
+                        >
+                          {copiedCode === payment.pix_code ? (
+                            <Check className="h-4 w-4" />
+                          ) : (
+                            <Copy className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleUpdateStatus(payment.id, 'paid')}
+                          disabled={payment.status === 'paid'}
+                        >
+                          Marcar como Pago
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleUpdateStatus(payment.id, 'pending')}
+                          disabled={payment.status === 'pending'}
+                        >
+                          Pendente
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}

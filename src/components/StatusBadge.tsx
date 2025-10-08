@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 
-type StatusType = "active" | "inactive" | "integration" | "pending";
+type StatusType = "active" | "disabled" | "integration" | "pending";
 
 interface StatusBadgeProps {
   status: StatusType;
@@ -13,20 +13,20 @@ const statusConfig = {
     color: "bg-green-500",
     glow: "shadow-[0_0_15px_rgba(34,197,94,0.6)]",
   },
-  inactive: {
+  disabled: {
     label: "Desativado",
     color: "bg-red-500",
     glow: "shadow-[0_0_15px_rgba(239,68,68,0.6)]",
   },
   integration: {
     label: "Integração",
-    color: "bg-blue-500",
-    glow: "shadow-[0_0_15px_rgba(59,130,246,0.6)]",
+    color: "bg-orange-500",
+    glow: "shadow-[0_0_15px_rgba(249,115,22,0.6)]",
   },
   pending: {
     label: "Pendente",
-    color: "bg-orange-500",
-    glow: "shadow-[0_0_15px_rgba(249,115,22,0.6)]",
+    color: "bg-blue-500",
+    glow: "shadow-[0_0_15px_rgba(59,130,246,0.6)]",
   },
 };
 

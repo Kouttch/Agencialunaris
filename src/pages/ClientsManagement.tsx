@@ -30,6 +30,11 @@ export default function ClientsManagement() {
     loadManagers();
   }, []);
 
+  const regularUsersCount = users.filter(user => {
+    // Check if user has only 'user' role (not admin or moderator)
+    return !user.manager_id; // Simple way: managers won't be counted
+  }).length;
+
   const loadUsers = async () => {
     const { data } = await supabase
       .from('profiles')
@@ -156,15 +161,17 @@ export default function ClientsManagement() {
               <CardTitle className="text-sm font-medium text-muted-foreground">Total de Clientes</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{users.length}</div>
+              <div className="text-2xl font-bold">{regularUsersCount}</div>
+              <p className="text-xs text-muted-foreground mt-1">Somente usuários</p>
             </CardContent>
           </Card>
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Clientes Cadastrados</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">Total Geral</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-primary">{users.length}</div>
+              <p className="text-xs text-muted-foreground mt-1">Todos os perfis</p>
             </CardContent>
           </Card>
         </div>

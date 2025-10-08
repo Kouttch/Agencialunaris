@@ -14,7 +14,7 @@ export function AppSidebar() {
   const customerItems = [{
     title: "Dashboard",
     url: "/minha-conta",
-    icon: Home
+    icon: BarChart3
   }, {
     title: "Estratégia",
     url: "/minha-conta/estrategia",

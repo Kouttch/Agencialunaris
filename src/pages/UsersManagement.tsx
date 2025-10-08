@@ -202,7 +202,8 @@ export default function UsersManagement() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="user">Usuário</SelectItem>
+                    <SelectItem value="user">Cliente</SelectItem>
+                    <SelectItem value="moderator">Gestor</SelectItem>
                     <SelectItem value="admin">Administrador</SelectItem>
                   </SelectContent>
                 </Select>
@@ -254,7 +255,10 @@ export default function UsersManagement() {
                     <TableCell>{user.email}</TableCell>
                     <TableCell>{user.full_name || "-"}</TableCell>
                     <TableCell>{user.company || "-"}</TableCell>
-                    <TableCell className="capitalize">{user.role}</TableCell>
+                    <TableCell>
+                      {user.role === 'admin' ? 'Admin' : 
+                       user.role === 'moderator' ? 'Gestor' : 'Cliente'}
+                    </TableCell>
                     <TableCell className="text-right">
                       <Button
                         variant="ghost"

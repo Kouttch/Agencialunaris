@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell, Legend } from 'recharts';
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
@@ -30,9 +30,11 @@ export default function AdminDashboard() {
   const [selectedUserId, setSelectedUserId] = useState<string>(searchParams.get('user') || "");
   const [campaignData, setCampaignData] = useState<CampaignData[]>([]);
   const [loading, setLoading] = useState(false);
+  const [clientStatusData, setClientStatusData] = useState<any[]>([]);
 
   useEffect(() => {
     loadUsers();
+    loadClientStatusStats();
   }, []);
 
   useEffect(() => {
@@ -53,6 +55,41 @@ export default function AdminDashboard() {
       setUsers(data || []);
     } catch (error) {
       console.error('Error loading users:', error);
+    }
+  };
+
+  const loadClientStatusStats = async () => {
+    try {
+      const { data } = await supabase
+        .from('profiles')
+        .select('account_status');
+
+      if (data) {
+        const statusCounts = data.reduce((acc: any, profile) => {
+          const status = profile.account_status || 'active';
+          acc[status] = (acc[status] || 0) + 1;
+          return acc;
+        }, {});
+
+        const COLORS = {
+          active: '#22c55e',
+          disabled: '#ef4444',
+          integration: '#f97316',
+          pending: '#3b82f6'
+        };
+
+        const pieData = Object.entries(statusCounts).map(([status, count]) => ({
+          name: status === 'active' ? 'Ativo' : 
+                status === 'disabled' ? 'Desativado' : 
+                status === 'integration' ? 'Integração' : 'Pendente',
+          value: count,
+          color: COLORS[status as keyof typeof COLORS]
+        }));
+
+        setClientStatusData(pieData);
+      }
+    } catch (error) {
+      console.error('Error loading client status stats:', error);
     }
   };
 
@@ -97,6 +134,38 @@ export default function AdminDashboard() {
         <h1 className="text-3xl font-bold mb-2">Painel Administrativo</h1>
         <p className="text-muted-foreground">Visão geral de dados reais dos clientes</p>
       </div>
+
+      {/* Client Status Overview */}
+      <Card className="mb-8">
+        <CardHeader>
+          <CardTitle>Distribuição de Status dos Clientes</CardTitle>
+          <CardDescription>
+            Visão geral dos status de todas as contas
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ResponsiveContainer width="100%" height={300}>
+            <PieChart>
+              <Pie
+                data={clientStatusData}
+                cx="50%"
+                cy="50%"
+                labelLine={false}
+                label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                outerRadius={100}
+                fill="#8884d8"
+                dataKey="value"
+              >
+                {clientStatusData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.color} />
+                ))}
+              </Pie>
+              <Tooltip />
+              <Legend />
+            </PieChart>
+          </ResponsiveContainer>
+        </CardContent>
+      </Card>
 
       {/* User Dashboard Access */}
       <Card className="mb-8">
