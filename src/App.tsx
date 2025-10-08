@@ -24,6 +24,7 @@ import NotFound from "./pages/NotFound";
 import Contact from "./pages/Contact";
 import TermsOfUse from "./pages/TermsOfUse";
 import Privacy from "./pages/Privacy";
+import StrategyManagement from "./pages/StrategyManagement";
 
 const queryClient = new QueryClient();
 
@@ -151,6 +152,16 @@ const App = () => (
                   <ProtectedRoute>
                     <DashboardLayout>
                       <ChecklistManagement />
+                    </DashboardLayout>
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/fulladmin/strategies" 
+                element={
+                  <ProtectedRoute>
+                    <DashboardLayout>
+                      <StrategyManagement />
                     </DashboardLayout>
                   </ProtectedRoute>
                 } 

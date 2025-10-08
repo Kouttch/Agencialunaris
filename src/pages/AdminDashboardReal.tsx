@@ -147,6 +147,38 @@ export default function AdminDashboard() {
 
   const selectedUser = users.find(u => u.user_id === selectedUserId);
 
+  // Performance calculations
+  const calculatePerformance = () => {
+    if (campaignData.length === 0) return null;
+    
+    // Calculate weekly average metrics
+    const weeklyAvgConversations = totalConversations / campaignData.length;
+    const weeklyAvgReach = totalReach / campaignData.length;
+    const weeklyAvgCost = avgCostPerConversation;
+    
+    // Define performance thresholds
+    const performanceScore = 
+      (weeklyAvgConversations > 50 ? 1 : 0) +
+      (weeklyAvgReach > 5000 ? 1 : 0) +
+      (weeklyAvgCost < 5 ? 1 : 0) +
+      (avgFrequency > 2 ? 1 : 0);
+    
+    const performance = performanceScore >= 3 ? 'high' : performanceScore >= 2 ? 'medium' : 'low';
+    
+    return {
+      level: performance,
+      score: performanceScore,
+      label: performance === 'high' ? 'Alto Desempenho' : 
+             performance === 'medium' ? 'Médio Desempenho' : 'Baixo Desempenho',
+      color: performance === 'high' ? 'text-green-500' : 
+             performance === 'medium' ? 'text-yellow-500' : 'text-red-500',
+      bgColor: performance === 'high' ? 'bg-green-500/10 border-green-500/20' : 
+               performance === 'medium' ? 'bg-yellow-500/10 border-yellow-500/20' : 'bg-red-500/10 border-red-500/20'
+    };
+  };
+
+  const performanceData = calculatePerformance();
+
   return (
     <div className="container mx-auto p-6">
       <div className="mb-8">
@@ -222,16 +254,35 @@ export default function AdminDashboard() {
         <>
           {selectedUser && (
             <div className="mb-6">
-              <h2 className="text-2xl font-bold">
-                {selectedUser.full_name}
-                {selectedUser.company && ` - ${selectedUser.company}`}
-              </h2>
-              <p className="text-muted-foreground">
-                {campaignData.length > 0 
-                  ? `${campaignData.length} campanhas encontradas`
-                  : 'Nenhuma campanha encontrada'
-                }
-              </p>
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold">
+                    {selectedUser.full_name}
+                    {selectedUser.company && ` - ${selectedUser.company}`}
+                  </h2>
+                  <p className="text-muted-foreground">
+                    {campaignData.length > 0 
+                      ? `${campaignData.length} campanhas encontradas`
+                      : 'Nenhuma campanha encontrada'
+                    }
+                  </p>
+                </div>
+                {performanceData && (
+                  <Card className={`${performanceData.bgColor} border-2`}>
+                    <CardContent className="pt-6">
+                      <div className="text-center">
+                        <p className="text-sm text-muted-foreground mb-1">Status de Desempenho</p>
+                        <p className={`text-2xl font-bold ${performanceData.color}`}>
+                          {performanceData.label}
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-2">
+                          Pontuação: {performanceData.score}/4
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
             </div>
           )}
 

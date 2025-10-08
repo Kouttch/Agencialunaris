@@ -491,6 +491,45 @@ export type Database = {
           },
         ]
       }
+      strategy_documents: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          file_name: string
+          file_size: number
+          file_url: string
+          id: string
+          title: string
+          updated_at: string | null
+          uploaded_by: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          file_name: string
+          file_size: number
+          file_url: string
+          id?: string
+          title: string
+          updated_at?: string | null
+          uploaded_by: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          file_name?: string
+          file_size?: number
+          file_url?: string
+          id?: string
+          title?: string
+          updated_at?: string | null
+          uploaded_by?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string

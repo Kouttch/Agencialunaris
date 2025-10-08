@@ -1,40 +1,100 @@
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Download, FileText, Calendar } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
-// TODO: Fetch from database
-const mockDocuments = [
-  {
-    id: 1,
-    title: "Estratégia de Marketing - Janeiro 2025",
-    description: "Planejamento estratégico para campanhas do primeiro trimestre",
-    uploadDate: "2025-01-15",
-    fileUrl: "#",
-    size: "2.4 MB"
-  },
-  {
-    id: 2,
-    title: "Relatório de Performance Q4 2024",
-    description: "Análise detalhada dos resultados do último trimestre",
-    uploadDate: "2024-12-20",
-    fileUrl: "#",
-    size: "1.8 MB"
-  },
-  {
-    id: 3,
-    title: "Guia de Boas Práticas",
-    description: "Diretrizes e recomendações para otimização de campanhas",
-    uploadDate: "2024-11-10",
-    fileUrl: "#",
-    size: "3.1 MB"
-  }
-];
+interface StrategyDocument {
+  id: string;
+  title: string;
+  description: string | null;
+  file_url: string;
+  file_name: string;
+  file_size: number;
+  created_at: string;
+}
 
 export default function CustomerStrategy() {
-  const handleDownload = (doc: typeof mockDocuments[0]) => {
-    // TODO: Implement actual download logic
-    console.log("Downloading:", doc.title);
+  const [documents, setDocuments] = useState<StrategyDocument[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    loadDocuments();
+  }, []);
+
+  const loadDocuments = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data, error } = await supabase
+        .from('strategy_documents')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setDocuments(data || []);
+    } catch (error) {
+      console.error('Error loading documents:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível carregar os documentos.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
   };
+
+  const handleDownload = async (doc: StrategyDocument) => {
+    try {
+      const { data, error } = await supabase.storage
+        .from('strategy-documents')
+        .download(doc.file_url);
+
+      if (error) throw error;
+
+      const url = URL.createObjectURL(data);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = doc.file_name;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      toast({
+        title: "Download iniciado",
+        description: "O arquivo está sendo baixado."
+      });
+    } catch (error) {
+      console.error('Error downloading document:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível baixar o documento.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+  };
+
+  if (loading) {
+    return (
+      <div className="p-6">
+        <p className="text-center text-muted-foreground">Carregando documentos...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 space-y-6">
@@ -46,7 +106,7 @@ export default function CustomerStrategy() {
       </div>
 
       <div className="grid gap-4">
-        {mockDocuments.map((doc) => (
+        {documents.map((doc) => (
           <Card key={doc.id} className="hover:shadow-lg transition-shadow">
             <CardHeader>
               <div className="flex items-start justify-between">
@@ -56,7 +116,7 @@ export default function CustomerStrategy() {
                   </div>
                   <div className="flex-1">
                     <CardTitle className="text-lg mb-1">{doc.title}</CardTitle>
-                    <CardDescription>{doc.description}</CardDescription>
+                    <CardDescription>{doc.description || 'Sem descrição'}</CardDescription>
                   </div>
                 </div>
                 <Button 
@@ -73,10 +133,10 @@ export default function CustomerStrategy() {
               <div className="flex items-center gap-4 text-sm text-muted-foreground">
                 <div className="flex items-center gap-1">
                   <Calendar className="h-4 w-4" />
-                  {new Date(doc.uploadDate).toLocaleDateString('pt-BR')}
+                  {new Date(doc.created_at).toLocaleDateString('pt-BR')}
                 </div>
                 <div>
-                  {doc.size}
+                  {formatFileSize(doc.file_size)}
                 </div>
               </div>
             </CardContent>
@@ -84,7 +144,7 @@ export default function CustomerStrategy() {
         ))}
       </div>
 
-      {mockDocuments.length === 0 && (
+      {documents.length === 0 && (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <FileText className="h-12 w-12 text-muted-foreground mb-4" />

@@ -1,4 +1,4 @@
-import { BarChart3, Users, Settings, CreditCard, User, Home, MessageSquare, Shield, TrendingUp, FileText, CheckCircle2 } from "lucide-react";
+import { BarChart3, Users, Settings, CreditCard, User, Home, MessageSquare, Shield, TrendingUp, FileText, CheckCircle2, FolderOpen } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -46,6 +46,10 @@ export function AppSidebar() {
     url: "/fulladmin/checklist",
     icon: CheckCircle2
   }, {
+    title: "Estratégias",
+    url: "/fulladmin/strategies",
+    icon: FolderOpen
+  }, {
     title: "Pagamentos",
     url: "/fulladmin/payments",
     icon: CreditCard
@@ -75,6 +79,10 @@ export function AppSidebar() {
     title: "Checklist",
     url: "/fulladmin/checklist",
     icon: CheckCircle2
+  }, {
+    title: "Estratégias",
+    url: "/fulladmin/strategies",
+    icon: FolderOpen
   }, {
     title: "Usuários",
     url: "/fulladmin/users",
