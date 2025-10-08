@@ -9,6 +9,8 @@ import { Tooltip as TooltipUI, TooltipContent, TooltipProvider, TooltipTrigger }
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { useUserRole } from "@/hooks/useUserRole";
+import ChecklistManagement from "./ChecklistManagement";
 interface ChartData {
   name: string;
   conversas: number;
@@ -18,6 +20,7 @@ interface ChartData {
 export default function CustomerDashboard() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { isAdmin, isModerator } = useUserRole();
   const [theme, setTheme] = useState<"light" | "dark">("dark");
   const [profileData, setProfileData] = useState({
     userName: "",
@@ -28,6 +31,7 @@ export default function CustomerDashboard() {
   
   const [weeklyData, setWeeklyData] = useState<ChartData[]>([]);
   const [monthlyData, setMonthlyData] = useState<ChartData[]>([]);
+  const [annualData, setAnnualData] = useState<ChartData[]>([]);
   const [metrics, setMetrics] = useState({
     conversasIniciadas: 0,
     custoPorConversa: 0,
@@ -150,6 +154,28 @@ export default function CustomerDashboard() {
           alcance: items.reduce((sum, item) => sum + (item.reach || 0), 0)
         }));
 
+      // Processar dados anuais (agrupar por mês)
+      const monthlyGroups: { [key: number]: any[] } = {};
+      campaignData.forEach(item => {
+        if (item.week_start) {
+          const month = new Date(item.week_start).getMonth();
+          if (!monthlyGroups[month]) {
+            monthlyGroups[month] = [];
+          }
+          monthlyGroups[month].push(item);
+        }
+      });
+
+      const monthNames = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+      const annualChartData: ChartData[] = Object.entries(monthlyGroups)
+        .map(([month, items]) => ({
+          name: monthNames[parseInt(month)],
+          conversas: items.reduce((sum, item) => sum + (item.conversations_started || 0), 0),
+          custo: items.reduce((sum, item) => sum + parseFloat(item.amount_spent?.toString() || '0'), 0),
+          alcance: items.reduce((sum, item) => sum + (item.reach || 0), 0)
+        }))
+        .sort((a, b) => monthNames.indexOf(a.name) - monthNames.indexOf(b.name));
+
       // Calcular métricas totais
       const totalConversas = campaignData.reduce((sum, item) => sum + (item.conversations_started || 0), 0);
       const totalGasto = campaignData.reduce((sum, item) => sum + parseFloat(item.amount_spent?.toString() || '0'), 0);
@@ -162,6 +188,7 @@ export default function CustomerDashboard() {
 
       setWeeklyData(weeklyChartData);
       setMonthlyData(monthlyChartData);
+      setAnnualData(annualChartData);
       setMetrics({
         conversasIniciadas: totalConversas,
         custoPorConversa: custoPorConversa,
@@ -181,6 +208,19 @@ export default function CustomerDashboard() {
   };
 
   const isDeactivated = profileData.accountStatus !== 'active' && profileData.accountStatus !== 'pending';
+
+  // Se for Admin ou Gestor, mostrar Checklist
+  if (isAdmin || isModerator) {
+    return (
+      <div className="container mx-auto p-6 pb-24">
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold mb-2">Checklist de Tarefas</h1>
+          <p className="text-muted-foreground">Gerencie todas as tarefas e acompanhamento</p>
+        </div>
+        <ChecklistManagement />
+      </div>
+    );
+  }
 
   return <div className="container mx-auto p-6 pb-24">
       <div className="mb-10">
@@ -277,6 +317,7 @@ export default function CustomerDashboard() {
           <TabsList>
             <TabsTrigger value="weekly">Semanal</TabsTrigger>
             <TabsTrigger value="monthly">Mensal</TabsTrigger>
+            <TabsTrigger value="annual">Anual</TabsTrigger>
           </TabsList>
           
           {managerData.name && (
@@ -367,6 +408,46 @@ export default function CustomerDashboard() {
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
                   <LineChart data={monthlyData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip />
+                    <Line type="monotone" dataKey="alcance" stroke="hsl(var(--primary))" strokeWidth={2} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="annual" className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Conversas por Mês</CardTitle>
+                <CardDescription>Últimos 12 meses</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={annualData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip />
+                    <Bar dataKey="conversas" fill="hsl(var(--primary))" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Alcance por Mês</CardTitle>
+                <CardDescription>Últimos 12 meses</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart data={annualData}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="name" />
                     <YAxis />

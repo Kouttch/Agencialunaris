@@ -63,11 +63,11 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           
           <div className="flex items-center gap-4">
             {isAdmin ? (
-              <Badge className="bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-600 text-black font-bold shadow-[0_0_20px_rgba(250,204,21,0.6)] border-yellow-300 [animation:gold-shimmer_2s_ease-in-out_infinite]">
+              <Badge className="bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-600 text-black font-bold shadow-[0_0_20px_rgba(250,204,21,0.6)] border-yellow-300 animate-[gold-shimmer_2s_ease-in-out_infinite]">
                 Admin
               </Badge>
             ) : isModerator ? (
-              <Badge className="bg-gradient-to-r from-[#f59b46] to-[#e83950] text-white font-bold shadow-[0_0_20px_rgba(245,155,70,0.6)] border-transparent [animation:gradient-pulse_2s_ease-in-out_infinite]">
+              <Badge className="relative bg-gradient-to-br from-[#f59b46] via-[#f07850] to-[#e83950] text-white font-bold shadow-[0_0_25px_rgba(245,155,70,0.7)] border border-[#f59b46]/30 animate-[gradient-pulse_2s_ease-in-out_infinite] bg-[length:200%_200%]">
                 Gestor
               </Badge>
             ) : (

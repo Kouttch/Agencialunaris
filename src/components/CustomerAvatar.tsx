@@ -37,7 +37,7 @@ export const CustomerAvatar = ({
     if (isModerator) {
       return {
         label: "Gestor",
-        className: "bg-gradient-to-r from-[#f59b46] to-[#e83950] text-white font-bold shadow-[0_0_20px_rgba(245,155,70,0.6)] border-transparent [animation:gradient-pulse_2s_ease-in-out_infinite]"
+        className: "relative bg-gradient-to-br from-[#f59b46] via-[#f07850] to-[#e83950] text-white font-bold shadow-[0_0_25px_rgba(245,155,70,0.7)] border border-[#f59b46]/30 animate-[gradient-pulse_2s_ease-in-out_infinite] bg-[length:200%_200%]"
       };
     }
     return {
