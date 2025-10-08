@@ -63,43 +63,52 @@ export default function PaymentsManagement() {
 
   const loadPaymentHistory = async () => {
     try {
-      let query = supabase
+      // Buscar payment requests
+      let paymentsQuery = supabase
         .from('payment_requests')
-        .select(`
-          id,
-          user_id,
-          amount,
-          pix_code,
-          message,
-          status,
-          created_at,
-          profiles!payment_requests_user_id_fkey (
-            full_name,
-            company
-          )
-        `);
+        .select('*');
 
       // Se for moderador, filtrar apenas pagamentos de clientes gerenciados
       if (isModerator && managedClients.length > 0) {
-        query = query.in('user_id', managedClients);
+        paymentsQuery = paymentsQuery.in('user_id', managedClients);
       }
 
-      const { data, error } = await query.order('created_at', { ascending: false });
+      const { data: paymentsData, error: paymentsError } = await paymentsQuery
+        .order('created_at', { ascending: false });
       
-      if (error) {
-        console.error('Error loading payment history:', error);
-        toast({
-          title: "Erro ao carregar histórico",
-          description: error.message,
-          variant: "destructive"
-        });
-        return;
+      if (paymentsError) {
+        console.error('Error loading payments:', paymentsError);
+        throw paymentsError;
       }
-      
-      console.log('Payment history loaded:', data);
-      if (data) setPaymentHistory(data as any);
-    } catch (error) {
+
+      // Buscar profiles separadamente
+      const userIds = [...new Set(paymentsData?.map(p => p.user_id) || [])];
+      const { data: profilesData, error: profilesError } = await supabase
+        .from('profiles')
+        .select('user_id, full_name, company')
+        .in('user_id', userIds);
+
+      if (profilesError) {
+        console.error('Error loading profiles:', profilesError);
+        throw profilesError;
+      }
+
+      // Combinar dados
+      const profilesMap = new Map(profilesData?.map(p => [p.user_id, p]) || []);
+      const combined = paymentsData?.map(payment => ({
+        ...payment,
+        profiles: profilesMap.get(payment.user_id) || { full_name: 'N/A', company: 'N/A' }
+      })) || [];
+
+      console.log('Payment history loaded:', combined);
+      setPaymentHistory(combined as any);
+    } catch (error: any) {
       console.error('Error loading payment history:', error);
+      toast({
+        title: "Erro ao carregar histórico",
+        description: error.message || "Não foi possível carregar o histórico.",
+        variant: "destructive"
+      });
     }
   };
 
