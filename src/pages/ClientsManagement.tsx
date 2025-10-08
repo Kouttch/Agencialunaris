@@ -9,7 +9,6 @@ import { Search, Plus, MoreHorizontal, Eye, Edit, Trash2, UserCog } from "lucide
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger } from "@/components/ui/dropdown-menu";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { useNavigate } from "react-router-dom";
 
 interface UserProfile {
   user_id: string;
@@ -25,26 +24,38 @@ export default function ClientsManagement() {
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [managers, setManagers] = useState<UserProfile[]>([]);
   const { toast } = useToast();
-  const navigate = useNavigate();
 
   useEffect(() => {
     loadUsers();
     loadManagers();
   }, []);
 
-  const regularUsersCount = users.filter(user => {
-    // Check if user has only 'user' role (not admin or moderator)
-    return !user.manager_id; // Simple way: managers won't be counted
-  }).length;
-
   const loadUsers = async () => {
-    const { data } = await supabase
+    // Get all profiles
+    const { data: profilesData } = await supabase
       .from('profiles')
       .select('user_id, full_name, company, created_at, account_status, manager_id')
       .order('full_name');
     
-    if (data) setUsers(data);
+    // Get all user roles
+    const { data: rolesData } = await supabase
+      .from('user_roles')
+      .select('user_id, role');
+    
+    if (profilesData && rolesData) {
+      // Create a map of user roles
+      const rolesMap = new Map(rolesData.map(r => [r.user_id, r.role]));
+      
+      // Filter to only include users with 'user' role (not admins or moderators)
+      const clientUsers = profilesData.filter(profile => 
+        rolesMap.get(profile.user_id) === 'user'
+      );
+      
+      setUsers(clientUsers);
+    }
   };
+
+  const regularUsersCount = users.length; // Now users array only contains actual clients
 
   const loadManagers = async () => {
     const { data } = await supabase
@@ -137,7 +148,7 @@ export default function ClientsManagement() {
             <h1 className="text-3xl font-bold mb-2">Gerenciamento de Clientes</h1>
             <p className="text-muted-foreground">Lista completa de usuários e seus status</p>
           </div>
-          <Button onClick={() => navigate('/fulladmin/data')}>
+          <Button>
             <Plus className="h-4 w-4 mr-2" />
             Novo Cliente
           </Button>

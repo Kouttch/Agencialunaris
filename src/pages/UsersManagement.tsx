@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Loader2, Plus, Trash2 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useNavigate } from "react-router-dom";
 
 interface User {
   id: string;
@@ -21,6 +22,7 @@ interface User {
 export default function UsersManagement() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
@@ -120,8 +122,11 @@ export default function UsersManagement() {
     if (!confirm("Tem certeza que deseja deletar este usuário?")) return;
 
     try {
-      const { error } = await supabase.auth.admin.deleteUser(userId);
-      
+      // Call edge function to delete user from auth
+      const { error } = await supabase.functions.invoke('delete-user', {
+        body: { userId }
+      });
+
       if (error) throw error;
 
       toast({
@@ -131,6 +136,7 @@ export default function UsersManagement() {
 
       loadUsers();
     } catch (error: any) {
+      console.error('Error deleting user:', error);
       toast({
         title: "Erro ao deletar usuário",
         description: error.message,
@@ -141,9 +147,15 @@ export default function UsersManagement() {
 
   return (
     <div className="container mx-auto p-6 pb-24">
-      <div className="mb-10">
-        <h1 className="text-3xl font-bold mb-2">Gerenciamento de Usuários</h1>
-        <p className="text-muted-foreground">Crie e gerencie contas de usuários</p>
+      <div className="mb-10 flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold mb-2">Gerenciamento de Usuários</h1>
+          <p className="text-muted-foreground">Crie e gerencie contas de usuários</p>
+        </div>
+        <Button onClick={() => navigate('/fulladmin/data')}>
+          <Plus className="h-4 w-4 mr-2" />
+          Novo Cliente
+        </Button>
       </div>
 
       {/* Create User Form */}
