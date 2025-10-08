@@ -20,13 +20,13 @@ const statusConfig = {
   },
   integration: {
     label: "Integração",
-    color: "bg-orange-500",
-    glow: "shadow-[0_0_15px_rgba(249,115,22,0.6)]",
+    color: "bg-blue-500",
+    glow: "shadow-[0_0_15px_rgba(59,130,246,0.6)]",
   },
   pending: {
     label: "Pendente",
-    color: "bg-blue-500",
-    glow: "shadow-[0_0_15px_rgba(59,130,246,0.6)]",
+    color: "bg-orange-500",
+    glow: "shadow-[0_0_15px_rgba(249,115,22,0.6)]",
   },
 };
 

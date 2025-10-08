@@ -194,7 +194,11 @@ export default function CustomerDashboard() {
           <div className="absolute inset-0 z-50 backdrop-blur-md bg-background/80 flex items-center justify-center rounded-lg min-h-[500px]">
             <div className="text-center space-y-2 p-8">
               <h2 className="text-3xl font-bold text-destructive">Dashboard Indisponível</h2>
-              <p className="text-muted-foreground text-lg">Sua conta está desativada. Entre em contato com o suporte.</p>
+              <p className="text-muted-foreground text-lg">
+                {profileData.accountStatus === 'integration' 
+                  ? 'Estamos construindo e ajustando o seu acesso.'
+                  : 'Sua conta está desativada. Entre em contato com o suporte.'}
+              </p>
             </div>
           </div>
         )}

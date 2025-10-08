@@ -127,8 +127,8 @@ export default function ClientsManagement() {
     const config = {
       active: { variant: "default" as const, label: "Ativo", className: "bg-green-500" },
       disabled: { variant: "destructive" as const, label: "Desativado", className: "bg-red-500" },
-      integration: { variant: "secondary" as const, label: "Integração", className: "bg-orange-500" },
-      pending: { variant: "outline" as const, label: "Pendente", className: "bg-blue-500 text-white" }
+      integration: { variant: "secondary" as const, label: "Integração", className: "bg-blue-500 text-white" },
+      pending: { variant: "outline" as const, label: "Pendente", className: "bg-orange-500 text-white" }
     };
     
     const statusConfig = config[status as keyof typeof config] || config.active;
