@@ -41,35 +41,84 @@ serve(async (req) => {
     }
 
     const csvText = await response.text();
-    const lines = csvText.split('\n');
+    console.log('CSV preview (first 500 chars):', csvText.substring(0, 500));
     
-    // Parse CSV (skip header)
+    const lines = csvText.split('\n');
+    const header = lines[0].toLowerCase().split(',').map(h => h.trim().replace(/"/g, ''));
+    
+    console.log('CSV Headers:', header);
+    
+    // Parse CSV based on actual column names
     const rawCampaignData = [];
     for (let i = 1; i < lines.length; i++) {
       const line = lines[i].trim();
       if (!line) continue;
 
-      const values = line.split(',').map(v => v.replace(/^"|"$/g, '').trim());
+      // Parse CSV line (handle quoted values)
+      const values: string[] = [];
+      let current = '';
+      let inQuotes = false;
       
-      if (values.length < 15) continue;
+      for (let j = 0; j < line.length; j++) {
+        const char = line[j];
+        if (char === '"') {
+          inQuotes = !inQuotes;
+        } else if (char === ',' && !inQuotes) {
+          values.push(current.trim());
+          current = '';
+        } else {
+          current += char;
+        }
+      }
+      values.push(current.trim());
+
+      if (values.length < 3) continue;
+
+      // Map columns by header names (case insensitive)
+      const row: any = {};
+      header.forEach((col, idx) => {
+        row[col] = values[idx] || '';
+      });
+
+      // Extract date from date_start (format: 26/09/2025 -> 2025-09-26)
+      let weekStart = new Date().toISOString().split('T')[0];
+      if (row.date_start || row.date) {
+        const dateStr = row.date_start || row.date;
+        const parts = dateStr.split('/');
+        if (parts.length === 3) {
+          weekStart = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+        }
+      }
+
+      // Parse campaign name
+      const campaignName = row.campaign_name || row.campaign || 'Sem nome';
+      
+      // Parse numeric values
+      const spend = parseFloat(row.spend || row.amount_spent || '0');
+      const impressions = parseInt(row.impressions || '0');
+      const actions = parseInt(row.actions || row.results || '0');
+      
+      // Calculate metrics
+      const cpm = impressions > 0 ? (spend / impressions) * 1000 : 0;
+      const costPerResult = actions > 0 ? spend / actions : 0;
 
       rawCampaignData.push({
         user_id: userId,
-        campaign_name: values[0],
-        reach: parseInt(values[1]) || 0,
-        impressions: parseInt(values[2]) || 0,
-        frequency: parseFloat(values[3]) || 0,
-        results: parseInt(values[4]) || 0,
-        cost_per_result: parseFloat(values[5]) || 0,
-        amount_spent: parseFloat(values[6]) || 0,
-        cpm: parseFloat(values[7]) || 0,
-        link_clicks: parseInt(values[8]) || 0,
-        cpc: parseFloat(values[9]) || 0,
-        ctr: parseFloat(values[10]) || 0,
-        cost_per_conversation: parseFloat(values[11]) || null,
-        conversations_started: parseInt(values[12]) || null,
-        week_start: values[13] || new Date().toISOString().split('T')[0],
-        week_end: values[14] || new Date().toISOString().split('T')[0]
+        campaign_name: campaignName,
+        reach: 0, // Not in this spreadsheet format
+        impressions: impressions,
+        frequency: 0, // Not in this spreadsheet format
+        results: actions,
+        cost_per_result: costPerResult,
+        amount_spent: spend,
+        cpm: cpm,
+        link_clicks: 0, // Not in this spreadsheet format
+        cpc: 0, // Not in this spreadsheet format
+        ctr: 0, // Not in this spreadsheet format
+        cost_per_conversation: null,
+        conversations_started: actions > 0 ? actions : null,
+        week_start: weekStart,
+        week_end: weekStart
       });
     }
 
