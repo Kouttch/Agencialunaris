@@ -1,11 +1,11 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Upload, Link as LinkIcon, Plus, Trash2, User } from "lucide-react";
+import { Loader2, Link as LinkIcon, User } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -14,6 +14,8 @@ interface Manager {
   id: string;
   name: string;
   photo_url: string | null;
+  email?: string;
+  role?: string;
 }
 
 interface UserProfile {
@@ -29,10 +31,6 @@ export default function DataManagement() {
   const [sheetUrl, setSheetUrl] = useState("");
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [managers, setManagers] = useState<Manager[]>([]);
-  const [newManager, setNewManager] = useState({ name: "" });
-  const [uploadingPhoto, setUploadingPhoto] = useState(false);
-  const [selectedPhoto, setSelectedPhoto] = useState<File | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     loadUsers();
@@ -64,12 +62,34 @@ export default function DataManagement() {
   };
 
   const loadManagers = async () => {
-    const { data } = await supabase
-      .from('account_managers')
-      .select('*')
-      .order('name');
+    // Buscar usuários com role de admin ou moderator
+    const { data: rolesData } = await supabase
+      .from('user_roles')
+      .select('user_id, role')
+      .in('role', ['admin', 'moderator']);
+
+    if (!rolesData) return;
+
+    const userIds = rolesData.map(r => r.user_id);
     
-    if (data) setManagers(data);
+    // Buscar perfis desses usuários
+    const { data: profilesData } = await supabase
+      .from('profiles')
+      .select('user_id, full_name, avatar_url')
+      .in('user_id', userIds);
+
+    if (profilesData) {
+      const managersData = profilesData.map(profile => {
+        const role = rolesData.find(r => r.user_id === profile.user_id)?.role;
+        return {
+          id: profile.user_id,
+          name: profile.full_name || 'Sem nome',
+          photo_url: profile.avatar_url,
+          role: role === 'admin' ? 'Admin' : 'Gestor'
+        };
+      });
+      setManagers(managersData);
+    }
   };
 
   const handleSyncGoogleSheets = async () => {
@@ -114,106 +134,6 @@ export default function DataManagement() {
       });
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handlePhotoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        toast({
-          title: "Arquivo muito grande",
-          description: "A foto deve ter no máximo 5MB",
-          variant: "destructive"
-        });
-        return;
-      }
-      setSelectedPhoto(file);
-    }
-  };
-
-  const uploadPhoto = async (): Promise<string | null> => {
-    if (!selectedPhoto) return null;
-
-    try {
-      setUploadingPhoto(true);
-      const fileExt = selectedPhoto.name.split('.').pop();
-      const fileName = `${Math.random().toString(36).substring(2)}.${fileExt}`;
-      const filePath = `${fileName}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from('manager-photos')
-        .upload(filePath, selectedPhoto);
-
-      if (uploadError) throw uploadError;
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('manager-photos')
-        .getPublicUrl(filePath);
-
-      return publicUrl;
-    } catch (error: any) {
-      toast({
-        title: "Erro no upload",
-        description: error.message,
-        variant: "destructive"
-      });
-      return null;
-    } finally {
-      setUploadingPhoto(false);
-    }
-  };
-
-  const handleCreateManager = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newManager.name) return;
-
-    try {
-      let photoUrl = null;
-      if (selectedPhoto) {
-        photoUrl = await uploadPhoto();
-        if (!photoUrl) return;
-      }
-
-      const { error } = await supabase
-        .from('account_managers')
-        .insert([{ name: newManager.name, photo_url: photoUrl }]);
-
-      if (error) throw error;
-
-      toast({ title: "Gestor criado com sucesso" });
-      setNewManager({ name: "" });
-      setSelectedPhoto(null);
-      if (fileInputRef.current) fileInputRef.current.value = '';
-      loadManagers();
-    } catch (error: any) {
-      toast({
-        title: "Erro ao criar gestor",
-        description: error.message,
-        variant: "destructive"
-      });
-    }
-  };
-
-  const handleDeleteManager = async (id: string) => {
-    if (!confirm("Tem certeza que deseja deletar este gestor?")) return;
-
-    try {
-      const { error } = await supabase
-        .from('account_managers')
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
-
-      toast({ title: "Gestor deletado com sucesso" });
-      loadManagers();
-    } catch (error: any) {
-      toast({
-        title: "Erro ao deletar gestor",
-        description: error.message,
-        variant: "destructive"
-      });
     }
   };
 
@@ -296,85 +216,44 @@ export default function DataManagement() {
       <Card className="mb-8">
         <CardHeader>
           <CardTitle>Gestores Responsáveis</CardTitle>
-          <CardDescription>Gerencie os gestores de contas dos clientes</CardDescription>
+          <CardDescription>Usuários Admin e Gestores disponíveis para atribuição</CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleCreateManager} className="space-y-4 mb-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="managerName">Nome do Gestor *</Label>
-                <Input
-                  id="managerName"
-                  value={newManager.name}
-                  onChange={(e) => setNewManager({ ...newManager, name: e.target.value })}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="managerPhoto">Foto do Gestor</Label>
-                <div className="flex gap-2">
-                  <Input
-                    ref={fileInputRef}
-                    id="managerPhoto"
-                    type="file"
-                    accept="image/*"
-                    onChange={handlePhotoSelect}
-                  />
-                  {selectedPhoto && (
-                    <Avatar className="h-10 w-10">
-                      <AvatarImage src={URL.createObjectURL(selectedPhoto)} />
-                      <AvatarFallback><User className="h-5 w-5" /></AvatarFallback>
-                    </Avatar>
-                  )}
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  Máximo 5MB - JPG, PNG, WEBP
-                </p>
-              </div>
-              <div className="flex items-end">
-                <Button type="submit" className="w-full" disabled={uploadingPhoto}>
-                  {uploadingPhoto ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  ) : (
-                    <Plus className="mr-2 h-4 w-4" />
-                  )}
-                  Adicionar Gestor
-                </Button>
-              </div>
-            </div>
-          </form>
-
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Foto</TableHead>
                 <TableHead>Nome</TableHead>
-                <TableHead className="text-right">Ações</TableHead>
+                <TableHead>Função</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {managers.map((manager) => (
-                <TableRow key={manager.id}>
-                  <TableCell>
-                    <Avatar className="h-10 w-10">
-                      <AvatarImage src={manager.photo_url || undefined} />
-                      <AvatarFallback>
-                        <User className="h-5 w-5" />
-                      </AvatarFallback>
-                    </Avatar>
-                  </TableCell>
-                  <TableCell>{manager.name}</TableCell>
-                  <TableCell className="text-right">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleDeleteManager(manager.id)}
-                    >
-                      <Trash2 className="h-4 w-4 text-destructive" />
-                    </Button>
+              {managers.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={3} className="text-center text-muted-foreground">
+                    Nenhum gestor disponível
                   </TableCell>
                 </TableRow>
-              ))}
+              ) : (
+                managers.map((manager) => (
+                  <TableRow key={manager.id}>
+                    <TableCell>
+                      <Avatar className="h-10 w-10">
+                        <AvatarImage src={manager.photo_url || undefined} />
+                        <AvatarFallback>
+                          <User className="h-5 w-5" />
+                        </AvatarFallback>
+                      </Avatar>
+                    </TableCell>
+                    <TableCell>{manager.name}</TableCell>
+                    <TableCell>
+                      <span className="text-xs px-2 py-1 rounded-full bg-primary/10 text-primary">
+                        {manager.role}
+                      </span>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         </CardContent>

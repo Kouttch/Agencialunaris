@@ -40,7 +40,7 @@ serve(async (req) => {
     const lines = csvText.split('\n');
     
     // Parse CSV (skip header)
-    const campaignData = [];
+    const rawCampaignData = [];
     for (let i = 1; i < lines.length; i++) {
       const line = lines[i].trim();
       if (!line) continue;
@@ -49,7 +49,7 @@ serve(async (req) => {
       
       if (values.length < 15) continue;
 
-      campaignData.push({
+      rawCampaignData.push({
         user_id: userId,
         campaign_name: values[0],
         reach: parseInt(values[1]) || 0,
@@ -69,7 +69,38 @@ serve(async (req) => {
       });
     }
 
-    console.log(`Parsed ${campaignData.length} campaign records`);
+    console.log(`Parsed ${rawCampaignData.length} raw campaign records`);
+
+    // Agrupar campanhas pelo nome e somar as métricas
+    const campaignGroups = new Map();
+    
+    for (const campaign of rawCampaignData) {
+      const key = `${campaign.campaign_name}_${campaign.week_start}`;
+      
+      if (!campaignGroups.has(key)) {
+        campaignGroups.set(key, { ...campaign });
+      } else {
+        const existing = campaignGroups.get(key);
+        existing.reach += campaign.reach;
+        existing.impressions += campaign.impressions;
+        existing.results += campaign.results;
+        existing.amount_spent += campaign.amount_spent;
+        existing.link_clicks += campaign.link_clicks;
+        existing.conversations_started = (existing.conversations_started || 0) + (campaign.conversations_started || 0);
+        
+        // Recalcular médias ponderadas
+        const totalSpent = existing.amount_spent;
+        existing.cost_per_result = existing.results > 0 ? totalSpent / existing.results : 0;
+        existing.cpm = existing.impressions > 0 ? (totalSpent / existing.impressions) * 1000 : 0;
+        existing.cpc = existing.link_clicks > 0 ? totalSpent / existing.link_clicks : 0;
+        existing.ctr = existing.impressions > 0 ? (existing.link_clicks / existing.impressions) * 100 : 0;
+        existing.frequency = existing.reach > 0 ? existing.impressions / existing.reach : 0;
+        existing.cost_per_conversation = existing.conversations_started > 0 ? totalSpent / existing.conversations_started : null;
+      }
+    }
+
+    const campaignData = Array.from(campaignGroups.values());
+    console.log(`Aggregated to ${campaignData.length} unique campaigns`);
 
     // Delete old data for this user
     const { error: deleteError } = await supabase
