@@ -30,10 +30,14 @@ serve(async (req) => {
 
     // Fetch data from Google Sheets (using CSV export)
     const csvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv`;
+    console.log('Fetching from URL:', csvUrl);
+    
     const response = await fetch(csvUrl);
     
     if (!response.ok) {
-      throw new Error('Failed to fetch Google Sheets data');
+      const errorText = await response.text();
+      console.error('Google Sheets fetch failed:', response.status, errorText);
+      throw new Error(`Failed to fetch Google Sheets data. Status: ${response.status}. A planilha precisa estar pública (compartilhada com "Qualquer pessoa com o link pode visualizar"). Verifique as configurações de compartilhamento.`);
     }
 
     const csvText = await response.text();

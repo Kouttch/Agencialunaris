@@ -146,7 +146,10 @@ export default function DataManagement() {
 
       if (error) throw error;
 
-      toast({ title: "Gestor atribuído com sucesso" });
+      toast({ 
+        title: "Gestor atribuído com sucesso",
+        description: "O gestor agora é responsável por este cliente" 
+      });
     } catch (error: any) {
       toast({
         title: "Erro ao atribuir gestor",
