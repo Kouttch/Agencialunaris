@@ -90,13 +90,15 @@ serve(async (req) => {
         }
       }
 
-      // Parse campaign name
-      const campaignName = row.campaign_name || row.campaign || 'Sem nome';
+      // Parse campaign name - normalize to avoid duplicates
+      let campaignName = row.campaign_name || row.campaign || 'Sem nome';
+      // Remove extra spaces and trim
+      campaignName = campaignName.replace(/\s+/g, ' ').trim().replace(/"/g, '');
       
-      // Parse numeric values
-      const spend = parseFloat(row.spend || row.amount_spent || '0');
-      const impressions = parseInt(row.impressions || '0');
-      const actions = parseInt(row.actions || row.results || '0');
+      // Parse numeric values - handle quoted values and clean strings
+      const spend = parseFloat((row.spend || row.amount_spent || '0').toString().replace(/"/g, '').replace(',', '.'));
+      const impressions = parseInt((row.impressions || '0').toString().replace(/"/g, ''));
+      const actions = parseInt((row.actions || row.results || '0').toString().replace(/"/g, ''));
       
       // Calculate metrics
       const cpm = impressions > 0 ? (spend / impressions) * 1000 : 0;
@@ -124,24 +126,37 @@ serve(async (req) => {
 
     console.log(`Parsed ${rawCampaignData.length} raw campaign records`);
 
-    // Agrupar campanhas pelo nome e somar as métricas
+    // Agrupar campanhas pelo nome (ignorando datas) e somar as métricas
     const campaignGroups = new Map();
     
     for (const campaign of rawCampaignData) {
-      const key = `${campaign.campaign_name}_${campaign.week_start}`;
+      // Use apenas o nome da campanha como chave para agrupar todas as ocorrências
+      const key = campaign.campaign_name;
       
       if (!campaignGroups.has(key)) {
-        campaignGroups.set(key, { ...campaign });
+        campaignGroups.set(key, { 
+          ...campaign,
+          // Inicializar conversas como 0 se for null
+          conversations_started: campaign.conversations_started || 0
+        });
       } else {
         const existing = campaignGroups.get(key);
+        
+        // Somar todas as métricas
         existing.reach += campaign.reach;
         existing.impressions += campaign.impressions;
         existing.results += campaign.results;
         existing.amount_spent += campaign.amount_spent;
         existing.link_clicks += campaign.link_clicks;
-        existing.conversations_started = (existing.conversations_started || 0) + (campaign.conversations_started || 0);
+        existing.conversations_started += (campaign.conversations_started || 0);
         
-        // Recalcular médias ponderadas
+        // Usar a data mais recente
+        if (campaign.week_start > existing.week_start) {
+          existing.week_start = campaign.week_start;
+          existing.week_end = campaign.week_end;
+        }
+        
+        // Recalcular médias e proporções
         const totalSpent = existing.amount_spent;
         existing.cost_per_result = existing.results > 0 ? totalSpent / existing.results : 0;
         existing.cpm = existing.impressions > 0 ? (totalSpent / existing.impressions) * 1000 : 0;
@@ -154,6 +169,11 @@ serve(async (req) => {
 
     const campaignData = Array.from(campaignGroups.values());
     console.log(`Aggregated to ${campaignData.length} unique campaigns`);
+    
+    // Log sample of aggregated data for debugging
+    if (campaignData.length > 0) {
+      console.log('Sample aggregated campaign:', JSON.stringify(campaignData[0], null, 2));
+    }
 
     // Delete old data for this user
     const { error: deleteError } = await supabase
