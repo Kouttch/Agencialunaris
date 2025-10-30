@@ -98,6 +98,8 @@ export type Database = {
           impressions: number | null
           link_clicks: number | null
           reach: number | null
+          report_date: string | null
+          report_type: string | null
           results: number | null
           updated_at: string | null
           user_id: string
@@ -119,6 +121,8 @@ export type Database = {
           impressions?: number | null
           link_clicks?: number | null
           reach?: number | null
+          report_date?: string | null
+          report_type?: string | null
           results?: number | null
           updated_at?: string | null
           user_id: string
@@ -140,11 +144,43 @@ export type Database = {
           impressions?: number | null
           link_clicks?: number | null
           reach?: number | null
+          report_date?: string | null
+          report_type?: string | null
           results?: number | null
           updated_at?: string | null
           user_id?: string
           week_end?: string | null
           week_start?: string | null
+        }
+        Relationships: []
+      }
+      campaign_name_mappings: {
+        Row: {
+          created_at: string | null
+          created_by: string
+          display_name: string
+          id: string
+          original_name: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          created_by: string
+          display_name: string
+          id?: string
+          original_name: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string
+          display_name?: string
+          id?: string
+          original_name?: string
+          updated_at?: string | null
+          user_id?: string
         }
         Relationships: []
       }
@@ -578,10 +614,7 @@ export type Database = {
         }
         Returns: boolean
       }
-      sync_all_google_sheets: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
+      sync_all_google_sheets: { Args: never; Returns: undefined }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"

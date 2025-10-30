@@ -173,6 +173,11 @@ export default function DataManagement() {
           <CardDescription>
             Cole a URL da planilha do Google Sheets para atualizar automaticamente os dashboards
           </CardDescription>
+          <div className="mt-3 p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-md">
+            <p className="text-sm text-amber-800 dark:text-amber-200">
+              ⚠️ <strong>Importante:</strong> Para validar corretamente, é necessário que o link do Google Sheets esteja público (compartilhado com "Qualquer pessoa com o link pode visualizar").
+            </p>
+          </div>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
@@ -263,7 +268,7 @@ export default function DataManagement() {
       </Card>
 
       {/* Assign Managers to Users */}
-      <Card>
+      <Card className="mb-8">
         <CardHeader>
           <CardTitle>Atribuir Gestores aos Clientes</CardTitle>
           <CardDescription>Defina qual gestor será responsável por cada cliente</CardDescription>

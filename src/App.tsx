@@ -26,6 +26,7 @@ import TermsOfUse from "./pages/TermsOfUse";
 import Privacy from "./pages/Privacy";
 import StrategyManagement from "./pages/StrategyManagement";
 import ClientDashboardView from "./pages/ClientDashboardView";
+import CampaignNamesManagement from "./pages/CampaignNamesManagement";
 
 const queryClient = new QueryClient();
 
@@ -163,6 +164,16 @@ const App = () => (
                   <ProtectedRoute>
                     <DashboardLayout>
                       <ClientDashboardView />
+                    </DashboardLayout>
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/fulladmin/campaign-names" 
+                element={
+                  <ProtectedRoute>
+                    <DashboardLayout>
+                      <CampaignNamesManagement />
                     </DashboardLayout>
                   </ProtectedRoute>
                 } 

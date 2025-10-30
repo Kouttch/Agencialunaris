@@ -18,7 +18,6 @@ serve(async (req) => {
     );
 
     const { userId, sheetUrl } = await req.json();
-
     console.log('Starting Google Sheets sync for user:', userId);
 
     // Extract sheet ID from URL
@@ -28,152 +27,119 @@ serve(async (req) => {
     }
     const sheetId = sheetIdMatch[1];
 
-    // Fetch data from Google Sheets (using CSV export)
-    const csvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv`;
-    console.log('Fetching from URL:', csvUrl);
-    
-    const response = await fetch(csvUrl);
-    
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('Google Sheets fetch failed:', response.status, errorText);
-      throw new Error(`Failed to fetch Google Sheets data. Status: ${response.status}. A planilha precisa estar pública (compartilhada com "Qualquer pessoa com o link pode visualizar"). Verifique as configurações de compartilhamento.`);
-    }
-
-    const csvText = await response.text();
-    console.log('CSV preview (first 500 chars):', csvText.substring(0, 500));
-    
-    const lines = csvText.split('\n');
-    const header = lines[0].toLowerCase().split(',').map(h => h.trim().replace(/"/g, ''));
-    
-    console.log('CSV Headers:', header);
-    
-    // Parse CSV based on actual column names
-    const rawCampaignData = [];
-    for (let i = 1; i < lines.length; i++) {
-      const line = lines[i].trim();
-      if (!line) continue;
-
-      // Parse CSV line (handle quoted values)
-      const values: string[] = [];
-      let current = '';
-      let inQuotes = false;
+    // Função auxiliar para buscar e processar uma aba
+    const fetchAndProcessSheet = async (gid: string, reportType: 'daily' | 'weekly' | 'monthly') => {
+      const csvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}`;
+      console.log(`Fetching ${reportType} data from:`, csvUrl);
       
-      for (let j = 0; j < line.length; j++) {
-        const char = line[j];
-        if (char === '"') {
-          inQuotes = !inQuotes;
-        } else if (char === ',' && !inQuotes) {
-          values.push(current.trim());
-          current = '';
-        } else {
-          current += char;
-        }
-      }
-      values.push(current.trim());
-
-      if (values.length < 3) continue;
-
-      // Map columns by header names (case insensitive)
-      const row: any = {};
-      header.forEach((col, idx) => {
-        row[col] = values[idx] || '';
-      });
-
-      // Extract date from date_start (format: 26/09/2025 -> 2025-09-26)
-      let weekStart = new Date().toISOString().split('T')[0];
-      if (row.date_start || row.date) {
-        const dateStr = row.date_start || row.date;
-        const parts = dateStr.split('/');
-        if (parts.length === 3) {
-          weekStart = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
-        }
+      const response = await fetch(csvUrl);
+      
+      if (!response.ok) {
+        console.error(`${reportType} sheet fetch failed:`, response.status);
+        return [];
       }
 
-      // Parse campaign name - normalize to avoid duplicates
-      let campaignName = row.campaign_name || row.campaign || 'Sem nome';
-      // Remove extra spaces and trim
-      campaignName = campaignName.replace(/\s+/g, ' ').trim().replace(/"/g, '');
+      const csvText = await response.text();
+      const lines = csvText.split('\n');
+      const header = lines[0].toLowerCase().split(',').map(h => h.trim().replace(/"/g, ''));
       
-      // Parse numeric values - handle quoted values and clean strings
-      const spend = parseFloat((row.spend || row.amount_spent || '0').toString().replace(/"/g, '').replace(',', '.'));
-      const impressions = parseInt((row.impressions || '0').toString().replace(/"/g, ''));
-      const actions = parseInt((row.actions || row.results || '0').toString().replace(/"/g, ''));
+      console.log(`${reportType} Headers:`, header);
       
-      // Calculate metrics
-      const cpm = impressions > 0 ? (spend / impressions) * 1000 : 0;
-      const costPerResult = actions > 0 ? spend / actions : 0;
+      const campaignData = [];
+      for (let i = 1; i < lines.length; i++) {
+        const line = lines[i].trim();
+        if (!line) continue;
 
-      rawCampaignData.push({
-        user_id: userId,
-        campaign_name: campaignName,
-        reach: 0, // Not in this spreadsheet format
-        impressions: impressions,
-        frequency: 0, // Not in this spreadsheet format
-        results: actions,
-        cost_per_result: costPerResult,
-        amount_spent: spend,
-        cpm: cpm,
-        link_clicks: 0, // Not in this spreadsheet format
-        cpc: 0, // Not in this spreadsheet format
-        ctr: 0, // Not in this spreadsheet format
-        cost_per_conversation: null,
-        conversations_started: actions > 0 ? actions : null,
-        week_start: weekStart,
-        week_end: weekStart
-      });
-    }
+        // Parse CSV line (handle quoted values)
+        const values: string[] = [];
+        let current = '';
+        let inQuotes = false;
+        
+        for (let j = 0; j < line.length; j++) {
+          const char = line[j];
+          if (char === '"') {
+            inQuotes = !inQuotes;
+          } else if (char === ',' && !inQuotes) {
+            values.push(current.trim().replace(/"/g, ''));
+            current = '';
+          } else {
+            current += char;
+          }
+        }
+        values.push(current.trim().replace(/"/g, ''));
 
-    console.log(`Parsed ${rawCampaignData.length} raw campaign records`);
+        if (values.length < 3) continue;
 
-    // Agrupar campanhas pelo nome (ignorando datas) e somar as métricas
-    const campaignGroups = new Map();
-    
-    for (const campaign of rawCampaignData) {
-      // Use apenas o nome da campanha como chave para agrupar todas as ocorrências
-      const key = campaign.campaign_name;
-      
-      if (!campaignGroups.has(key)) {
-        campaignGroups.set(key, { 
-          ...campaign,
-          // Inicializar conversas como 0 se for null
-          conversations_started: campaign.conversations_started || 0
+        // Map columns by header names
+        const row: any = {};
+        header.forEach((col, idx) => {
+          row[col] = values[idx] || '';
         });
-      } else {
-        const existing = campaignGroups.get(key);
-        
-        // Somar todas as métricas
-        existing.reach += campaign.reach;
-        existing.impressions += campaign.impressions;
-        existing.results += campaign.results;
-        existing.amount_spent += campaign.amount_spent;
-        existing.link_clicks += campaign.link_clicks;
-        existing.conversations_started += (campaign.conversations_started || 0);
-        
-        // Usar a data mais recente
-        if (campaign.week_start > existing.week_start) {
-          existing.week_start = campaign.week_start;
-          existing.week_end = campaign.week_end;
-        }
-        
-        // Recalcular médias e proporções
-        const totalSpent = existing.amount_spent;
-        existing.cost_per_result = existing.results > 0 ? totalSpent / existing.results : 0;
-        existing.cpm = existing.impressions > 0 ? (totalSpent / existing.impressions) * 1000 : 0;
-        existing.cpc = existing.link_clicks > 0 ? totalSpent / existing.link_clicks : 0;
-        existing.ctr = existing.impressions > 0 ? (existing.link_clicks / existing.impressions) * 100 : 0;
-        existing.frequency = existing.reach > 0 ? existing.impressions / existing.reach : 0;
-        existing.cost_per_conversation = existing.conversations_started > 0 ? totalSpent / existing.conversations_started : null;
-      }
-    }
 
-    const campaignData = Array.from(campaignGroups.values());
-    console.log(`Aggregated to ${campaignData.length} unique campaigns`);
+        // Parse date (format: DD/MM/YYYY -> YYYY-MM-DD)
+        let reportDate = new Date().toISOString().split('T')[0];
+        const dateStr = row.date_start || row.date || row.data;
+        if (dateStr) {
+          const parts = dateStr.split('/');
+          if (parts.length === 3) {
+            reportDate = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+          }
+        }
+
+        // Parse campaign name
+        let campaignName = row.campaign_name || row.campaign || row.campanha || 'Sem nome';
+        campaignName = campaignName.replace(/\s+/g, ' ').trim();
+        
+        // Parse numeric values
+        const spend = parseFloat((row.spend || row.amount_spent || row.investimento || '0').toString().replace(',', '.'));
+        const impressions = parseInt((row.impressions || row.impressoes || '0').toString());
+        const reach = parseInt((row.reach || row.alcance || '0').toString());
+        const actions = parseInt((row.actions || row.results || row.resultados || '0').toString());
+        const clicks = parseInt((row.link_clicks || row.clicks || row.cliques || '0').toString());
+        
+        // Calculate metrics
+        const cpm = impressions > 0 ? (spend / impressions) * 1000 : 0;
+        const cpc = clicks > 0 ? spend / clicks : 0;
+        const ctr = impressions > 0 ? (clicks / impressions) * 100 : 0;
+        const costPerResult = actions > 0 ? spend / actions : 0;
+        const frequency = reach > 0 ? impressions / reach : 0;
+
+        campaignData.push({
+          user_id: userId,
+          campaign_name: campaignName,
+          reach: reach,
+          impressions: impressions,
+          frequency: frequency,
+          results: actions,
+          cost_per_result: costPerResult,
+          amount_spent: spend,
+          cpm: cpm,
+          link_clicks: clicks,
+          cpc: cpc,
+          ctr: ctr,
+          cost_per_conversation: actions > 0 ? costPerResult : null,
+          conversations_started: actions,
+          week_start: reportDate,
+          week_end: reportDate,
+          report_type: reportType,
+          report_date: reportDate
+        });
+      }
+      
+      return campaignData;
+    };
+
+    // Buscar as 3 abas: diário (gid=0), semanal (gid=1), mensal (gid=2)
+    console.log('Fetching all report types...');
     
-    // Log sample of aggregated data for debugging
-    if (campaignData.length > 0) {
-      console.log('Sample aggregated campaign:', JSON.stringify(campaignData[0], null, 2));
-    }
+    const [dailyData, weeklyData, monthlyData] = await Promise.all([
+      fetchAndProcessSheet('0', 'daily'),
+      fetchAndProcessSheet('1', 'weekly'),
+      fetchAndProcessSheet('2', 'monthly')
+    ]);
+
+    const allData = [...dailyData, ...weeklyData, ...monthlyData];
+    console.log(`Total records parsed: ${allData.length} (Daily: ${dailyData.length}, Weekly: ${weeklyData.length}, Monthly: ${monthlyData.length})`);
 
     // Delete old data for this user
     const { error: deleteError } = await supabase
@@ -187,10 +153,10 @@ serve(async (req) => {
     }
 
     // Insert new data
-    if (campaignData.length > 0) {
+    if (allData.length > 0) {
       const { error: insertError } = await supabase
         .from('campaign_data')
-        .insert(campaignData);
+        .insert(allData);
 
       if (insertError) {
         console.error('Error inserting data:', insertError);
@@ -213,7 +179,12 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ 
         success: true, 
-        recordsProcessed: campaignData.length 
+        recordsProcessed: allData.length,
+        breakdown: {
+          daily: dailyData.length,
+          weekly: weeklyData.length,
+          monthly: monthlyData.length
+        }
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
