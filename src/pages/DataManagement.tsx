@@ -29,6 +29,7 @@ export default function DataManagement() {
   const [loading, setLoading] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState("");
   const [sheetUrl, setSheetUrl] = useState("");
+  const [dashboardName, setDashboardName] = useState("");
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [managers, setManagers] = useState<Manager[]>([]);
 
@@ -93,10 +94,10 @@ export default function DataManagement() {
   };
 
   const handleSyncGoogleSheets = async () => {
-    if (!selectedUserId || !sheetUrl) {
+    if (!selectedUserId || !sheetUrl || !dashboardName) {
       toast({
         title: "Campos obrigatórios",
-        description: "Selecione um usuário e cole a URL da planilha",
+        description: "Preencha todos os campos: cliente, nome do dashboard e URL",
         variant: "destructive"
       });
       return;
@@ -108,60 +109,39 @@ export default function DataManagement() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Usuário não autenticado");
 
-      // Buscar ou criar dashboard default para o usuário
-      let { data: existingDashboards } = await supabase
+      // Criar novo dashboard
+      const { data: newDashboard, error: createError } = await supabase
         .from('user_dashboards')
-        .select('id')
-        .eq('user_id', selectedUserId)
-        .limit(1);
-
-      let dashboardId: string;
-
-      if (existingDashboards && existingDashboards.length > 0) {
-        dashboardId = existingDashboards[0].id;
-      } else {
-        // Criar novo dashboard default
-        const { data: newDashboard, error: createError } = await supabase
-          .from('user_dashboards')
-          .insert({
-            user_id: selectedUserId,
-            created_by: user.id,
-            dashboard_name: 'Dashboard Principal',
-            sheet_url: sheetUrl
-          })
-          .select('id')
-          .single();
-
-        if (createError) throw createError;
-        dashboardId = newDashboard.id;
-      }
-
-      // Atualizar a URL do sheet no dashboard
-      const { error: updateError } = await supabase
-        .from('user_dashboards')
-        .update({ 
-          sheet_url: sheetUrl,
-          updated_at: new Date().toISOString()
+        .insert({
+          user_id: selectedUserId,
+          created_by: user.id,
+          dashboard_name: dashboardName,
+          sheet_url: sheetUrl
         })
-        .eq('id', dashboardId);
+        .select('id')
+        .single();
 
-      if (updateError) throw updateError;
+      if (createError) throw createError;
 
       // Trigger sync com dashboardId
       const { error: syncError } = await supabase.functions.invoke('sync-google-sheets', {
         body: { 
           userId: selectedUserId, 
           sheetUrl,
-          dashboardId 
+          dashboardId: newDashboard.id 
         }
       });
 
       if (syncError) throw syncError;
 
       toast({
-        title: "Sincronização iniciada",
-        description: "Os dados serão atualizados em breve"
+        title: "Dashboard criado e sincronização iniciada",
+        description: "O dashboard foi criado e os dados serão atualizados em breve"
       });
+
+      // Limpar campos
+      setDashboardName("");
+      setSheetUrl("");
     } catch (error: any) {
       toast({
         title: "Erro na sincronização",
@@ -205,9 +185,9 @@ export default function DataManagement() {
       {/* Google Sheets Sync */}
       <Card className="mb-8">
         <CardHeader>
-          <CardTitle>Sincronizar Google Sheets</CardTitle>
+          <CardTitle>Adicionar Novo Dashboard</CardTitle>
           <CardDescription>
-            Cole a URL da planilha do Google Sheets para atualizar automaticamente os dashboards
+            Crie um novo dashboard com integração ao Google Sheets
           </CardDescription>
           <div className="mt-3 p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-md">
             <p className="text-sm text-amber-800 dark:text-amber-200">
@@ -230,6 +210,19 @@ export default function DataManagement() {
                 ))}
               </SelectContent>
             </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="dashboardName">Nome do Dashboard</Label>
+            <Input
+              id="dashboardName"
+              placeholder="Ex: Meta Ads, Google Ads, TikTok Ads..."
+              value={dashboardName}
+              onChange={(e) => setDashboardName(e.target.value)}
+            />
+            <p className="text-xs text-muted-foreground">
+              Dê um nome identificável ao dashboard (empresa, plataforma, etc)
+            </p>
           </div>
 
           <div className="space-y-2">

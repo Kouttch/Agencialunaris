@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -12,6 +13,12 @@ interface UserProfile {
   user_id: string;
   full_name: string;
   company: string;
+}
+
+interface Dashboard {
+  id: string;
+  dashboard_name: string;
+  sheet_url: string;
 }
 
 interface CampaignData {
@@ -31,6 +38,8 @@ export default function AdminDashboard() {
   const { isModerator } = useUserRole();
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [selectedUserId, setSelectedUserId] = useState<string>(searchParams.get('user') || "");
+  const [dashboards, setDashboards] = useState<Dashboard[]>([]);
+  const [selectedDashboardId, setSelectedDashboardId] = useState<string>("");
   const [campaignData, setCampaignData] = useState<CampaignData[]>([]);
   const [loading, setLoading] = useState(false);
   const [clientStatusData, setClientStatusData] = useState<any[]>([]);
@@ -42,11 +51,21 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     if (selectedUserId) {
-      loadCampaignData(selectedUserId);
+      loadDashboards(selectedUserId);
     } else {
+      setDashboards([]);
+      setSelectedDashboardId("");
       setCampaignData([]);
     }
   }, [selectedUserId]);
+
+  useEffect(() => {
+    if (selectedDashboardId) {
+      loadCampaignData(selectedUserId, selectedDashboardId);
+    } else {
+      setCampaignData([]);
+    }
+  }, [selectedDashboardId]);
 
   const loadUsers = async () => {
     try {
@@ -113,13 +132,34 @@ export default function AdminDashboard() {
     }
   };
 
-  const loadCampaignData = async (userId: string) => {
+  const loadDashboards = async (userId: string) => {
+    try {
+      const { data } = await supabase
+        .from('user_dashboards')
+        .select('id, dashboard_name, sheet_url')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false });
+
+      if (data && data.length > 0) {
+        setDashboards(data);
+        setSelectedDashboardId(data[0].id);
+      } else {
+        setDashboards([]);
+        setSelectedDashboardId("");
+      }
+    } catch (error) {
+      console.error('Error loading dashboards:', error);
+    }
+  };
+
+  const loadCampaignData = async (userId: string, dashboardId: string) => {
     setLoading(true);
     try {
       const { data } = await supabase
         .from('campaign_data')
         .select('*')
         .eq('user_id', userId)
+        .eq('dashboard_id', dashboardId)
         .order('week_start', { ascending: true });
 
       setCampaignData(data || []);
@@ -193,36 +233,56 @@ export default function AdminDashboard() {
       {/* User Dashboard Access */}
       <Card className="mb-8">
         <CardHeader>
-          <CardTitle>Selecionar Cliente</CardTitle>
+          <CardTitle>Selecionar Cliente e Dashboard</CardTitle>
           <CardDescription>
-            Selecione um cliente para visualizar seus dados em tempo real
+            Selecione um cliente e o dashboard que deseja visualizar
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex gap-4">
-            <Select value={selectedUserId} onValueChange={setSelectedUserId}>
-              <SelectTrigger className="flex-1 max-w-sm">
-                <SelectValue placeholder="Selecione um cliente..." />
-              </SelectTrigger>
-              <SelectContent>
-                {users.map((user) => (
-                  <SelectItem key={user.user_id} value={user.user_id}>
-                    {user.full_name} {user.company ? `- ${user.company}` : ''}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Button 
-              onClick={handleViewUserDashboard} 
-              disabled={!selectedUserId}
-            >
-              Visualizar Dashboard Completo
-            </Button>
+          <div className="space-y-4">
+            <div className="flex gap-4">
+              <Select value={selectedUserId} onValueChange={setSelectedUserId}>
+                <SelectTrigger className="flex-1 max-w-sm">
+                  <SelectValue placeholder="Selecione um cliente..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {users.map((user) => (
+                    <SelectItem key={user.user_id} value={user.user_id}>
+                      {user.full_name} {user.company ? `- ${user.company}` : ''}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Button 
+                onClick={handleViewUserDashboard} 
+                disabled={!selectedUserId}
+              >
+                Visualizar Dashboard Completo
+              </Button>
+            </div>
+
+            {dashboards.length > 0 && (
+              <div className="space-y-2">
+                <Label>Selecionar Dashboard</Label>
+                <Select value={selectedDashboardId} onValueChange={setSelectedDashboardId}>
+                  <SelectTrigger className="max-w-sm">
+                    <SelectValue placeholder="Selecione um dashboard..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {dashboards.map((dashboard) => (
+                      <SelectItem key={dashboard.id} value={dashboard.id}>
+                        {dashboard.dashboard_name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
 
-      {selectedUserId ? (
+      {selectedUserId && selectedDashboardId ? (
         <>
           {selectedUser && (
             <div className="mb-6">
@@ -451,11 +511,27 @@ export default function AdminDashboard() {
             </>
           )}
         </>
+      ) : selectedUserId && dashboards.length === 0 ? (
+        <Card>
+          <CardContent className="py-12">
+            <div className="text-center space-y-2">
+              <p className="text-muted-foreground">
+                Este cliente ainda não possui nenhum dashboard configurado
+              </p>
+              <Button 
+                variant="outline" 
+                onClick={() => navigate('/fulladmin/user-dashboards')}
+              >
+                Configurar Dashboard
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       ) : (
         <Card>
           <CardContent className="py-12">
             <p className="text-center text-muted-foreground">
-              Selecione um cliente para visualizar os dados
+              Selecione um cliente acima para visualizar seus dados em tempo real
             </p>
           </CardContent>
         </Card>
