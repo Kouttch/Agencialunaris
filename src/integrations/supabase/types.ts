@@ -93,6 +93,7 @@ export type Database = {
           cpm: number | null
           created_at: string | null
           ctr: number | null
+          dashboard_id: string | null
           frequency: number | null
           id: string
           impressions: number | null
@@ -116,6 +117,7 @@ export type Database = {
           cpm?: number | null
           created_at?: string | null
           ctr?: number | null
+          dashboard_id?: string | null
           frequency?: number | null
           id?: string
           impressions?: number | null
@@ -139,6 +141,7 @@ export type Database = {
           cpm?: number | null
           created_at?: string | null
           ctr?: number | null
+          dashboard_id?: string | null
           frequency?: number | null
           id?: string
           impressions?: number | null
@@ -152,7 +155,15 @@ export type Database = {
           week_end?: string | null
           week_start?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "campaign_data_dashboard_id_fkey"
+            columns: ["dashboard_id"]
+            isOneToOne: false
+            referencedRelation: "user_dashboards"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       campaign_name_mappings: {
         Row: {
@@ -577,6 +588,39 @@ export type Database = {
           title?: string
           updated_at?: string | null
           uploaded_by?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_dashboards: {
+        Row: {
+          created_at: string | null
+          created_by: string
+          dashboard_name: string
+          id: string
+          sheet_gid: string | null
+          sheet_url: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          created_by: string
+          dashboard_name: string
+          id?: string
+          sheet_gid?: string | null
+          sheet_url: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string
+          dashboard_name?: string
+          id?: string
+          sheet_gid?: string | null
+          sheet_url?: string
+          updated_at?: string | null
           user_id?: string
         }
         Relationships: []

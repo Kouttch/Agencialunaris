@@ -2,10 +2,11 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell, Legend } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useUserRole } from "@/hooks/useUserRole";
+import ClientStatusGrid from "@/components/ClientStatusGrid";
 
 interface UserProfile {
   user_id: string;
@@ -187,36 +188,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* Client Status Overview */}
-      <Card className="mb-8">
-        <CardHeader>
-          <CardTitle>Distribuição de Status dos Clientes</CardTitle>
-          <CardDescription>
-            Visão geral dos status de todas as contas
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ResponsiveContainer width="100%" height={300}>
-            <PieChart>
-              <Pie
-                data={clientStatusData}
-                cx="50%"
-                cy="50%"
-                labelLine={false}
-                label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                outerRadius={100}
-                fill="#8884d8"
-                dataKey="value"
-              >
-                {clientStatusData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
-                ))}
-              </Pie>
-              <Tooltip />
-              <Legend />
-            </PieChart>
-          </ResponsiveContainer>
-        </CardContent>
-      </Card>
+      <ClientStatusGrid />
 
       {/* User Dashboard Access */}
       <Card className="mb-8">

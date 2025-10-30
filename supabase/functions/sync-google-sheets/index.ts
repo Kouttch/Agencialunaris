@@ -17,8 +17,8 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    const { userId, sheetUrl } = await req.json();
-    console.log('Starting Google Sheets sync for user:', userId);
+    const { userId, sheetUrl, dashboardId } = await req.json();
+    console.log('Starting Google Sheets sync for user:', userId, 'dashboard:', dashboardId);
 
     // Extract sheet ID from URL
     const sheetIdMatch = sheetUrl.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
@@ -26,6 +26,10 @@ serve(async (req) => {
       throw new Error('Invalid Google Sheets URL');
     }
     const sheetId = sheetIdMatch[1];
+    
+    // Extract gid from URL if present
+    const gidMatch = sheetUrl.match(/[#&]gid=([0-9]+)/);
+    const baseGid = gidMatch ? gidMatch[1] : '0';
 
     // Função auxiliar para buscar e processar uma aba
     const fetchAndProcessSheet = async (gid: string, reportType: 'daily' | 'weekly' | 'monthly') => {
@@ -131,6 +135,7 @@ serve(async (req) => {
 
         campaignData.push({
           user_id: userId,
+          dashboard_id: dashboardId,
           campaign_name: campaignName,
           reach: reach,
           impressions: impressions,
@@ -166,11 +171,11 @@ serve(async (req) => {
     const allData = [...dailyData, ...weeklyData, ...monthlyData];
     console.log(`Total records parsed: ${allData.length} (Daily: ${dailyData.length}, Weekly: ${weeklyData.length}, Monthly: ${monthlyData.length})`);
 
-    // Delete old data for this user
+    // Delete old data for this dashboard
     const { error: deleteError } = await supabase
       .from('campaign_data')
       .delete()
-      .eq('user_id', userId);
+      .eq('dashboard_id', dashboardId);
 
     if (deleteError) {
       console.error('Error deleting old data:', deleteError);
@@ -189,11 +194,11 @@ serve(async (req) => {
       }
     }
 
-    // Update last sync time
+    // Update last sync time for dashboard
     const { error: updateError } = await supabase
-      .from('sheets_sync_config')
-      .update({ last_sync: new Date().toISOString() })
-      .eq('user_id', userId);
+      .from('user_dashboards')
+      .update({ updated_at: new Date().toISOString() })
+      .eq('id', dashboardId);
 
     if (updateError) {
       console.error('Error updating sync time:', updateError);
