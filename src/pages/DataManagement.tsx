@@ -104,20 +104,56 @@ export default function DataManagement() {
 
     setLoading(true);
     try {
-      // Save sync config
-      const { error: configError } = await supabase
-        .from('sheets_sync_config')
-        .upsert({
-          user_id: selectedUserId,
+      // Get current user to use as created_by
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Usuário não autenticado");
+
+      // Buscar ou criar dashboard default para o usuário
+      let { data: existingDashboards } = await supabase
+        .from('user_dashboards')
+        .select('id')
+        .eq('user_id', selectedUserId)
+        .limit(1);
+
+      let dashboardId: string;
+
+      if (existingDashboards && existingDashboards.length > 0) {
+        dashboardId = existingDashboards[0].id;
+      } else {
+        // Criar novo dashboard default
+        const { data: newDashboard, error: createError } = await supabase
+          .from('user_dashboards')
+          .insert({
+            user_id: selectedUserId,
+            created_by: user.id,
+            dashboard_name: 'Dashboard Principal',
+            sheet_url: sheetUrl
+          })
+          .select('id')
+          .single();
+
+        if (createError) throw createError;
+        dashboardId = newDashboard.id;
+      }
+
+      // Atualizar a URL do sheet no dashboard
+      const { error: updateError } = await supabase
+        .from('user_dashboards')
+        .update({ 
           sheet_url: sheetUrl,
           updated_at: new Date().toISOString()
-        });
+        })
+        .eq('id', dashboardId);
 
-      if (configError) throw configError;
+      if (updateError) throw updateError;
 
-      // Trigger sync
+      // Trigger sync com dashboardId
       const { error: syncError } = await supabase.functions.invoke('sync-google-sheets', {
-        body: { userId: selectedUserId, sheetUrl }
+        body: { 
+          userId: selectedUserId, 
+          sheetUrl,
+          dashboardId 
+        }
       });
 
       if (syncError) throw syncError;
