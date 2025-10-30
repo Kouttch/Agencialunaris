@@ -18,7 +18,7 @@ export default function ClientDashboardView() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { isAdmin } = useUserRole();
-  const userId = searchParams.get('userId');
+  const userId = searchParams.get('user');
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
