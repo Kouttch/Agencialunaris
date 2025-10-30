@@ -76,33 +76,58 @@ serve(async (req) => {
           row[col] = values[idx] || '';
         });
 
-        // Parse date (format: DD/MM/YYYY -> YYYY-MM-DD)
-        let reportDate = new Date().toISOString().split('T')[0];
-        const dateStr = row.date_start || row.date || row.data;
-        if (dateStr) {
-          const parts = dateStr.split('/');
+        // Parse dates (format: DD/MM/YYYY -> YYYY-MM-DD)
+        let startDate = new Date().toISOString().split('T')[0];
+        let endDate = startDate;
+        
+        const dateStartStr = row['data início'] || row['data inicio'] || row['date_start'];
+        if (dateStartStr) {
+          const parts = dateStartStr.split('/');
           if (parts.length === 3) {
-            reportDate = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+            startDate = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+          }
+        }
+
+        const dateEndStr = row['data final'] || row['date_end'];
+        if (dateEndStr) {
+          const parts = dateEndStr.split('/');
+          if (parts.length === 3) {
+            endDate = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
           }
         }
 
         // Parse campaign name
-        let campaignName = row.campaign_name || row.campaign || row.campanha || 'Sem nome';
+        let campaignName = row['campanha'] || row['campaign'] || row['campaign_name'] || 'Sem nome';
         campaignName = campaignName.replace(/\s+/g, ' ').trim();
         
-        // Parse numeric values
-        const spend = parseFloat((row.spend || row.amount_spent || row.investimento || '0').toString().replace(',', '.'));
-        const impressions = parseInt((row.impressions || row.impressoes || '0').toString());
-        const reach = parseInt((row.reach || row.alcance || '0').toString());
-        const actions = parseInt((row.actions || row.results || row.resultados || '0').toString());
-        const clicks = parseInt((row.link_clicks || row.clicks || row.cliques || '0').toString());
+        // Helper to parse Brazilian currency (R$ 1.234,56)
+        const parseCurrency = (value: string) => {
+          if (!value) return 0;
+          return parseFloat(value.toString().replace(/[R$\s.]/g, '').replace(',', '.'));
+        };
+
+        // Helper to parse numbers
+        const parseNumber = (value: string) => {
+          if (!value) return 0;
+          return parseFloat(value.toString().replace(/\./g, '').replace(',', '.'));
+        };
+
+        // Parse metrics
+        const conversationsStarted = parseInt((row['conversas iniciadas'] || row['conversations_started'] || '0').toString().replace(/\D/g, ''));
+        const costPerConversation = parseCurrency(row['custo por conversa (r$)'] || row['cost_per_conversation'] || '0');
+        const profileVisits = parseInt((row['visitas ao perfil'] || row['profile_visits'] || '0').toString().replace(/\D/g, ''));
+        const costPerVisit = parseCurrency(row['custo por visita (r$)'] || row['cost_per_visit'] || '0');
+        const reach = parseInt((row['alcance'] || row['reach'] || '0').toString().replace(/\D/g, ''));
+        const impressions = parseInt((row['impressões'] || row['impressoes'] || row['impressions'] || '0').toString().replace(/\D/g, ''));
+        const frequency = parseNumber(row['frequência'] || row['frequencia'] || row['frequency'] || '0');
+        const dailyBudget = parseCurrency(row['orçamento diário (r$)'] || row['orcamento diario'] || row['daily_budget'] || '0');
+        const amountSpent = parseCurrency(row['valor investido (r$)'] || row['amount_spent'] || '0');
         
-        // Calculate metrics
-        const cpm = impressions > 0 ? (spend / impressions) * 1000 : 0;
-        const cpc = clicks > 0 ? spend / clicks : 0;
-        const ctr = impressions > 0 ? (clicks / impressions) * 100 : 0;
-        const costPerResult = actions > 0 ? spend / actions : 0;
-        const frequency = reach > 0 ? impressions / reach : 0;
+        // Calculate additional metrics
+        const cpm = impressions > 0 ? (amountSpent / impressions) * 1000 : 0;
+        const linkClicks = profileVisits; // Using profile visits as clicks
+        const cpc = linkClicks > 0 ? amountSpent / linkClicks : 0;
+        const ctr = impressions > 0 ? (linkClicks / impressions) * 100 : 0;
 
         campaignData.push({
           user_id: userId,
@@ -110,19 +135,19 @@ serve(async (req) => {
           reach: reach,
           impressions: impressions,
           frequency: frequency,
-          results: actions,
-          cost_per_result: costPerResult,
-          amount_spent: spend,
+          results: conversationsStarted,
+          cost_per_result: costPerConversation,
+          amount_spent: amountSpent,
           cpm: cpm,
-          link_clicks: clicks,
+          link_clicks: linkClicks,
           cpc: cpc,
           ctr: ctr,
-          cost_per_conversation: actions > 0 ? costPerResult : null,
-          conversations_started: actions,
-          week_start: reportDate,
-          week_end: reportDate,
+          cost_per_conversation: costPerConversation,
+          conversations_started: conversationsStarted,
+          week_start: startDate,
+          week_end: endDate,
           report_type: reportType,
-          report_date: reportDate
+          report_date: startDate
         });
       }
       
