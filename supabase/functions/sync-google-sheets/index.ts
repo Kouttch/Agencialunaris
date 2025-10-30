@@ -17,8 +17,9 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    const { userId, sheetUrl, dashboardId } = await req.json();
+    const { userId, sheetUrl, dashboardId, dailyGid, weeklyGid, monthlyGid } = await req.json();
     console.log('Starting Google Sheets sync for user:', userId, 'dashboard:', dashboardId);
+    console.log('GIDs - Daily:', dailyGid, 'Weekly:', weeklyGid, 'Monthly:', monthlyGid);
 
     // Extract sheet ID from URL
     const sheetIdMatch = sheetUrl.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
@@ -26,10 +27,6 @@ serve(async (req) => {
       throw new Error('Invalid Google Sheets URL');
     }
     const sheetId = sheetIdMatch[1];
-    
-    // Extract gid from URL if present
-    const gidMatch = sheetUrl.match(/[#&]gid=([0-9]+)/);
-    const baseGid = gidMatch ? gidMatch[1] : '0';
 
     // Função auxiliar para buscar e processar uma aba
     const fetchAndProcessSheet = async (gid: string, reportType: 'daily' | 'weekly' | 'monthly') => {
@@ -159,13 +156,13 @@ serve(async (req) => {
       return campaignData;
     };
 
-    // Buscar as 3 abas: diário (gid=0), semanal (gid=1), mensal (gid=2)
+    // Buscar as 3 abas usando os GIDs fornecidos
     console.log('Fetching all report types...');
     
     const [dailyData, weeklyData, monthlyData] = await Promise.all([
-      fetchAndProcessSheet('0', 'daily'),
-      fetchAndProcessSheet('1', 'weekly'),
-      fetchAndProcessSheet('2', 'monthly')
+      fetchAndProcessSheet(dailyGid || '0', 'daily'),
+      fetchAndProcessSheet(weeklyGid || '1', 'weekly'),
+      fetchAndProcessSheet(monthlyGid || '2', 'monthly')
     ]);
 
     const allData = [...dailyData, ...weeklyData, ...monthlyData];

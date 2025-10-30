@@ -596,32 +596,41 @@ export type Database = {
         Row: {
           created_at: string | null
           created_by: string
+          daily_gid: string | null
           dashboard_name: string
           id: string
+          monthly_gid: string | null
           sheet_gid: string | null
           sheet_url: string
           updated_at: string | null
           user_id: string
+          weekly_gid: string | null
         }
         Insert: {
           created_at?: string | null
           created_by: string
+          daily_gid?: string | null
           dashboard_name: string
           id?: string
+          monthly_gid?: string | null
           sheet_gid?: string | null
           sheet_url: string
           updated_at?: string | null
           user_id: string
+          weekly_gid?: string | null
         }
         Update: {
           created_at?: string | null
           created_by?: string
+          daily_gid?: string | null
           dashboard_name?: string
           id?: string
+          monthly_gid?: string | null
           sheet_gid?: string | null
           sheet_url?: string
           updated_at?: string | null
           user_id?: string
+          weekly_gid?: string | null
         }
         Relationships: []
       }

@@ -30,6 +30,9 @@ export default function DataManagement() {
   const [selectedUserId, setSelectedUserId] = useState("");
   const [sheetUrl, setSheetUrl] = useState("");
   const [dashboardName, setDashboardName] = useState("");
+  const [dailyGid, setDailyGid] = useState("");
+  const [weeklyGid, setWeeklyGid] = useState("");
+  const [monthlyGid, setMonthlyGid] = useState("");
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [managers, setManagers] = useState<Manager[]>([]);
 
@@ -109,26 +112,32 @@ export default function DataManagement() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Usuário não autenticado");
 
-      // Criar novo dashboard
+      // Criar novo dashboard com GIDs
       const { data: newDashboard, error: createError } = await supabase
         .from('user_dashboards')
         .insert({
           user_id: selectedUserId,
           created_by: user.id,
           dashboard_name: dashboardName,
-          sheet_url: sheetUrl
+          sheet_url: sheetUrl,
+          daily_gid: dailyGid || '0',
+          weekly_gid: weeklyGid || '1',
+          monthly_gid: monthlyGid || '2'
         })
-        .select('id')
+        .select('id, daily_gid, weekly_gid, monthly_gid')
         .single();
 
       if (createError) throw createError;
 
-      // Trigger sync com dashboardId
+      // Trigger sync com dashboardId e GIDs
       const { error: syncError } = await supabase.functions.invoke('sync-google-sheets', {
         body: { 
           userId: selectedUserId, 
           sheetUrl,
-          dashboardId: newDashboard.id 
+          dashboardId: newDashboard.id,
+          dailyGid: newDashboard.daily_gid,
+          weeklyGid: newDashboard.weekly_gid,
+          monthlyGid: newDashboard.monthly_gid
         }
       });
 
@@ -142,6 +151,9 @@ export default function DataManagement() {
       // Limpar campos
       setDashboardName("");
       setSheetUrl("");
+      setDailyGid("");
+      setWeeklyGid("");
+      setMonthlyGid("");
     } catch (error: any) {
       toast({
         title: "Erro na sincronização",
@@ -227,25 +239,77 @@ export default function DataManagement() {
 
           <div className="space-y-2">
             <Label htmlFor="sheetUrl">URL da Planilha do Google Sheets</Label>
-            <div className="flex gap-2">
+            <Input
+              id="sheetUrl"
+              placeholder="https://docs.google.com/spreadsheets/d/..."
+              value={sheetUrl}
+              onChange={(e) => setSheetUrl(e.target.value)}
+            />
+          </div>
+
+          <div className="grid grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="dailyGid">GID Diário</Label>
               <Input
-                id="sheetUrl"
-                placeholder="https://docs.google.com/spreadsheets/d/..."
-                value={sheetUrl}
-                onChange={(e) => setSheetUrl(e.target.value)}
+                id="dailyGid"
+                placeholder="0"
+                value={dailyGid}
+                onChange={(e) => setDailyGid(e.target.value)}
               />
-              <Button onClick={handleSyncGoogleSheets} disabled={loading}>
-                {loading ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <LinkIcon className="h-4 w-4" />
-                )}
-              </Button>
+              <p className="text-xs text-muted-foreground">
+                GID da aba de dados diários
+              </p>
             </div>
-            <p className="text-xs text-muted-foreground">
-              Os dados serão atualizados automaticamente toda segunda-feira às 5h da manhã
+            
+            <div className="space-y-2">
+              <Label htmlFor="weeklyGid">GID Semanal</Label>
+              <Input
+                id="weeklyGid"
+                placeholder="1"
+                value={weeklyGid}
+                onChange={(e) => setWeeklyGid(e.target.value)}
+              />
+              <p className="text-xs text-muted-foreground">
+                GID da aba de dados semanais
+              </p>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="monthlyGid">GID Mensal</Label>
+              <Input
+                id="monthlyGid"
+                placeholder="2"
+                value={monthlyGid}
+                onChange={(e) => setMonthlyGid(e.target.value)}
+              />
+              <p className="text-xs text-muted-foreground">
+                GID da aba de dados mensais
+              </p>
+            </div>
+          </div>
+          
+          <div className="bg-muted p-4 rounded-lg">
+            <p className="text-sm text-muted-foreground">
+              <strong>Como encontrar o GID:</strong> Abra a planilha no Google Sheets e veja a URL. 
+              O GID aparece após <code className="bg-background px-1 rounded">#gid=</code> na URL. 
+              Por exemplo: <code className="bg-background px-1 rounded">...#gid=1182190191</code> 
+              significa que o GID é <strong>1182190191</strong>.
             </p>
           </div>
+
+          <Button onClick={handleSyncGoogleSheets} disabled={loading} className="w-full">
+            {loading ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Sincronizando...
+              </>
+            ) : (
+              <>
+                <LinkIcon className="h-4 w-4 mr-2" />
+                Criar Dashboard e Sincronizar
+              </>
+            )}
+          </Button>
         </CardContent>
       </Card>
 
