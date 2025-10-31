@@ -4,7 +4,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
-import { CalendarIcon, TrendingUp, TrendingDown, Activity, DollarSign, Users, MessageCircle, Eye, Target, Zap } from "lucide-react";
+import { CalendarIcon, TrendingUp, TrendingDown, MessageSquare, CircleDollarSign, UserCheck, Wallet, Radio, Sparkles, BarChart3, Banknote } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -156,21 +156,27 @@ export default function ModernDashboard({ userId, isAdmin = false, isModerator =
     value, 
     icon: Icon, 
     trend, 
-    trendValue 
+    trendValue,
+    gradientFrom,
+    gradientTo,
+    iconColor
   }: { 
     title: string; 
     value: string | number; 
     icon: any; 
     trend?: 'up' | 'down'; 
-    trendValue?: string 
+    trendValue?: string;
+    gradientFrom: string;
+    gradientTo: string;
+    iconColor: string;
   }) => (
     <Card className="relative overflow-hidden border border-white/10 bg-gradient-to-br from-white/5 via-white/5 to-white/10 backdrop-blur-xl">
       <div className="absolute inset-0 bg-grid-white/[0.02] bg-[size:20px_20px]" />
-      <div className="absolute -top-24 -right-24 w-48 h-48 bg-primary/20 rounded-full blur-3xl" />
+      <div className={`absolute -top-24 -right-24 w-48 h-48 rounded-full blur-3xl ${gradientFrom}`} />
       <div className="relative p-6">
         <div className="flex items-center justify-between mb-4">
-          <div className="p-3 rounded-xl bg-gradient-to-br from-primary/30 to-primary/10 backdrop-blur-sm border border-white/20">
-            <Icon className="h-5 w-5 text-primary" />
+          <div className={`p-3 rounded-xl backdrop-blur-sm border border-white/20 ${gradientTo}`}>
+            <Icon className={`h-5 w-5 ${iconColor}`} />
           </div>
           {trend && (
             <div className={cn(
@@ -241,42 +247,66 @@ export default function ModernDashboard({ userId, isAdmin = false, isModerator =
         <MetricCard
           title="Conversas Iniciadas"
           value={metrics.totalConversations}
-          icon={MessageCircle}
+          icon={MessageSquare}
+          gradientFrom="bg-blue-500/20"
+          gradientTo="bg-gradient-to-br from-blue-500/20 to-blue-600/10"
+          iconColor="text-blue-400"
         />
         <MetricCard
           title="Custo por Conversa"
           value={`R$ ${metrics.avgCostPerConversation.toFixed(2)}`}
-          icon={DollarSign}
+          icon={CircleDollarSign}
+          gradientFrom="bg-emerald-500/20"
+          gradientTo="bg-gradient-to-br from-emerald-500/20 to-emerald-600/10"
+          iconColor="text-emerald-400"
         />
         <MetricCard
           title="Visitas ao Perfil"
           value={metrics.totalProfileVisits >= 1000 ? `${(metrics.totalProfileVisits / 1000).toFixed(1)}K` : metrics.totalProfileVisits}
-          icon={Eye}
+          icon={UserCheck}
+          gradientFrom="bg-purple-500/20"
+          gradientTo="bg-gradient-to-br from-purple-500/20 to-purple-600/10"
+          iconColor="text-purple-400"
         />
         <MetricCard
           title="Custo por Visita"
           value={`R$ ${metrics.avgCostPerVisit.toFixed(2)}`}
-          icon={DollarSign}
+          icon={Wallet}
+          gradientFrom="bg-amber-500/20"
+          gradientTo="bg-gradient-to-br from-amber-500/20 to-amber-600/10"
+          iconColor="text-amber-400"
         />
         <MetricCard
           title="Alcance"
           value={metrics.totalReach >= 1000 ? `${(metrics.totalReach / 1000).toFixed(1)}K` : metrics.totalReach}
-          icon={Target}
+          icon={Radio}
+          gradientFrom="bg-cyan-500/20"
+          gradientTo="bg-gradient-to-br from-cyan-500/20 to-cyan-600/10"
+          iconColor="text-cyan-400"
         />
         <MetricCard
           title="Impressões"
           value={metrics.totalImpressions >= 1000 ? `${(metrics.totalImpressions / 1000).toFixed(1)}K` : metrics.totalImpressions}
-          icon={Zap}
+          icon={Sparkles}
+          gradientFrom="bg-pink-500/20"
+          gradientTo="bg-gradient-to-br from-pink-500/20 to-pink-600/10"
+          iconColor="text-pink-400"
         />
         <MetricCard
           title="Frequência"
           value={metrics.avgFrequency.toFixed(2)}
-          icon={Activity}
+          icon={BarChart3}
+          gradientFrom="bg-violet-500/20"
+          gradientTo="bg-gradient-to-br from-violet-500/20 to-violet-600/10"
+          iconColor="text-violet-400"
         />
         <MetricCard
           title="Valor Investido"
           value={`R$ ${metrics.totalSpent.toFixed(2)}`}
-          icon={DollarSign}
+          icon={Banknote}
+          gradientFrom="bg-green-500/20"
+          gradientTo="bg-gradient-to-br from-green-500/20 to-green-600/10"
+          iconColor="text-green-400"
         />
       </div>
 
@@ -360,7 +390,20 @@ export default function ModernDashboard({ userId, isAdmin = false, isModerator =
               <LineChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.1} />
                 <XAxis dataKey="name" stroke="#94a3b8" fontSize={12} />
-                <YAxis stroke="#94a3b8" fontSize={12} />
+                <YAxis 
+                  yAxisId="left" 
+                  stroke="#94a3b8" 
+                  fontSize={12}
+                  label={{ value: 'Impressões / Alcance', angle: -90, position: 'insideLeft', style: { fill: '#94a3b8' } }}
+                />
+                <YAxis 
+                  yAxisId="right" 
+                  orientation="right" 
+                  stroke="#ec4899" 
+                  fontSize={12}
+                  domain={[0, 1000]}
+                  label={{ value: 'Conversas', angle: 90, position: 'insideRight', style: { fill: '#ec4899' } }}
+                />
                 <Tooltip 
                   contentStyle={{ 
                     backgroundColor: 'hsl(var(--background))', 
@@ -370,6 +413,7 @@ export default function ModernDashboard({ userId, isAdmin = false, isModerator =
                   }}
                 />
                 <Line 
+                  yAxisId="right"
                   type="monotone" 
                   dataKey="conversas" 
                   stroke="#ec4899" 
@@ -378,6 +422,7 @@ export default function ModernDashboard({ userId, isAdmin = false, isModerator =
                   name="Conversas"
                 />
                 <Line 
+                  yAxisId="left"
                   type="monotone" 
                   dataKey="impressoes" 
                   stroke="#3b82f6" 
@@ -386,6 +431,7 @@ export default function ModernDashboard({ userId, isAdmin = false, isModerator =
                   name="Impressões"
                 />
                 <Line 
+                  yAxisId="left"
                   type="monotone" 
                   dataKey="alcance" 
                   stroke="#10b981" 
