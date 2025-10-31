@@ -89,6 +89,7 @@ export type Database = {
           conversations_started: number | null
           cost_per_conversation: number | null
           cost_per_result: number | null
+          cost_per_visit: number | null
           cpc: number | null
           cpm: number | null
           created_at: string | null
@@ -98,6 +99,7 @@ export type Database = {
           id: string
           impressions: number | null
           link_clicks: number | null
+          profile_visits: number | null
           reach: number | null
           report_date: string | null
           report_type: string | null
@@ -113,6 +115,7 @@ export type Database = {
           conversations_started?: number | null
           cost_per_conversation?: number | null
           cost_per_result?: number | null
+          cost_per_visit?: number | null
           cpc?: number | null
           cpm?: number | null
           created_at?: string | null
@@ -122,6 +125,7 @@ export type Database = {
           id?: string
           impressions?: number | null
           link_clicks?: number | null
+          profile_visits?: number | null
           reach?: number | null
           report_date?: string | null
           report_type?: string | null
@@ -137,6 +141,7 @@ export type Database = {
           conversations_started?: number | null
           cost_per_conversation?: number | null
           cost_per_result?: number | null
+          cost_per_visit?: number | null
           cpc?: number | null
           cpm?: number | null
           created_at?: string | null
@@ -146,6 +151,7 @@ export type Database = {
           id?: string
           impressions?: number | null
           link_clicks?: number | null
+          profile_visits?: number | null
           reach?: number | null
           report_date?: string | null
           report_type?: string | null
