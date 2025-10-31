@@ -286,31 +286,55 @@ export default function ModernDashboard({ userId, isAdmin = false, isModerator =
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0 border-white/10 bg-background/95 backdrop-blur-xl">
-              <Calendar
-                mode="single"
-                selected={selectedDate}
-                onSelect={setSelectedDate}
-                initialFocus
-                className="pointer-events-auto"
-                disabled={(date) => {
-                  // Disable dates that don't have data
-                  if (availableDates.length === 0) return true;
-                  
-                  if (reportType === 'weekly') {
-                    // Check if any date in this week has data
-                    return !availableDates.some(availableDate => 
-                      isSameWeek(date, availableDate, { locale: ptBR })
-                    );
-                  } else if (reportType === 'monthly') {
-                    // Check if any date in this month has data
-                    return !availableDates.some(availableDate => 
-                      isSameMonth(date, availableDate)
-                    );
-                  }
-                  
-                  return true;
-                }}
-              />
+              <div className="space-y-3 p-3">
+                <Calendar
+                  mode="single"
+                  selected={selectedDate}
+                  onSelect={setSelectedDate}
+                  initialFocus
+                  className="pointer-events-auto"
+                  disabled={(date) => {
+                    // Disable dates that don't have data
+                    if (availableDates.length === 0) return true;
+                    
+                    if (reportType === 'weekly') {
+                      // Check if any date in this week has data
+                      return !availableDates.some(availableDate => 
+                        isSameWeek(date, availableDate, { locale: ptBR })
+                      );
+                    } else if (reportType === 'monthly') {
+                      // Check if any date in this month has data
+                      return !availableDates.some(availableDate => 
+                        isSameMonth(date, availableDate)
+                      );
+                    }
+                    
+                    return true;
+                  }}
+                />
+                {reportType === 'monthly' && availableDates.length > 0 && (
+                  <div className="border-t border-white/10 pt-3">
+                    <p className="text-xs text-muted-foreground mb-2">Selecionar mês completo:</p>
+                    <div className="flex flex-wrap gap-2">
+                      {Array.from(new Set(availableDates.map(d => format(d, 'yyyy-MM')))).map(month => {
+                        const monthDate = new Date(month + '-01');
+                        const isSelected = selectedDate && isSameMonth(selectedDate, monthDate);
+                        return (
+                          <Button
+                            key={month}
+                            size="sm"
+                            variant={isSelected ? "default" : "outline"}
+                            onClick={() => setSelectedDate(monthDate)}
+                            className="text-xs"
+                          >
+                            {format(monthDate, 'MMM yyyy', { locale: ptBR })}
+                          </Button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
             </PopoverContent>
           </Popover>
         </div>
@@ -468,7 +492,13 @@ export default function ModernDashboard({ userId, isAdmin = false, isModerator =
                   yAxisId="left" 
                   stroke="#94a3b8" 
                   fontSize={12}
-                  label={{ value: 'Impressões / Alcance', angle: -90, position: 'insideLeft', style: { fill: '#94a3b8' } }}
+                  label={{ 
+                    value: 'Impressões/Alcance', 
+                    angle: -90, 
+                    position: 'insideLeft',
+                    offset: 10,
+                    style: { fill: '#94a3b8', textAnchor: 'middle' } 
+                  }}
                 />
                 <YAxis 
                   yAxisId="right" 
