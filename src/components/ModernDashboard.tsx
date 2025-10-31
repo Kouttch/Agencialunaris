@@ -401,7 +401,7 @@ export default function ModernDashboard({ userId, isAdmin = false, isModerator =
                   orientation="right" 
                   stroke="#ec4899" 
                   fontSize={12}
-                  domain={[0, 1000]}
+                  domain={[0, 500]}
                   label={{ value: 'Conversas', angle: 90, position: 'insideRight', style: { fill: '#ec4899' } }}
                 />
                 <Tooltip 
