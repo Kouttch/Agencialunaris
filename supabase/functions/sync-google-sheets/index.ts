@@ -98,8 +98,14 @@ serve(async (req) => {
         }
 
         // Parse campaign name
-        let campaignName = row['campanha'] || row['campaign'] || row['campaign_name'] || 'Sem nome';
+        let campaignName = row['campanha'] || row['campaign'] || row['campaign_name'] || '';
         campaignName = campaignName.replace(/\s+/g, ' ').trim();
+        
+        // Skip empty rows (no campaign name)
+        if (!campaignName) {
+          console.log('Skipping empty row at line', i);
+          continue;
+        }
         
         // Helper to parse Brazilian currency (R$ 1.234,56)
         const parseCurrency = (value: string) => {
@@ -126,9 +132,25 @@ serve(async (req) => {
         
         // Calculate additional metrics
         const cpm = impressions > 0 ? (amountSpent / impressions) * 1000 : 0;
-        const linkClicks = profileVisits; // Using profile visits as clicks
+        const linkClicks = profileVisits || 0;
         const cpc = linkClicks > 0 ? amountSpent / linkClicks : 0;
         const ctr = impressions > 0 ? (linkClicks / impressions) * 100 : 0;
+        
+        // Skip rows with no meaningful data (all metrics are zero)
+        const hasData = conversationsStarted > 0 || profileVisits > 0 || reach > 0 || impressions > 0 || amountSpent > 0;
+        if (!hasData) {
+          console.log('Skipping row with no data:', campaignName);
+          continue;
+        }
+
+        console.log(`Processing ${reportType} campaign:`, campaignName, {
+          conversationsStarted,
+          profileVisits,
+          costPerVisit,
+          reach,
+          impressions,
+          amountSpent
+        });
 
         campaignData.push({
           user_id: userId,
