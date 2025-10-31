@@ -146,6 +146,8 @@ serve(async (req) => {
           ctr: ctr,
           cost_per_conversation: costPerConversation,
           conversations_started: conversationsStarted,
+          profile_visits: profileVisits,
+          cost_per_visit: costPerVisit,
           week_start: startDate,
           week_end: endDate,
           report_type: reportType,
