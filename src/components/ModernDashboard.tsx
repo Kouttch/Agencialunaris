@@ -26,6 +26,8 @@ interface CampaignData {
   ctr: number;
   conversations_started: number;
   cost_per_conversation: number;
+  profile_visits?: number;
+  cost_per_visit?: number;
   report_date: string;
   report_type: string;
 }
@@ -98,22 +100,45 @@ export default function ModernDashboard({ userId, isAdmin = false }: ModernDashb
     return nameMappings[originalName] || originalName;
   };
 
-  // Calcular métricas agregadas
+  // Separar campanhas por tipo
+  const performanceCampaigns = campaignData.filter(c => 
+    (c.profile_visits && c.profile_visits > 0) || (c.cost_per_visit && c.cost_per_visit > 0)
+  );
+  
+  const conversationCampaigns = campaignData.filter(c => 
+    !(c.profile_visits && c.profile_visits > 0) && !(c.cost_per_visit && c.cost_per_visit > 0)
+  );
+
+  // Calcular métricas para campanhas de conversas
+  const conversationMetrics = {
+    totalConversations: conversationCampaigns.reduce((sum, c) => sum + (c.conversations_started || 0), 0),
+    totalSpent: conversationCampaigns.reduce((sum, c) => sum + (c.amount_spent || 0), 0),
+    avgCostPerConversation: 0
+  };
+  conversationMetrics.avgCostPerConversation = conversationMetrics.totalConversations > 0 
+    ? conversationMetrics.totalSpent / conversationMetrics.totalConversations 
+    : 0;
+
+  // Calcular métricas para campanhas de desempenho
+  const performanceMetrics = {
+    totalVisits: performanceCampaigns.reduce((sum, c) => sum + (c.profile_visits || 0), 0),
+    totalSpent: performanceCampaigns.reduce((sum, c) => sum + (c.amount_spent || 0), 0),
+    avgCostPerVisit: 0
+  };
+  performanceMetrics.avgCostPerVisit = performanceMetrics.totalVisits > 0 
+    ? performanceMetrics.totalSpent / performanceMetrics.totalVisits 
+    : 0;
+
+  // Métricas gerais
   const metrics = {
-    totalConversations: campaignData.reduce((sum, c) => sum + (c.conversations_started || 0), 0),
     totalSpent: campaignData.reduce((sum, c) => sum + (c.amount_spent || 0), 0),
     totalReach: campaignData.reduce((sum, c) => sum + (c.reach || 0), 0),
     totalImpressions: campaignData.reduce((sum, c) => sum + (c.impressions || 0), 0),
     totalClicks: campaignData.reduce((sum, c) => sum + (c.link_clicks || 0), 0),
-    avgCostPerConversation: 0,
     avgCPC: 0,
     avgCTR: 0
   };
 
-  metrics.avgCostPerConversation = metrics.totalConversations > 0 
-    ? metrics.totalSpent / metrics.totalConversations 
-    : 0;
-  
   metrics.avgCPC = metrics.totalClicks > 0 
     ? metrics.totalSpent / metrics.totalClicks 
     : 0;
@@ -126,6 +151,7 @@ export default function ModernDashboard({ userId, isAdmin = false }: ModernDashb
   const chartData = campaignData.map(c => ({
     name: getDisplayName(c.campaign_name),
     conversas: c.conversations_started || 0,
+    visitas: c.profile_visits || 0,
     investimento: c.amount_spent || 0,
     alcance: c.reach || 0,
     impressoes: c.impressions || 0,
@@ -217,16 +243,34 @@ export default function ModernDashboard({ userId, isAdmin = false }: ModernDashb
 
       {/* Métricas principais */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <MetricCard
-          title="Total de Conversas"
-          value={metrics.totalConversations}
-          icon={Activity}
-        />
-        <MetricCard
-          title="Custo por Conversa"
-          value={`R$ ${metrics.avgCostPerConversation.toFixed(2)}`}
-          icon={DollarSign}
-        />
+        {conversationCampaigns.length > 0 && (
+          <>
+            <MetricCard
+              title="Total de Conversas"
+              value={conversationMetrics.totalConversations}
+              icon={Activity}
+            />
+            <MetricCard
+              title="Custo por Conversa"
+              value={`R$ ${conversationMetrics.avgCostPerConversation.toFixed(2)}`}
+              icon={DollarSign}
+            />
+          </>
+        )}
+        {performanceCampaigns.length > 0 && (
+          <>
+            <MetricCard
+              title="Visitas ao Perfil"
+              value={performanceMetrics.totalVisits}
+              icon={Users}
+            />
+            <MetricCard
+              title="Custo por Visita"
+              value={`R$ ${performanceMetrics.avgCostPerVisit.toFixed(2)}`}
+              icon={DollarSign}
+            />
+          </>
+        )}
         <MetricCard
           title="Alcance Total"
           value={metrics.totalReach >= 1000 ? `${(metrics.totalReach / 1000).toFixed(1)}K` : metrics.totalReach}
@@ -345,42 +389,92 @@ export default function ModernDashboard({ userId, isAdmin = false }: ModernDashb
         </Card>
       </div>
 
-      {/* Tabela de campanhas */}
-      <Card className="border border-primary/20 bg-gradient-to-br from-background via-background to-primary/5 backdrop-blur-sm">
-        <div className="p-6">
-          <h3 className="text-lg font-semibold mb-4 bg-gradient-to-r from-primary to-purple-500 bg-clip-text text-transparent">Detalhes das Campanhas</h3>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-primary/20">
-                  <th className="text-left p-3 text-sm font-semibold text-muted-foreground">Campanha</th>
-                  <th className="text-right p-3 text-sm font-semibold text-muted-foreground">Conversas</th>
-                  <th className="text-right p-3 text-sm font-semibold text-muted-foreground">Custo/Conversa</th>
-                  <th className="text-right p-3 text-sm font-semibold text-muted-foreground">Investimento</th>
-                  <th className="text-right p-3 text-sm font-semibold text-muted-foreground">Alcance</th>
-                </tr>
-              </thead>
-              <tbody>
-                {campaignData.map((campaign, idx) => (
-                  <tr key={idx} className="border-b border-primary/10 hover:bg-primary/5 transition-colors">
-                    <td className="p-3 text-sm font-medium">{getDisplayName(campaign.campaign_name)}</td>
-                    <td className="p-3 text-sm text-right font-semibold text-primary">{campaign.conversations_started || 0}</td>
-                    <td className="p-3 text-sm text-right font-medium">
-                      R$ {(campaign.cost_per_conversation || 0).toFixed(2)}
-                    </td>
-                    <td className="p-3 text-sm text-right font-medium">
-                      R$ {(campaign.amount_spent || 0).toFixed(2)}
-                    </td>
-                    <td className="p-3 text-sm text-right">
-                      {campaign.reach >= 1000 ? `${(campaign.reach / 1000).toFixed(1)}K` : campaign.reach}
-                    </td>
+      {/* Tabelas de campanhas separadas por tipo */}
+      {conversationCampaigns.length > 0 && (
+        <Card className="border border-primary/20 bg-gradient-to-br from-background via-background to-primary/5 backdrop-blur-sm">
+          <div className="p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <h3 className="text-lg font-semibold bg-gradient-to-r from-primary to-purple-500 bg-clip-text text-transparent">Campanhas de Conversas</h3>
+              <span className="px-2 py-1 text-xs font-semibold bg-primary/10 text-primary rounded-full border border-primary/20">
+                {conversationCampaigns.length} campanhas
+              </span>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-primary/20">
+                    <th className="text-left p-3 text-sm font-semibold text-muted-foreground">Campanha</th>
+                    <th className="text-right p-3 text-sm font-semibold text-muted-foreground">Conversas</th>
+                    <th className="text-right p-3 text-sm font-semibold text-muted-foreground">Custo/Conversa</th>
+                    <th className="text-right p-3 text-sm font-semibold text-muted-foreground">Investimento</th>
+                    <th className="text-right p-3 text-sm font-semibold text-muted-foreground">Alcance</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {conversationCampaigns.map((campaign, idx) => (
+                    <tr key={idx} className="border-b border-primary/10 hover:bg-primary/5 transition-colors">
+                      <td className="p-3 text-sm font-medium">{getDisplayName(campaign.campaign_name)}</td>
+                      <td className="p-3 text-sm text-right font-semibold text-primary">{campaign.conversations_started || 0}</td>
+                      <td className="p-3 text-sm text-right font-medium">
+                        R$ {(campaign.cost_per_conversation || 0).toFixed(2)}
+                      </td>
+                      <td className="p-3 text-sm text-right font-medium">
+                        R$ {(campaign.amount_spent || 0).toFixed(2)}
+                      </td>
+                      <td className="p-3 text-sm text-right">
+                        {campaign.reach >= 1000 ? `${(campaign.reach / 1000).toFixed(1)}K` : campaign.reach}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
-      </Card>
+        </Card>
+      )}
+
+      {performanceCampaigns.length > 0 && (
+        <Card className="border border-purple-500/20 bg-gradient-to-br from-background via-background to-purple-500/5 backdrop-blur-sm">
+          <div className="p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <h3 className="text-lg font-semibold bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent">Campanhas de Desempenho</h3>
+              <span className="px-2 py-1 text-xs font-semibold bg-purple-500/10 text-purple-400 rounded-full border border-purple-500/20">
+                {performanceCampaigns.length} campanhas
+              </span>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-purple-500/20">
+                    <th className="text-left p-3 text-sm font-semibold text-muted-foreground">Campanha</th>
+                    <th className="text-right p-3 text-sm font-semibold text-muted-foreground">Visitas ao Perfil</th>
+                    <th className="text-right p-3 text-sm font-semibold text-muted-foreground">Custo/Visita</th>
+                    <th className="text-right p-3 text-sm font-semibold text-muted-foreground">Investimento</th>
+                    <th className="text-right p-3 text-sm font-semibold text-muted-foreground">Alcance</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {performanceCampaigns.map((campaign, idx) => (
+                    <tr key={idx} className="border-b border-purple-500/10 hover:bg-purple-500/5 transition-colors">
+                      <td className="p-3 text-sm font-medium">{getDisplayName(campaign.campaign_name)}</td>
+                      <td className="p-3 text-sm text-right font-semibold text-purple-400">{campaign.profile_visits || 0}</td>
+                      <td className="p-3 text-sm text-right font-medium">
+                        R$ {(campaign.cost_per_visit || 0).toFixed(2)}
+                      </td>
+                      <td className="p-3 text-sm text-right font-medium">
+                        R$ {(campaign.amount_spent || 0).toFixed(2)}
+                      </td>
+                      <td className="p-3 text-sm text-right">
+                        {campaign.reach >= 1000 ? `${(campaign.reach / 1000).toFixed(1)}K` : campaign.reach}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </Card>
+      )}
     </div>
   );
 }
