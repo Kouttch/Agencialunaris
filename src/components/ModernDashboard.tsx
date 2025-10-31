@@ -8,7 +8,7 @@ import { CalendarIcon, TrendingUp, TrendingDown, MessageSquare, CircleDollarSign
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { format } from "date-fns";
+import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, isWithinInterval, isSameMonth, isSameWeek } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 
@@ -40,11 +40,50 @@ export default function ModernDashboard({ userId, isAdmin = false, isModerator =
   const [reportType, setReportType] = useState<'weekly' | 'monthly'>('weekly');
   const [campaignData, setCampaignData] = useState<CampaignData[]>([]);
   const [nameMappings, setNameMappings] = useState<Record<string, string>>({});
+  const [availableDates, setAvailableDates] = useState<Date[]>([]);
+
+  useEffect(() => {
+    loadAvailableDates();
+    loadNameMappings();
+  }, [userId, reportType]);
 
   useEffect(() => {
     loadData();
-    loadNameMappings();
-  }, [userId, reportType, selectedDate]);
+  }, [userId, reportType, selectedDate, availableDates]);
+
+  const loadAvailableDates = async () => {
+    try {
+      // Get account_id for this user
+      const { data: mappingData } = await supabase
+        .from('meta_account_mappings')
+        .select('account_id')
+        .eq('user_id', userId)
+        .single();
+
+      if (!mappingData) {
+        setAvailableDates([]);
+        return;
+      }
+
+      // Get all unique dates from reports
+      const { data, error } = await supabase
+        .from('meta_reports')
+        .select('date_start')
+        .eq('account_id', mappingData.account_id)
+        .eq('report_type', reportType);
+
+      if (error) throw error;
+
+      if (data) {
+        const dates = data
+          .map(d => new Date(d.date_start))
+          .filter(d => !isNaN(d.getTime()));
+        setAvailableDates(dates);
+      }
+    } catch (error: any) {
+      console.error('Erro ao carregar datas disponíveis:', error);
+    }
+  };
 
   const loadNameMappings = async () => {
     const { data } = await supabase
@@ -84,8 +123,20 @@ export default function ModernDashboard({ userId, isAdmin = false, isModerator =
         .eq('report_type', reportType);
 
       if (selectedDate) {
-        const dateStr = format(selectedDate, 'yyyy-MM-dd');
-        query = query.eq('date_start', dateStr);
+        // Filter by week or month depending on reportType
+        if (reportType === 'weekly') {
+          const weekStart = startOfWeek(selectedDate, { locale: ptBR });
+          const weekEnd = endOfWeek(selectedDate, { locale: ptBR });
+          query = query
+            .gte('date_start', format(weekStart, 'yyyy-MM-dd'))
+            .lte('date_start', format(weekEnd, 'yyyy-MM-dd'));
+        } else if (reportType === 'monthly') {
+          const monthStart = startOfMonth(selectedDate);
+          const monthEnd = endOfMonth(selectedDate);
+          query = query
+            .gte('date_start', format(monthStart, 'yyyy-MM-dd'))
+            .lte('date_start', format(monthEnd, 'yyyy-MM-dd'));
+        }
       }
 
       const { data, error } = await query.order('date_start', { ascending: false });
@@ -226,7 +277,12 @@ export default function ModernDashboard({ userId, isAdmin = false, isModerator =
             <PopoverTrigger asChild>
               <Button variant="outline" className="bg-white/5 backdrop-blur-xl border-white/10 hover:border-white/20">
                 <CalendarIcon className="mr-2 h-4 w-4" />
-                {selectedDate ? format(selectedDate, "PPP", { locale: ptBR }) : "Selecionar período"}
+                {selectedDate 
+                  ? reportType === 'weekly'
+                    ? `Semana de ${format(startOfWeek(selectedDate, { locale: ptBR }), "dd MMM", { locale: ptBR })}`
+                    : format(selectedDate, "MMMM yyyy", { locale: ptBR })
+                  : "Selecionar período"
+                }
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0 border-white/10 bg-background/95 backdrop-blur-xl">
@@ -236,6 +292,24 @@ export default function ModernDashboard({ userId, isAdmin = false, isModerator =
                 onSelect={setSelectedDate}
                 initialFocus
                 className="pointer-events-auto"
+                disabled={(date) => {
+                  // Disable dates that don't have data
+                  if (availableDates.length === 0) return true;
+                  
+                  if (reportType === 'weekly') {
+                    // Check if any date in this week has data
+                    return !availableDates.some(availableDate => 
+                      isSameWeek(date, availableDate, { locale: ptBR })
+                    );
+                  } else if (reportType === 'monthly') {
+                    // Check if any date in this month has data
+                    return !availableDates.some(availableDate => 
+                      isSameMonth(date, availableDate)
+                    );
+                  }
+                  
+                  return true;
+                }}
               />
             </PopoverContent>
           </Popover>
