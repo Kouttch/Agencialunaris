@@ -1,11 +1,8 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Link as LinkIcon, User } from "lucide-react";
+import { User } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -14,7 +11,6 @@ interface Manager {
   id: string;
   name: string;
   photo_url: string | null;
-  email?: string;
   role?: string;
 }
 
@@ -26,13 +22,6 @@ interface UserProfile {
 
 export default function DataManagement() {
   const { toast } = useToast();
-  const [loading, setLoading] = useState(false);
-  const [selectedUserId, setSelectedUserId] = useState("");
-  const [sheetUrl, setSheetUrl] = useState("");
-  const [dashboardName, setDashboardName] = useState("");
-  const [dailyGid, setDailyGid] = useState("");
-  const [weeklyGid, setWeeklyGid] = useState("");
-  const [monthlyGid, setMonthlyGid] = useState("");
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [managers, setManagers] = useState<Manager[]>([]);
 
@@ -42,7 +31,6 @@ export default function DataManagement() {
   }, []);
 
   const loadUsers = async () => {
-    // Get all profiles
     const { data: profilesData } = await supabase
       .from('profiles')
       .select('user_id, full_name, company')
@@ -50,13 +38,11 @@ export default function DataManagement() {
     
     if (!profilesData) return;
 
-    // Get user roles to filter out admins and moderators
     const { data: rolesData } = await supabase
       .from('user_roles')
       .select('user_id, role')
       .in('user_id', profilesData.map(p => p.user_id));
 
-    // Filter to only show regular users (not admins or moderators)
     const regularUsers = profilesData.filter(profile => {
       const userRole = rolesData?.find(r => r.user_id === profile.user_id);
       return userRole?.role === 'user';
@@ -66,7 +52,6 @@ export default function DataManagement() {
   };
 
   const loadManagers = async () => {
-    // Buscar usuários com role de admin ou moderator
     const { data: rolesData } = await supabase
       .from('user_roles')
       .select('user_id, role')
@@ -76,7 +61,6 @@ export default function DataManagement() {
 
     const userIds = rolesData.map(r => r.user_id);
     
-    // Buscar perfis desses usuários
     const { data: profilesData } = await supabase
       .from('profiles')
       .select('user_id, full_name, avatar_url')
@@ -93,75 +77,6 @@ export default function DataManagement() {
         };
       });
       setManagers(managersData);
-    }
-  };
-
-  const handleSyncGoogleSheets = async () => {
-    if (!selectedUserId || !sheetUrl || !dashboardName) {
-      toast({
-        title: "Campos obrigatórios",
-        description: "Preencha todos os campos: cliente, nome do dashboard e URL",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    setLoading(true);
-    try {
-      // Get current user to use as created_by
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Usuário não autenticado");
-
-      // Criar novo dashboard com GIDs
-      const { data: newDashboard, error: createError } = await supabase
-        .from('user_dashboards')
-        .insert({
-          user_id: selectedUserId,
-          created_by: user.id,
-          dashboard_name: dashboardName,
-          sheet_url: sheetUrl,
-          daily_gid: dailyGid || '0',
-          weekly_gid: weeklyGid || '1',
-          monthly_gid: monthlyGid || '2'
-        })
-        .select('id, daily_gid, weekly_gid, monthly_gid')
-        .single();
-
-      if (createError) throw createError;
-
-      // Trigger sync com dashboardId e GIDs
-      const { error: syncError } = await supabase.functions.invoke('sync-google-sheets', {
-        body: { 
-          userId: selectedUserId, 
-          sheetUrl,
-          dashboardId: newDashboard.id,
-          dailyGid: newDashboard.daily_gid,
-          weeklyGid: newDashboard.weekly_gid,
-          monthlyGid: newDashboard.monthly_gid
-        }
-      });
-
-      if (syncError) throw syncError;
-
-      toast({
-        title: "Dashboard criado e sincronização iniciada",
-        description: "O dashboard foi criado e os dados serão atualizados em breve"
-      });
-
-      // Limpar campos
-      setDashboardName("");
-      setSheetUrl("");
-      setDailyGid("");
-      setWeeklyGid("");
-      setMonthlyGid("");
-    } catch (error: any) {
-      toast({
-        title: "Erro na sincronização",
-        description: error.message,
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -190,134 +105,17 @@ export default function DataManagement() {
   return (
     <div className="container mx-auto p-6 pb-24">
       <div className="mb-10">
-        <h1 className="text-3xl font-bold mb-2">Gerenciamento de Dados</h1>
-        <p className="text-muted-foreground">Sincronize planilhas e gerencie gestores</p>
+        <h1 className="text-3xl font-bold mb-2">Gestão de Clientes e Gestores</h1>
+        <p className="text-muted-foreground">
+          Gerencie a atribuição de gestores responsáveis pelos clientes
+        </p>
       </div>
 
-      {/* Google Sheets Sync */}
-      <Card className="mb-8">
-        <CardHeader>
-          <CardTitle>Adicionar Novo Dashboard</CardTitle>
-          <CardDescription>
-            Crie um novo dashboard com integração ao Google Sheets
-          </CardDescription>
-          <div className="mt-3 p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-md">
-            <p className="text-sm text-amber-800 dark:text-amber-200">
-              ⚠️ <strong>Importante:</strong> Para validar corretamente, é necessário que o link do Google Sheets esteja público (compartilhado com "Qualquer pessoa com o link pode visualizar").
-            </p>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="user">Selecionar Cliente</Label>
-            <Select value={selectedUserId} onValueChange={setSelectedUserId}>
-              <SelectTrigger>
-                <SelectValue placeholder="Escolha um cliente" />
-              </SelectTrigger>
-              <SelectContent>
-                {users.map((user) => (
-                  <SelectItem key={user.user_id} value={user.user_id}>
-                    {user.full_name || user.company || 'Sem nome'}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="dashboardName">Nome do Dashboard</Label>
-            <Input
-              id="dashboardName"
-              placeholder="Ex: Meta Ads, Google Ads, TikTok Ads..."
-              value={dashboardName}
-              onChange={(e) => setDashboardName(e.target.value)}
-            />
-            <p className="text-xs text-muted-foreground">
-              Dê um nome identificável ao dashboard (empresa, plataforma, etc)
-            </p>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="sheetUrl">URL da Planilha do Google Sheets</Label>
-            <Input
-              id="sheetUrl"
-              placeholder="https://docs.google.com/spreadsheets/d/..."
-              value={sheetUrl}
-              onChange={(e) => setSheetUrl(e.target.value)}
-            />
-          </div>
-
-          <div className="grid grid-cols-3 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="dailyGid">GID Diário</Label>
-              <Input
-                id="dailyGid"
-                placeholder="0"
-                value={dailyGid}
-                onChange={(e) => setDailyGid(e.target.value)}
-              />
-              <p className="text-xs text-muted-foreground">
-                GID da aba de dados diários
-              </p>
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="weeklyGid">GID Semanal</Label>
-              <Input
-                id="weeklyGid"
-                placeholder="1"
-                value={weeklyGid}
-                onChange={(e) => setWeeklyGid(e.target.value)}
-              />
-              <p className="text-xs text-muted-foreground">
-                GID da aba de dados semanais
-              </p>
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="monthlyGid">GID Mensal</Label>
-              <Input
-                id="monthlyGid"
-                placeholder="2"
-                value={monthlyGid}
-                onChange={(e) => setMonthlyGid(e.target.value)}
-              />
-              <p className="text-xs text-muted-foreground">
-                GID da aba de dados mensais
-              </p>
-            </div>
-          </div>
-          
-          <div className="bg-muted p-4 rounded-lg">
-            <p className="text-sm text-muted-foreground">
-              <strong>Como encontrar o GID:</strong> Abra a planilha no Google Sheets e veja a URL. 
-              O GID aparece após <code className="bg-background px-1 rounded">#gid=</code> na URL. 
-              Por exemplo: <code className="bg-background px-1 rounded">...#gid=1182190191</code> 
-              significa que o GID é <strong>1182190191</strong>.
-            </p>
-          </div>
-
-          <Button onClick={handleSyncGoogleSheets} disabled={loading} className="w-full">
-            {loading ? (
-              <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Sincronizando...
-              </>
-            ) : (
-              <>
-                <LinkIcon className="h-4 w-4 mr-2" />
-                Criar Dashboard e Sincronizar
-              </>
-            )}
-          </Button>
-        </CardContent>
-      </Card>
-
       {/* Managers Management */}
-      <Card className="mb-8">
+      <Card className="mb-8 border-primary/20 bg-gradient-to-br from-background via-background to-primary/5">
         <CardHeader>
-          <CardTitle>Gestores Responsáveis</CardTitle>
-          <CardDescription>Usuários Admin e Gestores disponíveis para atribuição</CardDescription>
+          <CardTitle>Gestores Disponíveis</CardTitle>
+          <CardDescription>Usuários Admin e Gestores disponíveis para atribuição aos clientes</CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
@@ -361,7 +159,7 @@ export default function DataManagement() {
       </Card>
 
       {/* Assign Managers to Users */}
-      <Card className="mb-8">
+      <Card className="mb-8 border-primary/20 bg-gradient-to-br from-background via-background to-primary/5">
         <CardHeader>
           <CardTitle>Atribuir Gestores aos Clientes</CardTitle>
           <CardDescription>Defina qual gestor será responsável por cada cliente</CardDescription>

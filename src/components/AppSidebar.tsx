@@ -72,8 +72,12 @@ export function AppSidebar() {
     url: "/fulladmin/clients",
     icon: Users
   }, {
-    title: "Dados",
-    url: "/fulladmin/data",
+    title: "Gestores",
+    url: "/fulladmin/managers",
+    icon: Users
+  }, {
+    title: "Contas Meta",
+    url: "/fulladmin/accounts",
     icon: FileText
   }, {
     title: "Checklist",

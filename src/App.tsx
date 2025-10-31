@@ -20,6 +20,7 @@ import PaymentsManagement from "./pages/PaymentsManagement";
 import UsersManagement from "./pages/UsersManagement";
 import DataManagement from "./pages/DataManagement";
 import ChecklistManagement from "./pages/ChecklistManagement";
+import AccountMappingManagement from "./pages/AccountMappingManagement";
 import NotFound from "./pages/NotFound";
 import Contact from "./pages/Contact";
 import TermsOfUse from "./pages/TermsOfUse";
@@ -130,7 +131,7 @@ const App = () => (
                 } 
               />
               <Route 
-                path="/fulladmin/data" 
+                path="/fulladmin/managers" 
                 element={
                   <ProtectedRoute>
                     <DashboardLayout>
@@ -140,7 +141,17 @@ const App = () => (
                 } 
               />
               <Route 
-                path="/fulladmin/checklist" 
+                path="/fulladmin/accounts" 
+                element={
+                  <ProtectedRoute>
+                    <DashboardLayout>
+                      <AccountMappingManagement />
+                    </DashboardLayout>
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/fulladmin/checklist"
                 element={
                   <ProtectedRoute>
                     <DashboardLayout>

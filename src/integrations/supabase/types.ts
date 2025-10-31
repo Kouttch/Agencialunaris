@@ -82,95 +82,6 @@ export type Database = {
           },
         ]
       }
-      campaign_data: {
-        Row: {
-          amount_spent: number | null
-          campaign_name: string
-          conversations_started: number | null
-          cost_per_conversation: number | null
-          cost_per_result: number | null
-          cost_per_visit: number | null
-          cpc: number | null
-          cpm: number | null
-          created_at: string | null
-          ctr: number | null
-          dashboard_id: string | null
-          frequency: number | null
-          id: string
-          impressions: number | null
-          link_clicks: number | null
-          profile_visits: number | null
-          reach: number | null
-          report_date: string | null
-          report_type: string | null
-          results: number | null
-          updated_at: string | null
-          user_id: string
-          week_end: string | null
-          week_start: string | null
-        }
-        Insert: {
-          amount_spent?: number | null
-          campaign_name: string
-          conversations_started?: number | null
-          cost_per_conversation?: number | null
-          cost_per_result?: number | null
-          cost_per_visit?: number | null
-          cpc?: number | null
-          cpm?: number | null
-          created_at?: string | null
-          ctr?: number | null
-          dashboard_id?: string | null
-          frequency?: number | null
-          id?: string
-          impressions?: number | null
-          link_clicks?: number | null
-          profile_visits?: number | null
-          reach?: number | null
-          report_date?: string | null
-          report_type?: string | null
-          results?: number | null
-          updated_at?: string | null
-          user_id: string
-          week_end?: string | null
-          week_start?: string | null
-        }
-        Update: {
-          amount_spent?: number | null
-          campaign_name?: string
-          conversations_started?: number | null
-          cost_per_conversation?: number | null
-          cost_per_result?: number | null
-          cost_per_visit?: number | null
-          cpc?: number | null
-          cpm?: number | null
-          created_at?: string | null
-          ctr?: number | null
-          dashboard_id?: string | null
-          frequency?: number | null
-          id?: string
-          impressions?: number | null
-          link_clicks?: number | null
-          profile_visits?: number | null
-          reach?: number | null
-          report_date?: string | null
-          report_type?: string | null
-          results?: number | null
-          updated_at?: string | null
-          user_id?: string
-          week_end?: string | null
-          week_start?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "campaign_data_dashboard_id_fkey"
-            columns: ["dashboard_id"]
-            isOneToOne: false
-            referencedRelation: "user_dashboards"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       campaign_name_mappings: {
         Row: {
           created_at: string | null
@@ -363,6 +274,99 @@ export type Database = {
         }
         Relationships: []
       }
+      meta_account_mappings: {
+        Row: {
+          account_id: string
+          account_name: string | null
+          created_at: string
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          account_id: string
+          account_name?: string | null
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          account_id?: string
+          account_name?: string | null
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      meta_reports: {
+        Row: {
+          account_id: string
+          campaign_id: string | null
+          campaign_name: string | null
+          collected_at: string | null
+          conversas_iniciadas: number | null
+          cpc_conv: number | null
+          cpc_visit: number | null
+          created_at: string
+          date_start: string | null
+          date_stop: string | null
+          frequency: number | null
+          id: string
+          impressions: number | null
+          period_ref: string | null
+          profile_visits: number | null
+          reach: number | null
+          report_id: string | null
+          report_type: string | null
+          spend: number | null
+        }
+        Insert: {
+          account_id: string
+          campaign_id?: string | null
+          campaign_name?: string | null
+          collected_at?: string | null
+          conversas_iniciadas?: number | null
+          cpc_conv?: number | null
+          cpc_visit?: number | null
+          created_at?: string
+          date_start?: string | null
+          date_stop?: string | null
+          frequency?: number | null
+          id?: string
+          impressions?: number | null
+          period_ref?: string | null
+          profile_visits?: number | null
+          reach?: number | null
+          report_id?: string | null
+          report_type?: string | null
+          spend?: number | null
+        }
+        Update: {
+          account_id?: string
+          campaign_id?: string | null
+          campaign_name?: string | null
+          collected_at?: string | null
+          conversas_iniciadas?: number | null
+          cpc_conv?: number | null
+          cpc_visit?: number | null
+          created_at?: string
+          date_start?: string | null
+          date_stop?: string | null
+          frequency?: number | null
+          id?: string
+          impressions?: number | null
+          period_ref?: string | null
+          profile_visits?: number | null
+          reach?: number | null
+          report_id?: string | null
+          report_type?: string | null
+          spend?: number | null
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           action_url: string | null
@@ -485,33 +489,6 @@ export type Database = {
           },
         ]
       }
-      sheets_sync_config: {
-        Row: {
-          created_at: string
-          id: string
-          last_sync: string | null
-          sheet_url: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          last_sync?: string | null
-          sheet_url: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          last_sync?: string | null
-          sheet_url?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
       strategies: {
         Row: {
           campaign_id: string | null
@@ -595,48 +572,6 @@ export type Database = {
           updated_at?: string | null
           uploaded_by?: string
           user_id?: string
-        }
-        Relationships: []
-      }
-      user_dashboards: {
-        Row: {
-          created_at: string | null
-          created_by: string
-          daily_gid: string | null
-          dashboard_name: string
-          id: string
-          monthly_gid: string | null
-          sheet_gid: string | null
-          sheet_url: string
-          updated_at: string | null
-          user_id: string
-          weekly_gid: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          created_by: string
-          daily_gid?: string | null
-          dashboard_name: string
-          id?: string
-          monthly_gid?: string | null
-          sheet_gid?: string | null
-          sheet_url: string
-          updated_at?: string | null
-          user_id: string
-          weekly_gid?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          created_by?: string
-          daily_gid?: string | null
-          dashboard_name?: string
-          id?: string
-          monthly_gid?: string | null
-          sheet_gid?: string | null
-          sheet_url?: string
-          updated_at?: string | null
-          user_id?: string
-          weekly_gid?: string | null
         }
         Relationships: []
       }

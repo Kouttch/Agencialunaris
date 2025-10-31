@@ -4,7 +4,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
-import { CalendarIcon, TrendingUp, TrendingDown, Activity, DollarSign, Users, MousePointer } from "lucide-react";
+import { CalendarIcon, TrendingUp, TrendingDown, Activity, DollarSign, Users } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -17,18 +17,13 @@ interface CampaignData {
   reach: number;
   impressions: number;
   frequency: number;
-  results: number;
-  cost_per_result: number;
-  amount_spent: number;
-  cpm: number;
-  link_clicks: number;
-  cpc: number;
-  ctr: number;
-  conversations_started: number;
-  cost_per_conversation: number;
-  profile_visits?: number;
-  cost_per_visit?: number;
-  report_date: string;
+  conversas_iniciadas: number;
+  cpc_conv: number;
+  profile_visits: number;
+  cpc_visit: number;
+  spend: number;
+  date_start: string;
+  date_stop: string;
   report_type: string;
 }
 
@@ -41,7 +36,7 @@ export default function ModernDashboard({ userId, isAdmin = false }: ModernDashb
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState<Date>();
-  const [reportType, setReportType] = useState<'weekly' | 'monthly' | 'daily'>('weekly');
+  const [reportType, setReportType] = useState<'weekly' | 'monthly'>('weekly');
   const [campaignData, setCampaignData] = useState<CampaignData[]>([]);
   const [nameMappings, setNameMappings] = useState<Record<string, string>>({});
 
@@ -69,18 +64,30 @@ export default function ModernDashboard({ userId, isAdmin = false }: ModernDashb
     try {
       setLoading(true);
       
-      let query = supabase
-        .from('campaign_data')
-        .select('*')
+      // Get account_id for this user
+      const { data: mappingData } = await supabase
+        .from('meta_account_mappings')
+        .select('account_id')
         .eq('user_id', userId)
+        .single();
+
+      if (!mappingData) {
+        setCampaignData([]);
+        return;
+      }
+
+      let query = supabase
+        .from('meta_reports')
+        .select('*')
+        .eq('account_id', mappingData.account_id)
         .eq('report_type', reportType);
 
       if (selectedDate) {
         const dateStr = format(selectedDate, 'yyyy-MM-dd');
-        query = query.eq('report_date', dateStr);
+        query = query.eq('date_start', dateStr);
       }
 
-      const { data, error } = await query.order('report_date', { ascending: false });
+      const { data, error } = await query.order('date_start', { ascending: false });
 
       if (error) throw error;
       
@@ -100,50 +107,27 @@ export default function ModernDashboard({ userId, isAdmin = false }: ModernDashb
     return nameMappings[originalName] || originalName;
   };
 
-  // Separar campanhas por tipo - Performance tem profile_visits > 0
+  // Separar campanhas por tipo
   const performanceCampaigns = campaignData.filter(c => 
     c.profile_visits && c.profile_visits > 0
   );
   
   const conversationCampaigns = campaignData.filter(c => 
-    !c.profile_visits || c.profile_visits === 0
+    c.conversas_iniciadas && c.conversas_iniciadas > 0
   );
-
-  // Calcular métricas para campanhas de conversas
-  const conversationMetrics = {
-    totalConversations: conversationCampaigns.reduce((sum, c) => sum + (c.conversations_started || 0), 0),
-    totalSpent: conversationCampaigns.reduce((sum, c) => sum + (c.amount_spent || 0), 0),
-    avgCostPerConversation: 0
-  };
-  conversationMetrics.avgCostPerConversation = conversationMetrics.totalConversations > 0 
-    ? conversationMetrics.totalSpent / conversationMetrics.totalConversations 
-    : 0;
-
-  // Calcular métricas para campanhas de desempenho
-  const performanceMetrics = {
-    totalVisits: performanceCampaigns.reduce((sum, c) => sum + (c.profile_visits || 0), 0),
-    totalSpent: performanceCampaigns.reduce((sum, c) => sum + (c.amount_spent || 0), 0),
-    avgCostPerVisit: 0
-  };
-  performanceMetrics.avgCostPerVisit = performanceMetrics.totalVisits > 0 
-    ? performanceMetrics.totalSpent / performanceMetrics.totalVisits 
-    : 0;
 
   // Métricas gerais
   const metrics = {
-    totalConversations: campaignData.reduce((sum, c) => sum + (c.conversations_started || 0), 0),
+    totalConversations: campaignData.reduce((sum, c) => sum + (c.conversas_iniciadas || 0), 0),
     totalProfileVisits: campaignData.reduce((sum, c) => sum + (c.profile_visits || 0), 0),
     totalReach: campaignData.reduce((sum, c) => sum + (c.reach || 0), 0),
     totalImpressions: campaignData.reduce((sum, c) => sum + (c.impressions || 0), 0),
-    totalSpent: campaignData.reduce((sum, c) => sum + (c.amount_spent || 0), 0),
+    totalSpent: campaignData.reduce((sum, c) => sum + (c.spend || 0), 0),
     avgFrequency: 0,
     avgCostPerConversation: 0,
     avgCostPerVisit: 0
   };
 
-  const totalWithConversations = campaignData.filter(c => c.conversations_started > 0).length;
-  const totalWithVisits = campaignData.filter(c => c.profile_visits && c.profile_visits > 0).length;
-  
   metrics.avgFrequency = campaignData.length > 0
     ? campaignData.reduce((sum, c) => sum + (c.frequency || 0), 0) / campaignData.length
     : 0;
@@ -158,10 +142,10 @@ export default function ModernDashboard({ userId, isAdmin = false }: ModernDashb
 
   // Preparar dados para gráficos
   const chartData = campaignData.map(c => ({
-    name: getDisplayName(c.campaign_name),
-    conversas: c.conversations_started || 0,
+    name: getDisplayName(c.campaign_name || 'Sem nome'),
+    conversas: c.conversas_iniciadas || 0,
     visitas: c.profile_visits || 0,
-    investimento: c.amount_spent || 0,
+    investimento: c.spend || 0,
     alcance: c.reach || 0,
     impressoes: c.impressions || 0
   }));
@@ -179,12 +163,12 @@ export default function ModernDashboard({ userId, isAdmin = false }: ModernDashb
     trend?: 'up' | 'down'; 
     trendValue?: string 
   }) => (
-    <Card className="relative overflow-hidden border border-primary/20 bg-gradient-to-br from-background via-background to-primary/5">
+    <Card className="relative overflow-hidden border border-white/10 bg-gradient-to-br from-white/5 via-white/5 to-white/10 backdrop-blur-xl">
       <div className="absolute inset-0 bg-grid-white/[0.02] bg-[size:20px_20px]" />
-      <div className="absolute -top-24 -right-24 w-48 h-48 bg-primary/10 rounded-full blur-3xl" />
+      <div className="absolute -top-24 -right-24 w-48 h-48 bg-primary/20 rounded-full blur-3xl" />
       <div className="relative p-6">
         <div className="flex items-center justify-between mb-4">
-          <div className="p-3 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 backdrop-blur-sm border border-primary/20">
+          <div className="p-3 rounded-xl bg-gradient-to-br from-primary/30 to-primary/10 backdrop-blur-sm border border-white/20">
             <Icon className="h-5 w-5 text-primary" />
           </div>
           {trend && (
@@ -201,7 +185,7 @@ export default function ModernDashboard({ userId, isAdmin = false }: ModernDashb
         </div>
         <div>
           <p className="text-sm text-muted-foreground mb-1 font-medium">{title}</p>
-          <p className="text-3xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{value}</p>
+          <p className="text-3xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">{value}</p>
         </div>
       </div>
     </Card>
@@ -222,21 +206,20 @@ export default function ModernDashboard({ userId, isAdmin = false }: ModernDashb
         
         <div className="flex gap-2">
           <Tabs value={reportType} onValueChange={(v: any) => setReportType(v)} className="w-auto">
-            <TabsList className="bg-background/50 backdrop-blur-sm border border-primary/20">
-              <TabsTrigger value="weekly" className="data-[state=active]:bg-primary/20">Semanal</TabsTrigger>
-              <TabsTrigger value="monthly" className="data-[state=active]:bg-primary/20">Mensal</TabsTrigger>
-              {isAdmin && <TabsTrigger value="daily" className="data-[state=active]:bg-primary/20">Diário</TabsTrigger>}
+            <TabsList className="bg-white/5 backdrop-blur-xl border border-white/10">
+              <TabsTrigger value="weekly" className="data-[state=active]:bg-white/10">Semanal</TabsTrigger>
+              <TabsTrigger value="monthly" className="data-[state=active]:bg-white/10">Mensal</TabsTrigger>
             </TabsList>
           </Tabs>
 
           <Popover>
             <PopoverTrigger asChild>
-              <Button variant="outline" className="bg-background/50 backdrop-blur-sm border-primary/20 hover:border-primary/40">
+              <Button variant="outline" className="bg-white/5 backdrop-blur-xl border-white/10 hover:border-white/20">
                 <CalendarIcon className="mr-2 h-4 w-4" />
                 {selectedDate ? format(selectedDate, "PPP", { locale: ptBR }) : "Selecionar período"}
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-auto p-0 border-primary/20">
+            <PopoverContent className="w-auto p-0 border-white/10 bg-background/95 backdrop-blur-xl">
               <Calendar
                 mode="single"
                 selected={selectedDate}
@@ -295,7 +278,7 @@ export default function ModernDashboard({ userId, isAdmin = false }: ModernDashb
 
       {/* Gráficos */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="border border-primary/20 bg-gradient-to-br from-background via-background to-primary/5 backdrop-blur-sm">
+        <Card className="border border-white/10 bg-gradient-to-br from-white/5 via-white/5 to-white/10 backdrop-blur-xl">
           <div className="p-6">
             <h3 className="text-lg font-semibold mb-4 bg-gradient-to-r from-primary to-purple-500 bg-clip-text text-transparent">Conversas por Campanha</h3>
             <ResponsiveContainer width="100%" height={300}>
@@ -306,14 +289,15 @@ export default function ModernDashboard({ userId, isAdmin = false }: ModernDashb
                     <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0.2}/>
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-                <XAxis dataKey="name" stroke="#94a3b8" />
-                <YAxis stroke="#94a3b8" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.1} />
+                <XAxis dataKey="name" stroke="#94a3b8" fontSize={12} />
+                <YAxis stroke="#94a3b8" fontSize={12} />
                 <Tooltip 
                   contentStyle={{ 
-                    backgroundColor: '#1e293b', 
-                    border: '1px solid #334155',
-                    borderRadius: '8px'
+                    backgroundColor: 'hsl(var(--background))', 
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '12px',
+                    backdropFilter: 'blur(12px)'
                   }}
                 />
                 <Bar dataKey="conversas" fill="url(#conversasGradient)" radius={[8, 8, 0, 0]} />
@@ -322,29 +306,30 @@ export default function ModernDashboard({ userId, isAdmin = false }: ModernDashb
           </div>
         </Card>
 
-        <Card className="border border-primary/20 bg-gradient-to-br from-background via-background to-primary/5 backdrop-blur-sm">
+        <Card className="border border-white/10 bg-gradient-to-br from-white/5 via-white/5 to-white/10 backdrop-blur-xl">
           <div className="p-6">
             <h3 className="text-lg font-semibold mb-4 bg-gradient-to-r from-primary to-purple-500 bg-clip-text text-transparent">Investimento vs Alcance</h3>
             <ResponsiveContainer width="100%" height={300}>
               <AreaChart data={chartData}>
                 <defs>
                   <linearGradient id="investimentoGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#10b981" stopOpacity={0.8}/>
+                    <stop offset="0%" stopColor="#10b981" stopOpacity={0.6}/>
                     <stop offset="100%" stopColor="#10b981" stopOpacity={0.1}/>
                   </linearGradient>
                   <linearGradient id="alcanceGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#8b5cf6" stopOpacity={0.8}/>
+                    <stop offset="0%" stopColor="#8b5cf6" stopOpacity={0.6}/>
                     <stop offset="100%" stopColor="#8b5cf6" stopOpacity={0.1}/>
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-                <XAxis dataKey="name" stroke="#94a3b8" />
-                <YAxis stroke="#94a3b8" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.1} />
+                <XAxis dataKey="name" stroke="#94a3b8" fontSize={12} />
+                <YAxis stroke="#94a3b8" fontSize={12} />
                 <Tooltip 
                   contentStyle={{ 
-                    backgroundColor: '#1e293b', 
-                    border: '1px solid #334155',
-                    borderRadius: '8px'
+                    backgroundColor: 'hsl(var(--background))', 
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '12px',
+                    backdropFilter: 'blur(12px)'
                   }}
                 />
                 <Area 
@@ -364,35 +349,36 @@ export default function ModernDashboard({ userId, isAdmin = false }: ModernDashb
           </div>
         </Card>
 
-        <Card className="border border-primary/20 bg-gradient-to-br from-background via-background to-primary/5 backdrop-blur-sm lg:col-span-2">
+        <Card className="border border-white/10 bg-gradient-to-br from-white/5 via-white/5 to-white/10 backdrop-blur-xl lg:col-span-2">
           <div className="p-6">
             <h3 className="text-lg font-semibold mb-4 bg-gradient-to-r from-primary to-purple-500 bg-clip-text text-transparent">Performance Geral</h3>
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-                <XAxis dataKey="name" stroke="#94a3b8" />
-                <YAxis stroke="#94a3b8" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.1} />
+                <XAxis dataKey="name" stroke="#94a3b8" fontSize={12} />
+                <YAxis stroke="#94a3b8" fontSize={12} />
                 <Tooltip 
                   contentStyle={{ 
-                    backgroundColor: '#1e293b', 
-                    border: '1px solid #334155',
-                    borderRadius: '8px'
+                    backgroundColor: 'hsl(var(--background))', 
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '12px',
+                    backdropFilter: 'blur(12px)'
                   }}
                 />
                 <Line 
                   type="monotone" 
                   dataKey="impressoes" 
                   stroke="#3b82f6" 
-                  strokeWidth={2}
-                  dot={{ fill: '#3b82f6', r: 4 }}
+                  strokeWidth={3}
+                  dot={{ fill: '#3b82f6', r: 5 }}
                   name="Impressões"
                 />
                 <Line 
                   type="monotone" 
                   dataKey="alcance" 
                   stroke="#10b981" 
-                  strokeWidth={2}
-                  dot={{ fill: '#10b981', r: 4 }}
+                  strokeWidth={3}
+                  dot={{ fill: '#10b981', r: 5 }}
                   name="Alcance"
                 />
               </LineChart>
@@ -401,9 +387,9 @@ export default function ModernDashboard({ userId, isAdmin = false }: ModernDashb
         </Card>
       </div>
 
-      {/* Tabelas de campanhas separadas por tipo */}
+      {/* Tabelas de campanhas */}
       {conversationCampaigns.length > 0 && (
-        <Card className="border border-primary/20 bg-gradient-to-br from-background via-background to-primary/5 backdrop-blur-sm">
+        <Card className="border border-white/10 bg-gradient-to-br from-white/5 via-white/5 to-white/10 backdrop-blur-xl">
           <div className="p-6">
             <div className="flex items-center gap-2 mb-4">
               <h3 className="text-lg font-semibold bg-gradient-to-r from-primary to-purple-500 bg-clip-text text-transparent">Campanhas de Conversas</h3>
@@ -414,44 +400,24 @@ export default function ModernDashboard({ userId, isAdmin = false }: ModernDashb
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b border-primary/20">
+                  <tr className="border-b border-white/10">
                     <th className="text-left p-3 text-sm font-semibold text-muted-foreground">Campanha</th>
                     <th className="text-right p-3 text-sm font-semibold text-muted-foreground">Conversas</th>
                     <th className="text-right p-3 text-sm font-semibold text-muted-foreground">Custo/Conversa</th>
-                    <th className="text-right p-3 text-sm font-semibold text-muted-foreground">Visitas Perfil</th>
-                    <th className="text-right p-3 text-sm font-semibold text-muted-foreground">Custo/Visita</th>
                     <th className="text-right p-3 text-sm font-semibold text-muted-foreground">Alcance</th>
                     <th className="text-right p-3 text-sm font-semibold text-muted-foreground">Impressões</th>
-                    <th className="text-right p-3 text-sm font-semibold text-muted-foreground">Frequência</th>
                     <th className="text-right p-3 text-sm font-semibold text-muted-foreground">Investimento</th>
                   </tr>
                 </thead>
                 <tbody>
                   {conversationCampaigns.map((campaign, idx) => (
-                    <tr key={idx} className="border-b border-primary/10 hover:bg-primary/5 transition-colors">
-                      <td className="p-3 text-sm font-medium">{getDisplayName(campaign.campaign_name)}</td>
-                      <td className="p-3 text-sm text-right font-semibold text-primary">{campaign.conversations_started || 0}</td>
-                      <td className="p-3 text-sm text-right font-medium">
-                        R$ {(campaign.cost_per_conversation || 0).toFixed(2)}
-                      </td>
-                      <td className="p-3 text-sm text-right font-medium">
-                        {campaign.profile_visits || 0}
-                      </td>
-                      <td className="p-3 text-sm text-right font-medium">
-                        R$ {(campaign.cost_per_visit || 0).toFixed(2)}
-                      </td>
-                      <td className="p-3 text-sm text-right">
-                        {campaign.reach >= 1000 ? `${(campaign.reach / 1000).toFixed(1)}K` : campaign.reach}
-                      </td>
-                      <td className="p-3 text-sm text-right">
-                        {campaign.impressions >= 1000 ? `${(campaign.impressions / 1000).toFixed(1)}K` : campaign.impressions}
-                      </td>
-                      <td className="p-3 text-sm text-right">
-                        {(campaign.frequency || 0).toFixed(2)}
-                      </td>
-                      <td className="p-3 text-sm text-right font-medium">
-                        R$ {(campaign.amount_spent || 0).toFixed(2)}
-                      </td>
+                    <tr key={idx} className="border-b border-white/5 hover:bg-white/5 transition-colors">
+                      <td className="p-3 text-sm font-medium">{getDisplayName(campaign.campaign_name || 'Sem nome')}</td>
+                      <td className="p-3 text-right text-sm">{campaign.conversas_iniciadas}</td>
+                      <td className="p-3 text-right text-sm">R$ {campaign.cpc_conv?.toFixed(2) || '0.00'}</td>
+                      <td className="p-3 text-right text-sm">{campaign.reach?.toLocaleString('pt-BR') || 0}</td>
+                      <td className="p-3 text-right text-sm">{campaign.impressions?.toLocaleString('pt-BR') || 0}</td>
+                      <td className="p-3 text-right text-sm font-semibold text-primary">R$ {campaign.spend?.toFixed(2) || '0.00'}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -462,58 +428,48 @@ export default function ModernDashboard({ userId, isAdmin = false }: ModernDashb
       )}
 
       {performanceCampaigns.length > 0 && (
-        <Card className="border border-purple-500/20 bg-gradient-to-br from-background via-background to-purple-500/5 backdrop-blur-sm">
+        <Card className="border border-white/10 bg-gradient-to-br from-white/5 via-white/5 to-white/10 backdrop-blur-xl">
           <div className="p-6">
             <div className="flex items-center gap-2 mb-4">
-              <h3 className="text-lg font-semibold bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent">Campanhas de Desempenho</h3>
-              <span className="px-2 py-1 text-xs font-semibold bg-purple-500/10 text-purple-400 rounded-full border border-purple-500/20">
+              <h3 className="text-lg font-semibold bg-gradient-to-r from-primary to-purple-500 bg-clip-text text-transparent">Campanhas de Desempenho</h3>
+              <span className="px-2 py-1 text-xs font-semibold bg-primary/10 text-primary rounded-full border border-primary/20">
                 {performanceCampaigns.length} campanhas
               </span>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b border-purple-500/20">
+                  <tr className="border-b border-white/10">
                     <th className="text-left p-3 text-sm font-semibold text-muted-foreground">Campanha</th>
-                    <th className="text-right p-3 text-sm font-semibold text-muted-foreground">Conversas</th>
-                    <th className="text-right p-3 text-sm font-semibold text-muted-foreground">Custo/Conversa</th>
                     <th className="text-right p-3 text-sm font-semibold text-muted-foreground">Visitas Perfil</th>
                     <th className="text-right p-3 text-sm font-semibold text-muted-foreground">Custo/Visita</th>
                     <th className="text-right p-3 text-sm font-semibold text-muted-foreground">Alcance</th>
                     <th className="text-right p-3 text-sm font-semibold text-muted-foreground">Impressões</th>
-                    <th className="text-right p-3 text-sm font-semibold text-muted-foreground">Frequência</th>
                     <th className="text-right p-3 text-sm font-semibold text-muted-foreground">Investimento</th>
                   </tr>
                 </thead>
                 <tbody>
                   {performanceCampaigns.map((campaign, idx) => (
-                    <tr key={idx} className="border-b border-purple-500/10 hover:bg-purple-500/5 transition-colors">
-                      <td className="p-3 text-sm font-medium">{getDisplayName(campaign.campaign_name)}</td>
-                      <td className="p-3 text-sm text-right font-medium">{campaign.conversations_started || 0}</td>
-                      <td className="p-3 text-sm text-right font-medium">
-                        R$ {(campaign.cost_per_conversation || 0).toFixed(2)}
-                      </td>
-                      <td className="p-3 text-sm text-right font-semibold text-purple-400">{campaign.profile_visits || 0}</td>
-                      <td className="p-3 text-sm text-right font-medium">
-                        R$ {(campaign.cost_per_visit || 0).toFixed(2)}
-                      </td>
-                      <td className="p-3 text-sm text-right">
-                        {campaign.reach >= 1000 ? `${(campaign.reach / 1000).toFixed(1)}K` : campaign.reach}
-                      </td>
-                      <td className="p-3 text-sm text-right">
-                        {campaign.impressions >= 1000 ? `${(campaign.impressions / 1000).toFixed(1)}K` : campaign.impressions}
-                      </td>
-                      <td className="p-3 text-sm text-right">
-                        {(campaign.frequency || 0).toFixed(2)}
-                      </td>
-                      <td className="p-3 text-sm text-right font-medium">
-                        R$ {(campaign.amount_spent || 0).toFixed(2)}
-                      </td>
+                    <tr key={idx} className="border-b border-white/5 hover:bg-white/5 transition-colors">
+                      <td className="p-3 text-sm font-medium">{getDisplayName(campaign.campaign_name || 'Sem nome')}</td>
+                      <td className="p-3 text-right text-sm">{campaign.profile_visits}</td>
+                      <td className="p-3 text-right text-sm">R$ {campaign.cpc_visit?.toFixed(2) || '0.00'}</td>
+                      <td className="p-3 text-right text-sm">{campaign.reach?.toLocaleString('pt-BR') || 0}</td>
+                      <td className="p-3 text-right text-sm">{campaign.impressions?.toLocaleString('pt-BR') || 0}</td>
+                      <td className="p-3 text-right text-sm font-semibold text-primary">R$ {campaign.spend?.toFixed(2) || '0.00'}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
+          </div>
+        </Card>
+      )}
+
+      {campaignData.length === 0 && !loading && (
+        <Card className="border border-white/10 bg-gradient-to-br from-white/5 via-white/5 to-white/10 backdrop-blur-xl">
+          <div className="p-12 text-center">
+            <p className="text-muted-foreground">Nenhum dado encontrado para o período selecionado</p>
           </div>
         </Card>
       )}
