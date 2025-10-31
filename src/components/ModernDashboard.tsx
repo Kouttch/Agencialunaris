@@ -131,15 +131,29 @@ export default function ModernDashboard({ userId, isAdmin = false }: ModernDashb
 
   // Métricas gerais
   const metrics = {
-    totalSpent: campaignData.reduce((sum, c) => sum + (c.amount_spent || 0), 0),
+    totalConversations: campaignData.reduce((sum, c) => sum + (c.conversations_started || 0), 0),
+    totalProfileVisits: campaignData.reduce((sum, c) => sum + (c.profile_visits || 0), 0),
     totalReach: campaignData.reduce((sum, c) => sum + (c.reach || 0), 0),
     totalImpressions: campaignData.reduce((sum, c) => sum + (c.impressions || 0), 0),
-    totalProfileVisits: campaignData.reduce((sum, c) => sum + (c.profile_visits || 0), 0),
-    avgCTR: 0
+    totalSpent: campaignData.reduce((sum, c) => sum + (c.amount_spent || 0), 0),
+    avgFrequency: 0,
+    avgCostPerConversation: 0,
+    avgCostPerVisit: 0
   };
 
-  metrics.avgCTR = metrics.totalImpressions > 0
-    ? ((campaignData.reduce((sum, c) => sum + (c.link_clicks || 0), 0)) / metrics.totalImpressions) * 100
+  const totalWithConversations = campaignData.filter(c => c.conversations_started > 0).length;
+  const totalWithVisits = campaignData.filter(c => c.profile_visits && c.profile_visits > 0).length;
+  
+  metrics.avgFrequency = campaignData.length > 0
+    ? campaignData.reduce((sum, c) => sum + (c.frequency || 0), 0) / campaignData.length
+    : 0;
+    
+  metrics.avgCostPerConversation = metrics.totalConversations > 0
+    ? metrics.totalSpent / metrics.totalConversations
+    : 0;
+    
+  metrics.avgCostPerVisit = metrics.totalProfileVisits > 0
+    ? metrics.totalSpent / metrics.totalProfileVisits
     : 0;
 
   // Preparar dados para gráficos
@@ -236,30 +250,46 @@ export default function ModernDashboard({ userId, isAdmin = false }: ModernDashb
       </div>
 
       {/* Métricas principais */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {conversationCampaigns.length > 0 && (
-          <>
-            <MetricCard
-              title="Total de Conversas"
-              value={conversationMetrics.totalConversations}
-              icon={Activity}
-            />
-            <MetricCard
-              title="Custo por Conversa"
-              value={`R$ ${conversationMetrics.avgCostPerConversation.toFixed(2)}`}
-              icon={DollarSign}
-            />
-          </>
-        )}
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-4">
+        <MetricCard
+          title="Conversas Iniciadas"
+          value={metrics.totalConversations}
+          icon={Activity}
+        />
+        <MetricCard
+          title="Custo por Conversa"
+          value={`R$ ${metrics.avgCostPerConversation.toFixed(2)}`}
+          icon={DollarSign}
+        />
         <MetricCard
           title="Visitas ao Perfil"
           value={metrics.totalProfileVisits >= 1000 ? `${(metrics.totalProfileVisits / 1000).toFixed(1)}K` : metrics.totalProfileVisits}
           icon={Users}
         />
         <MetricCard
-          title="Alcance Total"
+          title="Custo por Visita"
+          value={`R$ ${metrics.avgCostPerVisit.toFixed(2)}`}
+          icon={DollarSign}
+        />
+        <MetricCard
+          title="Alcance"
           value={metrics.totalReach >= 1000 ? `${(metrics.totalReach / 1000).toFixed(1)}K` : metrics.totalReach}
           icon={Users}
+        />
+        <MetricCard
+          title="Impressões"
+          value={metrics.totalImpressions >= 1000 ? `${(metrics.totalImpressions / 1000).toFixed(1)}K` : metrics.totalImpressions}
+          icon={Activity}
+        />
+        <MetricCard
+          title="Frequência"
+          value={metrics.avgFrequency.toFixed(2)}
+          icon={Activity}
+        />
+        <MetricCard
+          title="Valor Investido"
+          value={`R$ ${metrics.totalSpent.toFixed(2)}`}
+          icon={DollarSign}
         />
       </div>
 
@@ -360,9 +390,9 @@ export default function ModernDashboard({ userId, isAdmin = false }: ModernDashb
                 <Line 
                   type="monotone" 
                   dataKey="alcance" 
-                  stroke="#8b5cf6" 
+                  stroke="#10b981" 
                   strokeWidth={2}
-                  dot={{ fill: '#8b5cf6', r: 4 }}
+                  dot={{ fill: '#10b981', r: 4 }}
                   name="Alcance"
                 />
               </LineChart>
@@ -388,8 +418,12 @@ export default function ModernDashboard({ userId, isAdmin = false }: ModernDashb
                     <th className="text-left p-3 text-sm font-semibold text-muted-foreground">Campanha</th>
                     <th className="text-right p-3 text-sm font-semibold text-muted-foreground">Conversas</th>
                     <th className="text-right p-3 text-sm font-semibold text-muted-foreground">Custo/Conversa</th>
-                    <th className="text-right p-3 text-sm font-semibold text-muted-foreground">Investimento</th>
+                    <th className="text-right p-3 text-sm font-semibold text-muted-foreground">Visitas Perfil</th>
+                    <th className="text-right p-3 text-sm font-semibold text-muted-foreground">Custo/Visita</th>
                     <th className="text-right p-3 text-sm font-semibold text-muted-foreground">Alcance</th>
+                    <th className="text-right p-3 text-sm font-semibold text-muted-foreground">Impressões</th>
+                    <th className="text-right p-3 text-sm font-semibold text-muted-foreground">Frequência</th>
+                    <th className="text-right p-3 text-sm font-semibold text-muted-foreground">Investimento</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -401,10 +435,22 @@ export default function ModernDashboard({ userId, isAdmin = false }: ModernDashb
                         R$ {(campaign.cost_per_conversation || 0).toFixed(2)}
                       </td>
                       <td className="p-3 text-sm text-right font-medium">
-                        R$ {(campaign.amount_spent || 0).toFixed(2)}
+                        {campaign.profile_visits || 0}
+                      </td>
+                      <td className="p-3 text-sm text-right font-medium">
+                        R$ {(campaign.cost_per_visit || 0).toFixed(2)}
                       </td>
                       <td className="p-3 text-sm text-right">
                         {campaign.reach >= 1000 ? `${(campaign.reach / 1000).toFixed(1)}K` : campaign.reach}
+                      </td>
+                      <td className="p-3 text-sm text-right">
+                        {campaign.impressions >= 1000 ? `${(campaign.impressions / 1000).toFixed(1)}K` : campaign.impressions}
+                      </td>
+                      <td className="p-3 text-sm text-right">
+                        {(campaign.frequency || 0).toFixed(2)}
+                      </td>
+                      <td className="p-3 text-sm text-right font-medium">
+                        R$ {(campaign.amount_spent || 0).toFixed(2)}
                       </td>
                     </tr>
                   ))}
@@ -429,25 +475,39 @@ export default function ModernDashboard({ userId, isAdmin = false }: ModernDashb
                 <thead>
                   <tr className="border-b border-purple-500/20">
                     <th className="text-left p-3 text-sm font-semibold text-muted-foreground">Campanha</th>
-                    <th className="text-right p-3 text-sm font-semibold text-muted-foreground">Visitas ao Perfil</th>
+                    <th className="text-right p-3 text-sm font-semibold text-muted-foreground">Conversas</th>
+                    <th className="text-right p-3 text-sm font-semibold text-muted-foreground">Custo/Conversa</th>
+                    <th className="text-right p-3 text-sm font-semibold text-muted-foreground">Visitas Perfil</th>
                     <th className="text-right p-3 text-sm font-semibold text-muted-foreground">Custo/Visita</th>
-                    <th className="text-right p-3 text-sm font-semibold text-muted-foreground">Investimento</th>
                     <th className="text-right p-3 text-sm font-semibold text-muted-foreground">Alcance</th>
+                    <th className="text-right p-3 text-sm font-semibold text-muted-foreground">Impressões</th>
+                    <th className="text-right p-3 text-sm font-semibold text-muted-foreground">Frequência</th>
+                    <th className="text-right p-3 text-sm font-semibold text-muted-foreground">Investimento</th>
                   </tr>
                 </thead>
                 <tbody>
                   {performanceCampaigns.map((campaign, idx) => (
                     <tr key={idx} className="border-b border-purple-500/10 hover:bg-purple-500/5 transition-colors">
                       <td className="p-3 text-sm font-medium">{getDisplayName(campaign.campaign_name)}</td>
+                      <td className="p-3 text-sm text-right font-medium">{campaign.conversations_started || 0}</td>
+                      <td className="p-3 text-sm text-right font-medium">
+                        R$ {(campaign.cost_per_conversation || 0).toFixed(2)}
+                      </td>
                       <td className="p-3 text-sm text-right font-semibold text-purple-400">{campaign.profile_visits || 0}</td>
                       <td className="p-3 text-sm text-right font-medium">
                         R$ {(campaign.cost_per_visit || 0).toFixed(2)}
                       </td>
-                      <td className="p-3 text-sm text-right font-medium">
-                        R$ {(campaign.amount_spent || 0).toFixed(2)}
-                      </td>
                       <td className="p-3 text-sm text-right">
                         {campaign.reach >= 1000 ? `${(campaign.reach / 1000).toFixed(1)}K` : campaign.reach}
+                      </td>
+                      <td className="p-3 text-sm text-right">
+                        {campaign.impressions >= 1000 ? `${(campaign.impressions / 1000).toFixed(1)}K` : campaign.impressions}
+                      </td>
+                      <td className="p-3 text-sm text-right">
+                        {(campaign.frequency || 0).toFixed(2)}
+                      </td>
+                      <td className="p-3 text-sm text-right font-medium">
+                        R$ {(campaign.amount_spent || 0).toFixed(2)}
                       </td>
                     </tr>
                   ))}
