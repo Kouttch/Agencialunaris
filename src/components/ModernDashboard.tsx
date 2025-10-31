@@ -100,13 +100,13 @@ export default function ModernDashboard({ userId, isAdmin = false }: ModernDashb
     return nameMappings[originalName] || originalName;
   };
 
-  // Separar campanhas por tipo
+  // Separar campanhas por tipo - Performance tem profile_visits > 0
   const performanceCampaigns = campaignData.filter(c => 
-    (c.profile_visits && c.profile_visits > 0) || (c.cost_per_visit && c.cost_per_visit > 0)
+    c.profile_visits && c.profile_visits > 0
   );
   
   const conversationCampaigns = campaignData.filter(c => 
-    !(c.profile_visits && c.profile_visits > 0) && !(c.cost_per_visit && c.cost_per_visit > 0)
+    !c.profile_visits || c.profile_visits === 0
   );
 
   // Calcular métricas para campanhas de conversas
@@ -134,17 +134,12 @@ export default function ModernDashboard({ userId, isAdmin = false }: ModernDashb
     totalSpent: campaignData.reduce((sum, c) => sum + (c.amount_spent || 0), 0),
     totalReach: campaignData.reduce((sum, c) => sum + (c.reach || 0), 0),
     totalImpressions: campaignData.reduce((sum, c) => sum + (c.impressions || 0), 0),
-    totalClicks: campaignData.reduce((sum, c) => sum + (c.link_clicks || 0), 0),
-    avgCPC: 0,
+    totalProfileVisits: campaignData.reduce((sum, c) => sum + (c.profile_visits || 0), 0),
     avgCTR: 0
   };
 
-  metrics.avgCPC = metrics.totalClicks > 0 
-    ? metrics.totalSpent / metrics.totalClicks 
-    : 0;
-
   metrics.avgCTR = metrics.totalImpressions > 0
-    ? (metrics.totalClicks / metrics.totalImpressions) * 100
+    ? ((campaignData.reduce((sum, c) => sum + (c.link_clicks || 0), 0)) / metrics.totalImpressions) * 100
     : 0;
 
   // Preparar dados para gráficos
@@ -154,8 +149,7 @@ export default function ModernDashboard({ userId, isAdmin = false }: ModernDashb
     visitas: c.profile_visits || 0,
     investimento: c.amount_spent || 0,
     alcance: c.reach || 0,
-    impressoes: c.impressions || 0,
-    cliques: c.link_clicks || 0
+    impressoes: c.impressions || 0
   }));
 
   const MetricCard = ({ 
@@ -257,29 +251,15 @@ export default function ModernDashboard({ userId, isAdmin = false }: ModernDashb
             />
           </>
         )}
-        {performanceCampaigns.length > 0 && (
-          <>
-            <MetricCard
-              title="Visitas ao Perfil"
-              value={performanceMetrics.totalVisits}
-              icon={Users}
-            />
-            <MetricCard
-              title="Custo por Visita"
-              value={`R$ ${performanceMetrics.avgCostPerVisit.toFixed(2)}`}
-              icon={DollarSign}
-            />
-          </>
-        )}
+        <MetricCard
+          title="Visitas ao Perfil"
+          value={metrics.totalProfileVisits >= 1000 ? `${(metrics.totalProfileVisits / 1000).toFixed(1)}K` : metrics.totalProfileVisits}
+          icon={Users}
+        />
         <MetricCard
           title="Alcance Total"
           value={metrics.totalReach >= 1000 ? `${(metrics.totalReach / 1000).toFixed(1)}K` : metrics.totalReach}
           icon={Users}
-        />
-        <MetricCard
-          title="Taxa de Cliques"
-          value={`${metrics.avgCTR.toFixed(2)}%`}
-          icon={MousePointer}
         />
       </div>
 
@@ -375,13 +355,15 @@ export default function ModernDashboard({ userId, isAdmin = false }: ModernDashb
                   stroke="#3b82f6" 
                   strokeWidth={2}
                   dot={{ fill: '#3b82f6', r: 4 }}
+                  name="Impressões"
                 />
                 <Line 
                   type="monotone" 
-                  dataKey="cliques" 
-                  stroke="#f59e0b" 
+                  dataKey="alcance" 
+                  stroke="#8b5cf6" 
                   strokeWidth={2}
-                  dot={{ fill: '#f59e0b', r: 4 }}
+                  dot={{ fill: '#8b5cf6', r: 4 }}
+                  name="Alcance"
                 />
               </LineChart>
             </ResponsiveContainer>
