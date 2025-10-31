@@ -4,7 +4,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
-import { CalendarIcon, TrendingUp, TrendingDown, Activity, DollarSign, Users } from "lucide-react";
+import { CalendarIcon, TrendingUp, TrendingDown, Activity, DollarSign, Users, MessageCircle, Eye, Target, Zap } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -30,9 +30,10 @@ interface CampaignData {
 interface ModernDashboardProps {
   userId: string;
   isAdmin?: boolean;
+  isModerator?: boolean;
 }
 
-export default function ModernDashboard({ userId, isAdmin = false }: ModernDashboardProps) {
+export default function ModernDashboard({ userId, isAdmin = false, isModerator = false }: ModernDashboardProps) {
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState<Date>();
@@ -207,6 +208,9 @@ export default function ModernDashboard({ userId, isAdmin = false }: ModernDashb
         <div className="flex gap-2">
           <Tabs value={reportType} onValueChange={(v: any) => setReportType(v)} className="w-auto">
             <TabsList className="bg-white/5 backdrop-blur-xl border border-white/10">
+              {(isAdmin || isModerator) && (
+                <TabsTrigger value="daily" className="data-[state=active]:bg-white/10">Diário</TabsTrigger>
+              )}
               <TabsTrigger value="weekly" className="data-[state=active]:bg-white/10">Semanal</TabsTrigger>
               <TabsTrigger value="monthly" className="data-[state=active]:bg-white/10">Mensal</TabsTrigger>
             </TabsList>
@@ -237,7 +241,7 @@ export default function ModernDashboard({ userId, isAdmin = false }: ModernDashb
         <MetricCard
           title="Conversas Iniciadas"
           value={metrics.totalConversations}
-          icon={Activity}
+          icon={MessageCircle}
         />
         <MetricCard
           title="Custo por Conversa"
@@ -247,7 +251,7 @@ export default function ModernDashboard({ userId, isAdmin = false }: ModernDashb
         <MetricCard
           title="Visitas ao Perfil"
           value={metrics.totalProfileVisits >= 1000 ? `${(metrics.totalProfileVisits / 1000).toFixed(1)}K` : metrics.totalProfileVisits}
-          icon={Users}
+          icon={Eye}
         />
         <MetricCard
           title="Custo por Visita"
@@ -257,12 +261,12 @@ export default function ModernDashboard({ userId, isAdmin = false }: ModernDashb
         <MetricCard
           title="Alcance"
           value={metrics.totalReach >= 1000 ? `${(metrics.totalReach / 1000).toFixed(1)}K` : metrics.totalReach}
-          icon={Users}
+          icon={Target}
         />
         <MetricCard
           title="Impressões"
           value={metrics.totalImpressions >= 1000 ? `${(metrics.totalImpressions / 1000).toFixed(1)}K` : metrics.totalImpressions}
-          icon={Activity}
+          icon={Zap}
         />
         <MetricCard
           title="Frequência"
@@ -364,6 +368,14 @@ export default function ModernDashboard({ userId, isAdmin = false }: ModernDashb
                     borderRadius: '12px',
                     backdropFilter: 'blur(12px)'
                   }}
+                />
+                <Line 
+                  type="monotone" 
+                  dataKey="conversas" 
+                  stroke="#ec4899" 
+                  strokeWidth={3}
+                  dot={{ fill: '#ec4899', r: 5 }}
+                  name="Conversas"
                 />
                 <Line 
                   type="monotone" 

@@ -51,7 +51,7 @@ export function AppSidebar() {
     icon: Edit3
   }, {
     title: "Dashboards",
-    url: "/fulladmin/user-dashboards",
+    url: "/fulladmin/dashboards",
     icon: LayoutDashboard
   }, {
     title: "Pagamentos",
@@ -93,7 +93,7 @@ export function AppSidebar() {
     icon: Edit3
   }, {
     title: "Dashboards",
-    url: "/fulladmin/user-dashboards",
+    url: "/fulladmin/dashboards",
     icon: LayoutDashboard
   }, {
     title: "Usuários",

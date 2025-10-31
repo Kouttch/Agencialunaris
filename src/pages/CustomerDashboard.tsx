@@ -1,26 +1,15 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
 import { Button } from "@/components/ui/button";
-import { Moon, Sun, Info } from "lucide-react";
+import { Moon, Sun } from "lucide-react";
 import { useState, useEffect } from "react";
 import { CustomerAvatar } from "@/components/CustomerAvatar";
-import { Tooltip as TooltipUI, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { useToast } from "@/hooks/use-toast";
 import { useUserRole } from "@/hooks/useUserRole";
 import ChecklistManagement from "./ChecklistManagement";
 import ModernDashboard from "@/components/ModernDashboard";
-interface ChartData {
-  name: string;
-  conversas: number;
-  custo: number;
-  alcance: number;
-}
+
 export default function CustomerDashboard() {
   const { user } = useAuth();
-  const { toast } = useToast();
   const { isAdmin, isModerator } = useUserRole();
   const [theme, setTheme] = useState<"light" | "dark">("dark");
   const [profileData, setProfileData] = useState({
@@ -29,22 +18,6 @@ export default function CustomerDashboard() {
     avatarUrl: "",
     accountStatus: "active"
   });
-  
-  const [weeklyData, setWeeklyData] = useState<ChartData[]>([]);
-  const [monthlyData, setMonthlyData] = useState<ChartData[]>([]);
-  const [annualData, setAnnualData] = useState<ChartData[]>([]);
-  const [metrics, setMetrics] = useState({
-    conversasIniciadas: 0,
-    custoPorConversa: 0,
-    alcanceTotal: 0,
-    impressoesTotais: 0,
-    frequenciaMedia: 0
-  });
-  const [managerData, setManagerData] = useState({
-    name: "",
-    photoUrl: ""
-  });
-  const [loading, setLoading] = useState(true);
 
   const toggleTheme = () => {
     const newTheme = theme === "dark" ? "light" : "dark";
@@ -52,11 +25,9 @@ export default function CustomerDashboard() {
     document.documentElement.classList.toggle("light-mode", newTheme === "light");
   };
 
-  // Carregar dados do perfil e campanha
   useEffect(() => {
     if (user) {
       loadProfile();
-      loadCampaignData();
     }
   }, [user]);
 
@@ -68,12 +39,7 @@ export default function CustomerDashboard() {
           full_name, 
           company, 
           avatar_url,
-          account_status,
-          manager_id,
-          account_managers (
-            name,
-            photo_url
-          )
+          account_status
         `)
         .eq('user_id', user?.id)
         .single();
@@ -85,126 +51,9 @@ export default function CustomerDashboard() {
           avatarUrl: profile.avatar_url || "",
           accountStatus: profile.account_status || "active"
         });
-
-        // Load manager data
-        if (profile.account_managers) {
-          const manager = profile.account_managers as any;
-          setManagerData({
-            name: manager.name || "",
-            photoUrl: manager.photo_url || ""
-          });
-        }
       }
     } catch (error) {
       console.error('Erro ao carregar perfil:', error);
-    }
-  };
-
-  const loadCampaignData = async () => {
-    try {
-      setLoading(true);
-      
-      const { data: campaignData, error } = await supabase
-        .from('campaign_data')
-        .select('*')
-        .eq('user_id', user?.id)
-        .order('week_start', { ascending: false });
-
-      if (error) throw error;
-
-      if (!campaignData || campaignData.length === 0) {
-        // Se não houver dados, mostrar tudo zerado
-        setWeeklyData([]);
-        setMonthlyData([]);
-        setMetrics({
-          conversasIniciadas: 0,
-          custoPorConversa: 0,
-          alcanceTotal: 0,
-          impressoesTotais: 0,
-          frequenciaMedia: 0
-        });
-        setLoading(false);
-        return;
-      }
-
-      // Processar dados para gráficos diários (últimos 7 registros)
-      const last7Days = campaignData.slice(0, 7);
-      const weeklyChartData: ChartData[] = last7Days.map((item, index) => ({
-        name: ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab'][index % 7],
-        conversas: item.conversations_started || 0,
-        custo: parseFloat(item.amount_spent?.toString() || '0'),
-        alcance: item.reach || 0
-      })).reverse();
-
-      // Processar dados mensais (agrupar por semana)
-      const weeklyGroups: { [key: string]: any[] } = {};
-      campaignData.forEach(item => {
-        const weekKey = item.week_start?.toString() || 'unknown';
-        if (!weeklyGroups[weekKey]) {
-          weeklyGroups[weekKey] = [];
-        }
-        weeklyGroups[weekKey].push(item);
-      });
-
-      const monthlyChartData: ChartData[] = Object.entries(weeklyGroups)
-        .slice(0, 4)
-        .map(([week, items], index) => ({
-          name: `Sem ${index + 1}`,
-          conversas: items.reduce((sum, item) => sum + (item.conversations_started || 0), 0),
-          custo: items.reduce((sum, item) => sum + parseFloat(item.amount_spent?.toString() || '0'), 0),
-          alcance: items.reduce((sum, item) => sum + (item.reach || 0), 0)
-        }));
-
-      // Processar dados anuais (agrupar por mês)
-      const monthlyGroups: { [key: number]: any[] } = {};
-      campaignData.forEach(item => {
-        if (item.week_start) {
-          const month = new Date(item.week_start).getMonth();
-          if (!monthlyGroups[month]) {
-            monthlyGroups[month] = [];
-          }
-          monthlyGroups[month].push(item);
-        }
-      });
-
-      const monthNames = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
-      const annualChartData: ChartData[] = Object.entries(monthlyGroups)
-        .map(([month, items]) => ({
-          name: monthNames[parseInt(month)],
-          conversas: items.reduce((sum, item) => sum + (item.conversations_started || 0), 0),
-          custo: items.reduce((sum, item) => sum + parseFloat(item.amount_spent?.toString() || '0'), 0),
-          alcance: items.reduce((sum, item) => sum + (item.reach || 0), 0)
-        }))
-        .sort((a, b) => monthNames.indexOf(a.name) - monthNames.indexOf(b.name));
-
-      // Calcular métricas totais
-      const totalConversas = campaignData.reduce((sum, item) => sum + (item.conversations_started || 0), 0);
-      const totalGasto = campaignData.reduce((sum, item) => sum + parseFloat(item.amount_spent?.toString() || '0'), 0);
-      const totalAlcance = campaignData.reduce((sum, item) => sum + (item.reach || 0), 0);
-      const totalImpressoes = campaignData.reduce((sum, item) => sum + (item.impressions || 0), 0);
-      const custoPorConversa = totalConversas > 0 ? totalGasto / totalConversas : 0;
-      const frequenciaMedia = campaignData.length > 0 
-        ? campaignData.reduce((sum, item) => sum + (parseFloat(item.frequency?.toString() || '0')), 0) / campaignData.length 
-        : 0;
-
-      setWeeklyData(weeklyChartData);
-      setMonthlyData(monthlyChartData);
-      setAnnualData(annualChartData);
-      setMetrics({
-        conversasIniciadas: totalConversas,
-        custoPorConversa: custoPorConversa,
-        alcanceTotal: totalAlcance,
-        impressoesTotais: totalImpressoes,
-        frequenciaMedia: frequenciaMedia
-      });
-    } catch (error: any) {
-      toast({
-        title: "Erro ao carregar dados",
-        description: error.message,
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -223,7 +72,8 @@ export default function CustomerDashboard() {
     );
   }
 
-  return <div className="container mx-auto p-6 pb-24">
+  return (
+    <div className="container mx-auto p-6 pb-24">
       <div className="mb-10">
         <h1 className="text-3xl font-bold mb-2">Minha Conta</h1>
         <p className="text-muted-foreground">Acompanhe o desempenho de suas campanhas</p>
@@ -244,7 +94,7 @@ export default function CustomerDashboard() {
           </div>
         )}
 
-        <ModernDashboard userId={user?.id || ''} />
+        <ModernDashboard userId={user?.id || ''} isAdmin={isAdmin} isModerator={isModerator} />
       </div>
 
       {/* Theme Toggle Button */}
@@ -259,5 +109,6 @@ export default function CustomerDashboard() {
         avatarUrl={profileData.avatarUrl}
         accountStatus={profileData.accountStatus}
       />
-    </div>;
+    </div>
+  );
 }
