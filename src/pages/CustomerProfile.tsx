@@ -86,8 +86,7 @@ export default function CustomerProfile() {
         .update({
           full_name: tempData.name,
           phone: tempData.phone,
-          company: tempData.company,
-          bio: tempData.bio
+          company: tempData.company
         })
         .eq('user_id', user?.id);
 
@@ -356,19 +355,6 @@ export default function CustomerProfile() {
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="bio">Sobre</Label>
-              {isEditing ? (
-                <Textarea
-                  id="bio"
-                  rows={3}
-                  value={tempData.bio}
-                  onChange={(e) => handleInputChange('bio', e.target.value)}
-                />
-              ) : (
-                <div className="p-3 bg-muted rounded-md min-h-[80px]">{profileData.bio}</div>
-              )}
-            </div>
           </CardContent>
         </Card>
       </div>

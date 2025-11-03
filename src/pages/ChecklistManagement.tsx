@@ -499,9 +499,10 @@ export default function ChecklistManagement() {
                         </div>
                       </div>
 
-                      {newItem.recurrence_type === 'weekly' && (
+                      {(newItem.recurrence_type === 'daily' || newItem.recurrence_type === 'weekly') && (
                         <div className="space-y-2">
                           <Label>Dias da Semana</Label>
+                          <p className="text-xs text-muted-foreground">Selecione os dias em que esta tarefa deve aparecer</p>
                           <div className="flex flex-wrap gap-2">
                             {['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].map((day, index) => (
                               <Button

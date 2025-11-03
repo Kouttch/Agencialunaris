@@ -68,17 +68,25 @@ export default function ModernDashboard({ userId, isAdmin = false, isModerator =
       // Get all unique dates from reports
       const { data, error } = await supabase
         .from('meta_reports')
-        .select('date_start')
+        .select('date_start, date_stop')
         .eq('account_id', mappingData.account_id)
-        .eq('report_type', reportType);
+        .eq('report_type', reportType)
+        .order('date_start', { ascending: false });
 
       if (error) throw error;
 
-      if (data) {
+      if (data && data.length > 0) {
         const dates = data
           .map(d => new Date(d.date_start))
           .filter(d => !isNaN(d.getTime()));
         setAvailableDates(dates);
+        
+        // Se não há data selecionada, selecionar a mais recente
+        if (!selectedDate && dates.length > 0) {
+          setSelectedDate(dates[0]);
+        }
+      } else {
+        setAvailableDates([]);
       }
     } catch (error: any) {
       console.error('Erro ao carregar datas disponíveis:', error);

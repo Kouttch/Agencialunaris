@@ -15,6 +15,7 @@ interface UserProfile {
   user_id: string;
   full_name: string;
   company: string;
+  phone: string;
   created_at: string;
   account_status: string;
   manager_id: string | null;
@@ -36,7 +37,7 @@ export default function ClientsManagement() {
     // Get all profiles
     const { data: profilesData } = await supabase
       .from('profiles')
-      .select('user_id, full_name, company, created_at, account_status, manager_id')
+      .select('user_id, full_name, company, phone, created_at, account_status, manager_id')
       .order('full_name');
     
     // Get all user roles
@@ -207,6 +208,7 @@ export default function ClientsManagement() {
               <TableRow>
                 <TableHead>Nome</TableHead>
                 <TableHead>Empresa</TableHead>
+                <TableHead>Telefone</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Gestor</TableHead>
                 <TableHead>Data de Cadastro</TableHead>
@@ -216,7 +218,7 @@ export default function ClientsManagement() {
             <TableBody>
               {filteredUsers.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
+                  <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
                     Nenhum cliente encontrado
                   </TableCell>
                 </TableRow>
@@ -228,6 +230,7 @@ export default function ClientsManagement() {
                     <TableRow key={user.user_id}>
                       <TableCell className="font-medium">{user.full_name || '-'}</TableCell>
                       <TableCell>{user.company || '-'}</TableCell>
+                      <TableCell>{user.phone || '-'}</TableCell>
                       <TableCell>{getStatusBadge(user.account_status || 'active')}</TableCell>
                       <TableCell>{manager?.full_name || 'Nenhum'}</TableCell>
                       <TableCell>{new Date(user.created_at).toLocaleDateString('pt-BR')}</TableCell>

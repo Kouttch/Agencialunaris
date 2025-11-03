@@ -1,4 +1,4 @@
-import { BarChart3, Users, Settings, CreditCard, User, Home, MessageSquare, Shield, TrendingUp, FileText, CheckCircle2, FolderOpen, Edit3, LayoutDashboard } from "lucide-react";
+import { BarChart3, Users, Settings, CreditCard, User, Home, MessageSquare, Shield, TrendingUp, FileText, CheckCircle2, FolderOpen, Edit3 } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -50,10 +50,6 @@ export function AppSidebar() {
     url: "/fulladmin/campaign-names",
     icon: Edit3
   }, {
-    title: "Dashboards",
-    url: "/fulladmin/dashboards",
-    icon: LayoutDashboard
-  }, {
     title: "Pagamentos",
     url: "/fulladmin/payments",
     icon: CreditCard
@@ -91,10 +87,6 @@ export function AppSidebar() {
     title: "Nomes Campanhas",
     url: "/fulladmin/campaign-names",
     icon: Edit3
-  }, {
-    title: "Dashboards",
-    url: "/fulladmin/dashboards",
-    icon: LayoutDashboard
   }, {
     title: "Usuários",
     url: "/fulladmin/users",
