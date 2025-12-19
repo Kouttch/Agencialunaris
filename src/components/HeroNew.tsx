@@ -1,18 +1,12 @@
 import React from 'react';
-import { ArrowRight, ChevronRight, BarChart3, Shield, Zap } from 'lucide-react';
+import { BarChart3, Shield, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { ButtonColorful } from '@/components/ui/button-colorful';
 import { GlowingEffect } from '@/components/ui/glowing-effect';
-import { MarqueeDemo } from '@/components/ui/marquee-demo';
-import { GradientHeading } from '@/components/ui/gradient-heading';
 import { GradientText } from '@/components/ui/gradient-text';
 import { AnimatedGroup } from '@/components/ui/animated-group';
 import { BackgroundBeams } from '@/components/ui/background-beams';
-import { cn } from '@/lib/utils';
-import { Link, useNavigate } from 'react-router-dom';
-import heroDashboard from "@/assets/hero-dashboard.jpg";
+
 export function HeroNew() {
-  const navigate = useNavigate();
   const scrollToWhatsApp = () => {
     const whatsappSection = document.querySelector('.whatsapp-contact-section');
     if (whatsappSection) {
@@ -32,22 +26,9 @@ export function HeroNew() {
             <div className="mx-auto max-w-7xl px-6">
               <div className="text-center sm:mx-auto lg:mr-auto lg:mt-0">
                 <AnimatedGroup preset="blur-slide">
-                  <Link to="/auth" className="block">
-                    <div className="glass group mx-auto flex w-fit items-center gap-4 rounded-full border p-1 pl-4 shadow-lg transition-all duration-300 hover:shadow-glow cursor-pointer">
-                      <span className="text-foreground text-sm">Portal Exclusivo de Gestão de Tráfego</span>
-                      <span className="block h-4 w-0.5 border-l border-border bg-border"></span>
-                      <div className="bg-background group-hover:bg-muted size-6 overflow-hidden rounded-full duration-500">
-                        <div className="flex w-12 -translate-x-1/2 duration-500 ease-in-out group-hover:translate-x-0">
-                          <span className="flex size-6">
-                            <ArrowRight className="m-auto size-3" />
-                          </span>
-                          <span className="flex size-6">
-                            <ArrowRight className="m-auto size-3" />
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </Link>
+                  <div className="glass group mx-auto flex w-fit items-center gap-4 rounded-full border p-1 pl-4 pr-4 shadow-lg">
+                    <span className="text-foreground text-sm">Portal Exclusivo de Gestão de Tráfego</span>
+                  </div>
         
                   <h1 className="mt-8 max-w-4xl mx-auto text-balance text-6xl md:text-7xl lg:mt-16 xl:text-[5.25rem] font-black leading-tight">
                     <GradientText colors={["#f59b46", "#e83950", "#f59b46"]} animationSpeed={3} className="text-6xl md:text-7xl xl:text-[5.25rem] font-black leading-tight">
@@ -63,9 +44,6 @@ export function HeroNew() {
                 </AnimatedGroup>
 
                 <AnimatedGroup preset="scale" className="mt-12 flex flex-col items-center justify-center gap-4 md:flex-row">
-                  <div className="glass rounded-2xl border p-1">
-                    <ButtonColorful label="Acessar Portal" className="rounded-xl px-8 py-3 text-base font-semibold cursor-pointer" onClick={() => navigate('/auth')} />
-                  </div>
                   <Button size="lg" variant="ghost" className="h-12 rounded-xl px-8 py-3 text-base glass" onClick={scrollToWhatsApp}>
                     <span className="text-nowrap">Saiba Mais</span>
                   </Button>
