@@ -15,13 +15,13 @@ export const Footer = () => {
 
           {/* Links */}
           <div>
-            <h3 className="font-semibold mb-4">Portal do Cliente</h3>
+            
             <ul className="space-y-2 text-muted-foreground">
               <li>
-                <Link to="/auth" className="hover:text-primary transition-colors">Login</Link>
+                
               </li>
               <li>
-                <Link to="/minha-conta" className="hover:text-primary transition-colors">Minha conta</Link>
+                
               </li>
               <li>
                 
