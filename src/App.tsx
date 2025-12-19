@@ -8,7 +8,6 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { ThemeProvider } from "@/components/theme-provider";
 import { DashboardLayout } from "@/layouts/DashboardLayout";
 import Index from "./pages/Index";
-import Auth from "./pages/Auth";
 import CustomerDashboard from "./pages/CustomerDashboard";
 import CustomerProfile from "./pages/CustomerProfile";
 import CustomerRecharge from "./pages/CustomerRecharge";
@@ -41,51 +40,42 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
             <Routes>
-              <Route path="/auth" element={<Auth />} />
               <Route path="/" element={<Index />} />
               <Route path="/contact" element={<Contact />} />
               <Route path="/terms-of-use" element={<TermsOfUse />} />
               <Route path="/privacy" element={<Privacy />} />
               
-              {/* Customer Dashboard Routes */}
+              {/* Customer Dashboard Routes - No authentication required */}
               <Route 
                 path="/minha-conta" 
                 element={
-                  <ProtectedRoute>
-                    <DashboardLayout>
-                      <CustomerDashboard />
-                    </DashboardLayout>
-                  </ProtectedRoute>
+                  <DashboardLayout>
+                    <CustomerDashboard />
+                  </DashboardLayout>
                 } 
               />
               <Route 
                 path="/minha-conta/profile" 
                 element={
-                  <ProtectedRoute>
-                    <DashboardLayout>
-                      <CustomerProfile />
-                    </DashboardLayout>
-                  </ProtectedRoute>
+                  <DashboardLayout>
+                    <CustomerProfile />
+                  </DashboardLayout>
                 } 
               />
               <Route 
                 path="/minha-conta/recargas" 
                 element={
-                  <ProtectedRoute>
-                    <DashboardLayout>
-                      <CustomerRecharge />
-                    </DashboardLayout>
-                  </ProtectedRoute>
+                  <DashboardLayout>
+                    <CustomerRecharge />
+                  </DashboardLayout>
                 } 
               />
               <Route 
                 path="/minha-conta/estrategia" 
                 element={
-                  <ProtectedRoute>
-                    <DashboardLayout>
-                      <CustomerStrategy />
-                    </DashboardLayout>
-                  </ProtectedRoute>
+                  <DashboardLayout>
+                    <CustomerStrategy />
+                  </DashboardLayout>
                 } 
               />
               
