@@ -30,7 +30,7 @@ export const WhatsAppContactSection = () => {
           </p>
           
           <div className="flex flex-col items-center gap-4">
-            <ButtonColorful variant="green" label="Fale pelo WhatsApp" className="px-8 py-3" onClick={handleWhatsAppClick} />
+            <ButtonColorful variant="green" label="Fale com o Consultor pelo WhatsApp" className="px-8 py-3" onClick={handleWhatsAppClick} />
           </div>
         </div>
       </div>
