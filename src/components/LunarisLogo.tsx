@@ -10,7 +10,7 @@ export const LunarisLogo = ({
   return <div className={`flex items-center space-x-3 ${className}`}>
       <div className="relative">
         <img 
-          src="/lunaris-logo.png" 
+          src="/logo-lunaris-white.png" 
           alt="Lunaris Logo" 
           className="h-[45px] w-auto object-contain"
         />

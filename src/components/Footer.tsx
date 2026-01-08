@@ -6,7 +6,7 @@ export const Footer = () => {
           {/* Brand */}
           <div>
             <div className="mb-4">
-              <img src="/lunaris-logo.png" alt="Lunaris Logo" className="h-[34px] w-auto object-contain" />
+              <img src="/logo-lunaris-white.png" alt="Lunaris Logo" className="h-[34px] w-auto object-contain" />
             </div>
             <p className="text-muted-foreground">
               O futuro da gestão de tráfego pago. Transparência, inovação e resultados excepcionais.
